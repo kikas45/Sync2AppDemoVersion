@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:animateLayoutChanges="true"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+
+    android:gravity="center"
+
+    tools:context=".WebActivity"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/x_toolbar"
+        android:padding="8dp"
+        android:visibility="gone"
+       android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:background="?android:colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/drawer_menu_Btn"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_notes_24"
+            android:layout_width="28dp"
+            android:layout_height="28dp"/>
+
+        <TextView
+            android:id="@+id/toolbarTitleText"
+            android:paddingEnd="15dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_alignParentEnd="true"
+            android:text="@string/app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+    </RelativeLayout>
+            <RelativeLayout
+
+                android:id="@+id/webco"
+                android:orientation="vertical"
+                android:animateLayoutChanges="true"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp">
+
+
+                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                    android:id="@+id/swipeLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+                    <com.github.ksoichiro.android.observablescrollview.ObservableWebView
+                        android:id="@+id/webview"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:animateLayoutChanges="true" />
+
+                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+                <include layout="@layout/network_error" />
+
+                <ProgressBar
+                    android:id="@+id/SimpleProgressBar"
+                    android:visibility="gone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:indeterminateDrawable="@drawable/progress_drawable"
+                    android:indeterminate="true"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:background="@drawable/progress_bg"
+                     />
+
+
+                <FrameLayout
+                    android:id="@+id/frameLayoutHorizontalProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/app_color_primary"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/progressbar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:progressTint="@color/app_color_accent"
+                        android:layout_marginTop="-3dp"
+                        android:progress="20" />
+                </FrameLayout>
+
+                <include layout="@layout/window" />
+                <include layout="@layout/web_button"/>
+                <include layout="@layout/drawer_menu"/>
+
+                <ProgressBar
+                    android:id="@+id/WindowProgressBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
+                    android:visibility="gone" />
+
+
+            </RelativeLayout>
+
+
+
+
+
+
+
+<!--        <include layout="@layout/url_bar" />-->
+
+
+<!--    <com.google.android.material.navigation.NavigationView-->
+<!--        android:id="@+id/nav_view"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_gravity="start"-->
+<!--        android:fitsSystemWindows="true"-->
+<!--        app:headerLayout="@layout/nav_header_main"-->
+<!--        app:menu="@menu/activity_main_drawer"-->
+<!--        app:theme="@style/NavigationDrawerStyle" />-->
+
+    <LinearLayout
+
+
+
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="visible"
+        android:id="@+id/btm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:background="@color/white"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            ads:adSize="FULL_WIDTHx50"
+
+            ads:adUnitId="@string/admobid" />
+                <View
+                    android:layout_width="match_parent"
+                    android:background="@color/view_line"
+                    android:layout_height="0.1dp"/>
+        <include layout="@layout/bottom_toolbar"
+          />
+
+
+    </LinearLayout>
+
+</LinearLayout>

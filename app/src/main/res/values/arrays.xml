@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="from_select_urls">
+        <item>CP-Cloud App Server</item>
+        <item>API-Cloud App Server</item>
+    </string-array>
+
+
+    <string-array name="to_time_intervals">
+        <item>00:50</item>
+        <item>01:00</item>
+        <item>01:50</item>
+        <item>02:50</item>
+        <item>03:00</item>
+    </string-array>
+
+
+</resources>

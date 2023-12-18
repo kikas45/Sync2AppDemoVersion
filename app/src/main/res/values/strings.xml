@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">
+        <!--   <font fgcolor='#808080'>Remote</font><font fgcolor='#40E0D0'><b>X</b></font><font fgcolor='#808080'> WebView</font>
+    -->
+        Sync2app
+
+    </string>
+    <string name="todo">todo</string>
+    <!-- <string name="deeplink_url">zidsworld.com</string>-->
+    <string name="deeplink_url">Sync2app.MoreAdvice</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+
+    <string name="admobid">ca-app-pub-3940256099942544/6300978111</string>
+    // banner adunit id
+    <string name="appid">ca-app-pub-3940256099942544~3347511713</string>
+    // app id
+    <string name="interstitialadid">ca-app-pub-3940256099942544/1033173712</string>
+    // interstitial ad unit id
+
+    <string name="internet_error">Something went wrong way</string>
+    <string name="navigation_drawer_open">open drawer</string>
+    <string name="navigation_drawer_close">close drawer</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="swipe_refresh">Swipe Refresh</string>
+
+    <string name="awaiting_command">Awaiting command</string>
+    <string name="connecting">Connecting..</string>
+    <string name="invalide_remote_data">Invalid remote data</string>
+    <string name="initializing">initializing..</string>
+
+    <string name="hello_navigation_drawer">Hello drawer</string>
+    <string name="server_url"> </string>
+
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+    <string name="scan_qr_code">Scan QR Code</string>
+
+
+    <string name="toggle_flash">Toggle Flash</string>
+    <string name="action_settings">Settings</string>
+    <string name="scanned_data">Scanned Data</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="input_path_e_g_de_mo_2021000">Input path e.g DE_MO_2021000</string>
+    <string name="input_url_zip">Input url zip</string>
+    <string name="input_path_e_g_clo">Input path e.g CLO</string>
+    <string name="test_connection">Test Connection</string>
+
+</resources>

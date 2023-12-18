@@ -1,0 +1,52 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background -->
+    <item android:id="@android:id/background">
+        <shape>
+            <corners android:radius="5dip" />
+            <solid android:color="#EEF4F7" />
+            <!-- Dark gray outline -->
+            <stroke
+                android:width="1dp"
+                android:color="#444444" />
+        </shape>
+    </item>
+
+    <!-- Secondary Progress (Undownloaded) -->
+    <item android:id="@android:id/secondaryProgress">
+        <clip>
+            <shape>
+                <corners android:radius="5dip" />
+                <gradient
+                    android:startColor="#E0F5FE"
+                android:centerColor="#B3E0FC"
+                android:centerY="0.75"
+                android:endColor="#80D8FF"
+                android:angle="270"
+                />
+                <stroke
+                    android:width="1dp"
+                    android:color="#444444" />
+            </shape>
+        </clip>
+    </item>
+
+    <!-- Progress (Downloaded) -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <corners android:radius="5dip" />
+                <gradient
+                    android:startColor="#226280"
+                android:endColor="#226280"
+                android:angle="270"
+                />
+
+                <stroke
+                    android:width="1dp"
+                    android:color="#444444" />
+            </shape>
+        </clip>
+    </item>
+
+</layer-list>

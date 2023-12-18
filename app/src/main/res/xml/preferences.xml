@@ -1,0 +1,176 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_app_or_tv_tv_24"
+        android:key="appModeOrTvMode"
+        android:title="App Mode"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_location"
+        android:key="geolocation"
+        android:title="GPS &amp; Location"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:enabled="false"
+        android:key="downloadinapp"
+        android:summary="Files will be downloaded inside the app"
+        android:title="downloadinsideapp"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true"
+        app:isPreferenceVisible="false" />
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_dark_theme"
+        android:key="darktheme"
+        android:title="Dark Theme"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_night"
+        android:key="nightmode"
+        android:title="Night Mode"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_loading_svg"
+        android:key="nativeload"
+        android:title="Native Progress Bar"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true"
+        app:isPreferenceVisible="false" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_full_screen"
+        android:key="fullscreen"
+        android:title="Full Screen"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_expand_fullscreen"
+        android:key="immersive_mode"
+        android:title="Immersive Mode"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_refresh"
+        android:key="swiperefresh"
+        android:title="@string/swipe_refresh"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/permission"
+        android:key="permission_query"
+        android:summary="string/perm_description"
+        android:title="string/permiss_title"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:isPreferenceVisible="false" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_reload"
+        android:key="loadLastUrl"
+        android:title="Restore Last Page"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true"
+        app:isPreferenceVisible="false" />
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_shield_green"
+        android:key="blockAds"
+        android:title="Block Ads"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true"
+        app:isPreferenceVisible="false" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_toolbar_bottom"
+        android:key="hidebottombar"
+        android:title="Hide Bottom Bar"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+
+        app:iconSpaceReserved="true" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_toolbar_top"
+        android:key="autohideToolbar"
+        android:title="Auto Hide Toolbar"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+    <EditTextPreference
+        android:defaultValue=""
+        android:dialogMessage="Warning: if not a valid config url, app will not start - click retry button 3 times to setup again or clear appdata "
+        android:dialogTitle="Change Server URL"
+        android:icon="@drawable/ic_server_earbuds_24"
+        android:key="surl"
+        android:persistent="true"
+        android:title="Server URL"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true" />
+
+
+    <Preference
+        android:icon="@drawable/ic_settings_additional_suggest_24"
+        android:key="additional_settings_key"
+        android:title="Additional Settings"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:shouldDisableView="true"
+        app:iconSize="45dp"/>
+
+
+    <Preference
+        android:icon="@drawable/ic_settings_svg"
+        android:singleLineTitle="false"
+        android:summary="App restart may be required for effect"
+        android:title="@string/app_name"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSize="15dp"
+        tools:targetApi="o" />
+
+
+</PreferenceScreen>

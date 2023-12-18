@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="remotex.com.remotewebview">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" /> <!-- for Android 13 permission -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.CAMERA2" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_GPS" />
+    <uses-permission android:name="android.permission.ACCESS_ASSISTED_GPS" />
+    <uses-permission android:name="android.permission.ACCESS_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+
+    <application
+        android:name=".MyApplication"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/img_logo_icon"
+        android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@drawable/img_logo_icon"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RemoteWebViewLight"
+        android:usesCleartextTraffic="true"
+        tools:ignore="AllowBackup,UnusedAttribute">
+        <activity
+            android:name=".additionalSettings.DownloadsArray.list.DownlodPagger"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.DownloadsArray.list.DownLoadPage"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.RequiredBioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.SynCmangerPlus"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.SystemInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.AdditionalSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.TvActivityOrAppMode"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.PasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.scanutil.CaptureAct"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:theme="@style/zxing_CaptureTheme" />
+        <activity
+            android:name=".additionalSettings.QRSanActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Splash"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/appid" />
+
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".WebActivity"
+            android:theme="@style/Theme.RemoteWebViewSettings" />
+        <activity android:name=".WelcomeSlider" />
+        <activity
+            android:name=".additionalSettings.ReSyncActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".WebActivity"
+            android:alwaysRetainTaskState="true"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="@string/deeplink_url"
+                    android:scheme="https" />
+                <data
+                    android:host="@string/deeplink_url"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <!-- ressource file to create -->
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="zidsworld.com.remotewebview.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
+
+        <service
+            android:name=".MyFirebaseMessaging"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".RemotexNotifier"
+            android:exported="false" />
+    </application>
+
+</manifest>
