@@ -68,7 +68,17 @@ class DownlodPagger : AppCompatActivity() {
 
         manager = getApplicationContext()
             .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-        isValid = true
+      //  isValid = true
+
+
+
+        binding.textTitle.setOnClickListener {
+            val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+            val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
+
+            showToastMessage("$imagUsemanualOrnotuseManual ")
+
+        }
 
         binding.apply {
             closeBs.setOnClickListener {
@@ -77,12 +87,12 @@ class DownlodPagger : AppCompatActivity() {
 
             imagePauseDownload.setOnClickListener {
                 pauseDownload()
-                showToastMessage("Paused")
+               showToastMessage("Paused")
             }
 
 
             imageResumeDownload.setOnClickListener {
-                resumeDownload()
+               resumeDownload()
                 showToastMessage("Resuming..")
 
             }
@@ -178,7 +188,7 @@ class DownlodPagger : AppCompatActivity() {
         when (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             DownloadManager.STATUS_PENDING -> {
                 msg = "Pending.."
-                binding.imagePauseDownload.visibility = View.VISIBLE
+              binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
 
             }
@@ -187,6 +197,8 @@ class DownlodPagger : AppCompatActivity() {
                 msg = "Downloading.."
                 binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
+
+                isValid = true
             }
 
             DownloadManager.STATUS_PAUSED -> {
@@ -203,13 +215,14 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imagePauseDownload.isEnabled = false
                 binding.imageResumeDownload.isEnabled = false
 
+
                 val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+                val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
                 if (isValid == true) {
                     isValid = false
-                    if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+                    if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI) && !imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
                         funUnZipFile()
-                      //  showToastMessage("To show zip")
                     } else {
                         showToastMessage("Download completed")
                     }
@@ -415,7 +428,7 @@ class DownlodPagger : AppCompatActivity() {
             val Syn2AppLive = "Syn2AppLive"
 
             val download_ref: Long = sharedP.getLong(Constants.downloadKey, -15)
-            Toast.makeText(applicationContext,  "" + download_ref, Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(applicationContext,  "" + download_ref, Toast.LENGTH_SHORT).show()
             val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive" +  getToatlFilePath
 
             val downloadedFile = File(filePath)

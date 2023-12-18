@@ -22,6 +22,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -56,7 +57,8 @@ class ReSyncActivity : AppCompatActivity() {
     private lateinit var customProgressDialog: Dialog
 
 
-    private val baseUrl222 = "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
+    private val baseUrl222 =
+        "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
 
 
     private val multiplePermissionId = 14
@@ -75,13 +77,12 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-    private var urlIndex = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
-    private var urlIndexCPI = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
-    private var urlIndexAPI = "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
-
-
+    private var urlIndex =
+        "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
+    private var urlIndexCPI =
+        "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
+    private var urlIndexAPI =
+        "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
 
 
     private var isValid = false
@@ -96,18 +97,17 @@ class ReSyncActivity : AppCompatActivity() {
     private var rootfolder = "Downloads"
 
 
-
     private var getTimeDefined = ""
     private var timeMinuetesDefined = "Sync interval timer"
     private var timeMinuetes22 = "2 Minutes"
-    private var timeMinuetes55 =  "5 Minutes"
-    private var timeMinuetes10 =  "10 Minutes"
-    private var timeMinuetes15 =  "15 Minutes"
-    private var timeMinuetes30 =  "30 Minutes"
-    private var timeMinuetes60 =  "60 Minutes"
-    private var timeMinuetes120 =  "120 Minutes"
-    private var timeMinuetes180 =  "180 Minutes"
-    private var timeMinuetes240 =  "240 Minutes"
+    private var timeMinuetes55 = "5 Minutes"
+    private var timeMinuetes10 = "10 Minutes"
+    private var timeMinuetes15 = "15 Minutes"
+    private var timeMinuetes30 = "30 Minutes"
+    private var timeMinuetes60 = "60 Minutes"
+    private var timeMinuetes120 = "120 Minutes"
+    private var timeMinuetes180 = "180 Minutes"
+    private var timeMinuetes240 = "240 Minutes"
 
 
     private var getToatlFilePath = ""
@@ -151,7 +151,7 @@ class ReSyncActivity : AppCompatActivity() {
 
         binding.apply {
 
-           editTextCLOpath.setText("CLO")
+            editTextCLOpath.setText("CLO")
             editTextSubPathFolder.setText("DE_MO_2021000")
 
 
@@ -167,11 +167,12 @@ class ReSyncActivity : AppCompatActivity() {
                 onBackPressed()
             }
 
+
             initViewTooggle()
 
 
 
-         editTextInputSynUrlZip.setText(baseUrl222)
+            editTextInputSynUrlZip.setText(baseUrl222)
 
 
 
@@ -184,8 +185,8 @@ class ReSyncActivity : AppCompatActivity() {
             textTestConnectionAPPer.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 try {
-                testConnectionSetup()
-                }catch (_:Exception){
+                    testConnectionSetup()
+                } catch (_: Exception) {
                 }
             }
 
@@ -199,10 +200,7 @@ class ReSyncActivity : AppCompatActivity() {
         }
 
 
-
-
     }
-
 
 
     private fun showCustomProgressDialog(message: String) {
@@ -222,16 +220,12 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
     private fun testConnectionSetup() {
         binding.apply {
             val getFolderClo = editTextCLOpath.text.toString().trim()
             val getFolderSubpath = editTextSubPathFolder.text.toString().trim()
 
-            if (isNetworkAvailable()){
+            if (isNetworkAvailable()) {
                 if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
@@ -244,7 +238,7 @@ class ReSyncActivity : AppCompatActivity() {
                             }
                         }
 
-                        API_Server ->{
+                        API_Server -> {
                             showToastMessage("No Logic For API Server Yet")
                         }
 
@@ -252,16 +246,13 @@ class ReSyncActivity : AppCompatActivity() {
 
                 }
                 //// enf of the main if
-            }else{
+            } else {
                 showToastMessage("No Internet Connection")
             }
 
 
-
-
-
             /// when the button is checked
-            if (isNetworkAvailable()){
+            if (isNetworkAvailable()) {
                 if (imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
@@ -276,13 +267,13 @@ class ReSyncActivity : AppCompatActivity() {
 
                         }
 
-                        API_Server ->{
+                        API_Server -> {
                             showToastMessage("No Logic For API Server Yet")
                         }
 
                     }
                 }
-            }else{
+            } else {
                 showToastMessage("No Internet Connection")
             }
 
@@ -290,24 +281,27 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-    private fun httpNetworkTester(getFolderClo:String, getFolderSubpath:String) {
+    private fun httpNetworkTester(getFolderClo: String, getFolderSubpath: String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Testing connection..")
 
 
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
                 lifecycleScope.launch {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Successful" )
+                            showPopsForMyConnectionTest(
+                                getFolderClo,
+                                getFolderSubpath,
+                                "Successful"
+                            )
 
                         } else {
-                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!" )
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
@@ -315,19 +309,24 @@ class ReSyncActivity : AppCompatActivity() {
                     }
                 }
 
-            }else{
+            } else {
 
 
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Api/update.csv"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Api/update.csv"
 
                 lifecycleScope.launch {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Successful" )
+                            showPopsForMyConnectionTest(
+                                getFolderClo,
+                                getFolderSubpath,
+                                "Successful"
+                            )
 
                         } else {
-                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!" )
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
@@ -342,38 +341,32 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
+    private fun httpNetSingleUrlTest(baseUrl33: String) {
+        handler.postDelayed(Runnable {
+            showCustomProgressDialog("Testing connection...")
 
-    private fun httpNetSingleUrlTest(baseUrl33:String) {
-     handler.postDelayed(Runnable {
-         showCustomProgressDialog("Testing connection...")
 
+            val lastString = baseUrl33.substringAfterLast("/")
+            val fileNameWithoutExtension = lastString.substringBeforeLast(".")
 
-         val lastString = baseUrl33.substringAfterLast("/")
-         val fileNameWithoutExtension = lastString.substringBeforeLast(".")
+            lifecycleScope.launch {
+                try {
+                    val result = checkUrlExistence(baseUrl33)
+                    if (result) {
 
-         lifecycleScope.launch {
-             try {
-                 val result = checkUrlExistence(baseUrl33)
-                 if (result) {
+                        showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Successful")
 
-                     showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Successful" )
+                    } else {
 
-                 } else {
+                        showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
+                    }
+                } finally {
+                    customProgressDialog.dismiss()
+                }
+            }
 
-                     showPopsForMyConnectionTest("CLO", fileNameWithoutExtension,  "Failed!" )
-                 }
-             } finally {
-                 customProgressDialog.dismiss()
-             }
-         }
-
-     }, 300)
+        }, 300)
     }
-
-
-
-
-
 
 
     private fun startZipExtractionWork(zipFilePath: String, destinationPath: String) {
@@ -401,36 +394,37 @@ class ReSyncActivity : AppCompatActivity() {
         val App = "App.zip"
 
 
-      //  showToastMessage(getToatlFilePath)
+        //  showToastMessage(getToatlFilePath)
 
 
         // This is the path we are extracting to
         val folderToExtractTo = "/$Syn2AppLive" + unzipManual
 
-        val destinationFolder = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),   folderToExtractTo)
+        val destinationFolder = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            folderToExtractTo
+        )
         if (!destinationFolder.exists()) {
             destinationFolder.mkdirs()
         }
 
 
-
         // This is where we are extracting from , to get the file from
-       // val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive/$CLO/$MANUAL/$Zip/$App"
-        val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive" +  getToatlFilePath
-
+        // val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive/$CLO/$MANUAL/$Zip/$App"
+        val filePath =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive" + getToatlFilePath
 
 
         val downloadedFile = File(filePath)
 
         if (downloadedFile.exists()) {
-         //   showToastMessage("File Name: ${downloadedFile.name}")
+            //   showToastMessage("File Name: ${downloadedFile.name}")
 
-             startZipExtractionWork(filePath, destinationFolder.toString())
+            startZipExtractionWork(filePath, destinationFolder.toString())
 
         } else {
-           // showToastMessage("File does not exist in the folder.")
+            // showToastMessage("File does not exist in the folder.")
         }
-
 
 
     }
@@ -495,6 +489,7 @@ class ReSyncActivity : AppCompatActivity() {
 
             DownloadManager.STATUS_RUNNING -> {
                 msg = "Downloading.."
+                isValid = true
             }
 
             DownloadManager.STATUS_PAUSED -> {
@@ -508,10 +503,9 @@ class ReSyncActivity : AppCompatActivity() {
 
                 if (isValid == true) {
                     isValid = false
-                    if (binding.imagSwtichEnableSyncFromAPI.isChecked){
+                    if (binding.imagSwtichEnableSyncFromAPI.isChecked && !binding.imagSwtichEnableManualOrNot.isChecked) {
                         funUnZipFile()
-                        showToastMessage("Download completed")
-                    }else{
+                    } else {
                         showToastMessage("Download completed")
                     }
                 }
@@ -536,7 +530,7 @@ class ReSyncActivity : AppCompatActivity() {
         binding.apply {
 
             // for server
-            getUrlBasedOnSpinnerText =  CP_server
+            getUrlBasedOnSpinnerText = CP_server
             constraintLayout4.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
 
@@ -562,7 +556,7 @@ class ReSyncActivity : AppCompatActivity() {
                     this@ReSyncActivity,
                     TimePickerDialog.OnTimeSetListener { _, selectedHour, selectedMinute ->
                         // Display the selected time on textDisplaytime
-                       // val selectedTime = "Selected time : $selectedHour:$selectedMinute"
+                        // val selectedTime = "Selected time : $selectedHour:$selectedMinute"
                         val selectedTime = "$selectedHour:$selectedMinute"
                         textDisplaytime.text = selectedTime
                     },
@@ -604,11 +598,6 @@ class ReSyncActivity : AppCompatActivity() {
             }
 
 
-
-
-
-
-
             /// use first Sync  or Do not use First Sync
 
             // enable satrt file for first synct
@@ -642,8 +631,6 @@ class ReSyncActivity : AppCompatActivity() {
 
                 }
             }
-
-
 
 
             // enable config
@@ -680,19 +667,19 @@ class ReSyncActivity : AppCompatActivity() {
             }
 
 
-
-
             // enable Sync on File Change
 
-            val imgEnableFileOnSyncChange = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
-            imagSwtichEnableSyncOnFilecahnge.isChecked = imgEnableFileOnSyncChange.equals(Constants.imagSwtichEnableSyncOnFilecahnge)
+            val imgEnableFileOnSyncChange =
+                sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+            imagSwtichEnableSyncOnFilecahnge.isChecked =
+                imgEnableFileOnSyncChange.equals(Constants.imagSwtichEnableSyncOnFilecahnge)
 
 
             if (imgEnableFileOnSyncChange.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
-               // textSyncOnFileChangeIntervals.setText("Sync on file change")
+                // textSyncOnFileChangeIntervals.setText("Sync on file change")
                 textSyncOnFileChangeIntervals.setText("Download on files at set Intervals")
             } else {
-               // textSyncOnFileChangeIntervals.setText("Sync on file intervals")
+                // textSyncOnFileChangeIntervals.setText("Sync on file intervals")
                 textSyncOnFileChangeIntervals.setText("Download on files on file change")
             }
 
@@ -716,14 +703,12 @@ class ReSyncActivity : AppCompatActivity() {
             }
 
 
-
-
-
-
             // enable Toggle Mode
 
-            val imgEnableToggleMode = sharedBiometric.getString(Constants.imagSwtichEnablEnableToggleOrNot, "")
-            imagSwtichEnablEnableToggleOrNot.isChecked = imgEnableToggleMode.equals(Constants.imagSwtichEnablEnableToggleOrNot)
+            val imgEnableToggleMode =
+                sharedBiometric.getString(Constants.imagSwtichEnablEnableToggleOrNot, "")
+            imagSwtichEnablEnableToggleOrNot.isChecked =
+                imgEnableToggleMode.equals(Constants.imagSwtichEnablEnableToggleOrNot)
 
             if (imgEnableToggleMode.equals(Constants.imagSwtichEnablEnableToggleOrNot)) {
                 textToogleMode.setText("Disable Test Toggle Mode")
@@ -735,7 +720,8 @@ class ReSyncActivity : AppCompatActivity() {
                 val editor = sharedBiometric.edit()
                 if (compoundButton.isChecked) {
                     editor.putString(
-                        Constants.imagSwtichEnablEnableToggleOrNot, "imagSwtichEnablEnableToggleOrNot"
+                        Constants.imagSwtichEnablEnableToggleOrNot,
+                        "imagSwtichEnablEnableToggleOrNot"
                     )
                     editor.apply()
                     textToogleMode.setText("Disable Test Toggle Mode")
@@ -784,36 +770,45 @@ class ReSyncActivity : AppCompatActivity() {
                 }
             }
 
-            imagSwtichEnableSyncFromAPI.isChecked = true
-            // enable satrt file for first synct
-//            val textSynfromApiZip222 =
-//                sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
-//            imagSwtichEnableSyncFromAPI.isChecked =
-//                textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)
-//
-//
-//            if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
-//                textSynfromApiZip.setText("Use ZIP Sync")
-//                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-//            } else {
-//                textSynfromApiZip.setText("Use API Sync")
-//                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-//            }
 
+            // enable satrt file for first synct
+        /*    val textSynfromApiZip222 =
+                sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+
+            if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+                textSynfromApiZip.setText("Use ZIP Sync")
+                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
+            } else {
+                textSynfromApiZip.setText("Use API Sync")
+                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
+            }
+*/
+
+            imagSwtichEnableSyncFromAPI.isChecked = true
+
+            val editor = sharedBiometric.edit()
+            editor.putString(
+                Constants.imagSwtichEnableSyncFromAPI,
+                Constants.imagSwtichEnableSyncFromAPI
+            )
+            editor.apply()
 
             imagSwtichEnableSyncFromAPI.setOnCheckedChangeListener { compoundButton, isValued -> // we are putting the values into SHARED PREFERENCE
                 val editor = sharedBiometric.edit()
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 if (compoundButton.isChecked) {
-                   // editor.putString(Constants.imagSwtichEnableSyncFromAPI, Constants.imagSwtichEnableSyncFromAPI)
-                   // editor.apply()
+                    editor.putString(
+                        Constants.imagSwtichEnableSyncFromAPI,
+                        Constants.imagSwtichEnableSyncFromAPI
+                    )
+                    editor.apply()
                     textSynfromApiZip.setText("Use ZIP Sync")
                     editTextInputSynUrlZip.setHint("Input url  ZIP Sync")
                     textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
                 } else {
 
-                   // editor.remove(Constants.imagSwtichEnableSyncFromAPI)
-                  //  editor.apply()
+                    editor.remove(Constants.imagSwtichEnableSyncFromAPI)
+                    editor.apply()
 
                     textSynfromApiZip.setText("Use API Sync")
                     textDownloadZipSyncOrApiSyncNow.setText("Connect API Sync")
@@ -822,7 +817,6 @@ class ReSyncActivity : AppCompatActivity() {
 
                 }
             }
-
 
 
             // enable satrt file for first synct
@@ -835,71 +829,82 @@ class ReSyncActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun definedTimeIntervals() {
 
-        val serverOptions = arrayOf(timeMinuetesDefined, timeMinuetes22, timeMinuetes55,
-            timeMinuetes10, timeMinuetes15, timeMinuetes30, timeMinuetes60, timeMinuetes120, timeMinuetes180, timeMinuetes240)
+        val serverOptions = arrayOf(
+            timeMinuetesDefined,
+            timeMinuetes22,
+            timeMinuetes55,
+            timeMinuetes10,
+            timeMinuetes15,
+            timeMinuetes30,
+            timeMinuetes60,
+            timeMinuetes120,
+            timeMinuetes180,
+            timeMinuetes240
+        )
 
         val builder = AlertDialog.Builder(this@ReSyncActivity)
         // builder.setTitle("Choose Server")
-        builder  .setItems(serverOptions) { dialog, which ->
+        builder.setItems(serverOptions) { dialog, which ->
             when (which) {
                 0 -> {
                     // Handle CP-Cloud App Server selection
                     binding.textIntervalsSelect.text = timeMinuetesDefined
                     binding.textDisplaytime.text = "00:55 Seconds"
-                    getTimeDefined =  timeMinuetesDefined
+                    getTimeDefined = timeMinuetesDefined
                 }
+
                 1 -> {
                     binding.textIntervalsSelect.text = timeMinuetes22
                     binding.textDisplaytime.text = "2 Minutes"
-                    getTimeDefined =  timeMinuetes22
+                    getTimeDefined = timeMinuetes22
                 }
 
                 2 -> {
                     binding.textIntervalsSelect.text = timeMinuetes55
                     binding.textDisplaytime.text = "5 Minutes"
-                    getTimeDefined =  timeMinuetes55
+                    getTimeDefined = timeMinuetes55
                 }
 
                 3 -> {
                     binding.textIntervalsSelect.text = timeMinuetes10
                     binding.textDisplaytime.text = "10 Minutes"
-                    getTimeDefined =  timeMinuetes10
+                    getTimeDefined = timeMinuetes10
                 }
 
                 4 -> {
                     binding.textIntervalsSelect.text = timeMinuetes15
                     binding.textDisplaytime.text = "15 Minutes"
-                    getTimeDefined =  timeMinuetes15
+                    getTimeDefined = timeMinuetes15
                 }
 
                 5 -> {
                     binding.textIntervalsSelect.text = timeMinuetes30
                     binding.textDisplaytime.text = "30 Minutes"
-                    getTimeDefined =  timeMinuetes30
+                    getTimeDefined = timeMinuetes30
                 }
 
                 6 -> {
                     binding.textIntervalsSelect.text = timeMinuetes60
                     binding.textDisplaytime.text = "60 Minutes"
-                    getTimeDefined =  timeMinuetes60
+                    getTimeDefined = timeMinuetes60
                 }
 
                 7 -> {
                     binding.textIntervalsSelect.text = timeMinuetes120
                     binding.textDisplaytime.text = "2 Hours"
-                    getTimeDefined =  timeMinuetes120
+                    getTimeDefined = timeMinuetes120
                 }
 
                 8 -> {
                     binding.textIntervalsSelect.text = timeMinuetes180
                     binding.textDisplaytime.text = "3 hours"
-                    getTimeDefined =  timeMinuetes180
+                    getTimeDefined = timeMinuetes180
                 }
 
-                9-> {
+                9 -> {
                     binding.textIntervalsSelect.text = timeMinuetes240
                     binding.textDisplaytime.text = "4 hours"
-                    getTimeDefined =  timeMinuetes240
+                    getTimeDefined = timeMinuetes240
                 }
             }
             dialog.dismiss()
@@ -915,16 +920,17 @@ class ReSyncActivity : AppCompatActivity() {
 
         val builder = AlertDialog.Builder(this@ReSyncActivity)
         // builder.setTitle("Choose Server")
-        builder  .setItems(serverOptions) { dialog, which ->
+        builder.setItems(serverOptions) { dialog, which ->
             when (which) {
                 0 -> {
                     // Handle CP-Cloud App Server selection
                     binding.texturlsViews.text = CP_server
-                    getUrlBasedOnSpinnerText =  CP_server
+                    getUrlBasedOnSpinnerText = CP_server
                 }
+
                 1 -> {
-                    binding.texturlsViews.text =  API_Server
-                    getUrlBasedOnSpinnerText =  API_Server
+                    binding.texturlsViews.text = API_Server
+                    getUrlBasedOnSpinnerText = API_Server
                 }
             }
             dialog.dismiss()
@@ -933,13 +939,15 @@ class ReSyncActivity : AppCompatActivity() {
         val dialog = builder.create()
         dialog.show()
 
-}
+    }
 
     private fun funManulOrNotInteView() {
         binding.apply {
             // logic for use manual or not
-            val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
-            imagSwtichEnableManualOrNot.isChecked = imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)
+            val imagUsemanualOrnotuseManual =
+                sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
+            imagSwtichEnableManualOrNot.isChecked =
+                imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)
 
 
             if (imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
@@ -997,10 +1005,6 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
     private fun hideKeyBoard(editText: EditText) {
         try {
             editText.clearFocus()
@@ -1012,13 +1016,12 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
     private fun testAndDownLoadZipConnection() {
         binding.apply {
             val getFolderClo = editTextCLOpath.text.toString().trim()
             val getFolderSubpath = editTextSubPathFolder.text.toString().trim()
 
-            if (isNetworkAvailable()){
+            if (isNetworkAvailable()) {
                 if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
@@ -1031,7 +1034,7 @@ class ReSyncActivity : AppCompatActivity() {
                             }
                         }
 
-                        API_Server ->{
+                        API_Server -> {
                             showToastMessage("No Logic For API Server Yet")
                         }
 
@@ -1039,16 +1042,13 @@ class ReSyncActivity : AppCompatActivity() {
 
                 }
                 //// enf of the main if
-            }else{
+            } else {
                 showToastMessage("No Internet Connection")
             }
 
 
-
-
-
             /// when the button is checked
-            if (isNetworkAvailable()){
+            if (isNetworkAvailable()) {
                 if (imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
@@ -1063,13 +1063,13 @@ class ReSyncActivity : AppCompatActivity() {
 
                         }
 
-                        API_Server ->{
+                        API_Server -> {
                             showToastMessage("No Logic For API Server Yet")
                         }
 
                     }
                 }
-            }else{
+            } else {
                 showToastMessage("No Internet Connection")
             }
 
@@ -1077,25 +1077,30 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-    private fun httpNetworkDownloadsMultiplePaths(getFolderClo:String, getFolderSubpath:String) {
+    private fun httpNetworkDownloadsMultiplePaths(getFolderClo: String, getFolderSubpath: String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Please wait...")
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
                 lifecycleScope.launch {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                           // showPopContinueToDownloadingForMultiples(baseUrl,getFolderClo, getFolderSubpath, "Zip", "App.zip" )
-                            startMyDownlaodsMutiplesPath(baseUrl,getFolderClo, getFolderSubpath, "Zip", "App.zip" )
+                            // showPopContinueToDownloadingForMultiples(baseUrl,getFolderClo, getFolderSubpath, "Zip", "App.zip" )
+                            startMyDownlaodsMutiplesPath(
+                                baseUrl,
+                                getFolderClo,
+                                getFolderSubpath,
+                                "Zip",
+                                "App.zip"
+                            )
                         } else {
-                           // showPopConnectionSucessful(baseUrl, "Failed!")
-                             showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!" )
+                            // showPopConnectionSucessful(baseUrl, "Failed!")
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
@@ -1103,20 +1108,27 @@ class ReSyncActivity : AppCompatActivity() {
                 }
 
 
-            }else{
+            } else {
 
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Api/update.csv"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Api/update.csv"
 
                 lifecycleScope.launch {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                          ///  showPopContinueToDownloadingForMultiples(baseUrl,getFolderClo, getFolderSubpath, "Api", "update.csv" )
-                            startMyDownlaodsMutiplesPath(baseUrl,getFolderClo, getFolderSubpath, "Api", "update.csv" )
+                            ///  showPopContinueToDownloadingForMultiples(baseUrl,getFolderClo, getFolderSubpath, "Api", "update.csv" )
+                            startMyDownlaodsMutiplesPath(
+                                baseUrl,
+                                getFolderClo,
+                                getFolderSubpath,
+                                "Api",
+                                "update.csv"
+                            )
 
                         } else {
-                          //  showPopConnectionSucessful(baseUrl, "Failed!")
-                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!" )
+                            //  showPopConnectionSucessful(baseUrl, "Failed!")
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
@@ -1126,17 +1138,11 @@ class ReSyncActivity : AppCompatActivity() {
             }
 
 
-
-
         }, 300)
     }
 
 
-
-
-
-
-    private fun httpNetSingleDwonload(baseUrl:String) {
+    private fun httpNetSingleDwonload(baseUrl: String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Please wait...")
             val lastString = baseUrl.substringAfterLast("/")
@@ -1148,29 +1154,29 @@ class ReSyncActivity : AppCompatActivity() {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                          //  showPopContinueToDownloading(baseUrl, "Zip", "App.zip" )
-                            startDownloadSingles(baseUrl, "Zip", "App.zip" )
+                            //  showPopContinueToDownloading(baseUrl, "Zip", "App.zip" )
+                            startDownloadSingles(baseUrl, "Zip", "App.zip")
                         } else {
-                           // showPopConnectionSucessful(baseUrl, "Failed!")
-                            showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!" )
+                            // showPopConnectionSucessful(baseUrl, "Failed!")
+                            showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
                     }
                 }
 
-            }else{
+            } else {
 
                 lifecycleScope.launch {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                          //  showPopContinueToDownloading(baseUrl, "API", "App.zip" )
-                            startDownloadSingles(baseUrl, "API", "App.zip" )
+                            //  showPopContinueToDownloading(baseUrl, "API", "App.zip" )
+                            startDownloadSingles(baseUrl, "API", "App.zip")
 
                         } else {
 
-                            showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!" )
+                            showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
                         }
                     } finally {
                         customProgressDialog.dismiss()
@@ -1183,10 +1189,12 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
     @SuppressLint("MissingInflatedId", "SetTextI18n")
-    private fun showPopsForMyConnectionTest(getFolderClo:String, getFolderSubpath:String, message:String) {
+    private fun showPopsForMyConnectionTest(
+        getFolderClo: String,
+        getFolderSubpath: String,
+        message: String,
+    ) {
 
         val binding: CustomContinueDownloadLayoutBinding =
             CustomContinueDownloadLayoutBinding.inflate(layoutInflater)
@@ -1205,10 +1213,9 @@ class ReSyncActivity : AppCompatActivity() {
 
             val patterTexT = "/$getFolderClo/$getFolderSubpath"
 
-           textYourUrlTest.text =  "Your Directory is :\n$rootfolder$patterTexT"
+            textYourUrlTest.text = "Your Directory is :\n$rootfolder$patterTexT"
 
             textSucessful.text = message
-
 
             textContinuPassword2.setOnClickListener {
                 alertDialog.dismiss()
@@ -1225,7 +1232,13 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-    private fun startMyDownlaodsMutiplesPath(baseUrl:String, getFolderClo:String, getFolderSubpath:String, Zip:String, fileName:String) {
+    private fun startMyDownlaodsMutiplesPath(
+        baseUrl: String,
+        getFolderClo: String,
+        getFolderSubpath: String,
+        Zip: String,
+        fileName: String,
+    ) {
 
         val patterThreePath = "/$getFolderClo/$getFolderSubpath/$Zip"
 
@@ -1233,29 +1246,28 @@ class ReSyncActivity : AppCompatActivity() {
 
         val Extracted = "Offline_app"
         unzipManual = "/$getFolderClo/$getFolderSubpath/$Extracted"
+        Log.d("startMyDownlaodsMutiplesPath", ": $unzipManual")
 
 
-       download( baseUrl, patterThreePath, fileName)
-        isValid = true
+        download(baseUrl, patterThreePath, fileName)
+        // isValid = true
         getDownloadStatus();
 
         val intent = Intent(applicationContext, DownlodPagger::class.java)
-        intent.putExtra("baseUrl", baseUrl )
-        intent.putExtra("getToatlFilePath", getToatlFilePath )
-        intent.putExtra("unzipManual", unzipManual )
-        intent.putExtra("fileName", fileName )
-        intent.putExtra("patterThreePath", patterThreePath )
+        intent.putExtra("baseUrl", baseUrl)
+        intent.putExtra("getToatlFilePath", getToatlFilePath)
+        intent.putExtra("unzipManual", unzipManual)
+        intent.putExtra("fileName", fileName)
+        intent.putExtra("patterThreePath", patterThreePath)
         startActivity(intent)
 
 
     }
 
 
+    private fun startDownloadSingles(baseUrl: String, Zip: String, fileNamy: String) {
 
-
-    private fun startDownloadSingles(baseUrl:String, Zip:String, fileNamy:String) {
-
-        val MANUAL  = "MANUAL"
+        val MANUAL = "MANUAL"
 
         val manualPath = "/$MANUAL/$Zip"
 
@@ -1266,24 +1278,20 @@ class ReSyncActivity : AppCompatActivity() {
         val Extracted = "Manual_offline_app"
         unzipManual = "/$MANUAL/$Extracted"
 
-        download( baseUrl, manualPath, fileNamy)
-        isValid = true
+        download(baseUrl, manualPath, fileNamy)
+        //   isValid = true
         getDownloadStatus();
 
         val intent = Intent(applicationContext, DownlodPagger::class.java)
-        intent.putExtra("baseUrl", baseUrl )
-        intent.putExtra("getToatlFilePath", getToatlFilePath )
-        intent.putExtra("unzipManual", unzipManual )
-        intent.putExtra("fileName", fileNamy )
-        intent.putExtra("patterThreePath", patterThreePath )
+        intent.putExtra("baseUrl", baseUrl)
+        intent.putExtra("getToatlFilePath", getToatlFilePath)
+        intent.putExtra("unzipManual", unzipManual)
+        intent.putExtra("fileName", fileNamy)
+        intent.putExtra("patterThreePath", patterThreePath)
         startActivity(intent)
 
 
     }
-
-
-
-
 
 
     private fun showToastMessage(messages: String) {
@@ -1329,7 +1337,7 @@ class ReSyncActivity : AppCompatActivity() {
                 myHandler!!.removeCallbacks(runnable)
             }
             // Unregister the BroadcastReceiver to avoid memory leaks
-           // unregisterReceiver(downloadReceiver)
+            // unregisterReceiver(downloadReceiver)
 
         } catch (ignored: java.lang.Exception) {
         }
@@ -1375,8 +1383,6 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
     @SuppressLint("MissingInflatedId")
     private fun showPopDownloadOnstartFiles() {
 
@@ -1407,15 +1413,6 @@ class ReSyncActivity : AppCompatActivity() {
 
 
     }
-
-
-
-
-
-
-
-
-
 
 
     @SuppressLint("MissingInflatedId")
@@ -1454,11 +1451,9 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
     private fun doOperation() {
         testAndDownLoadZipConnection()
-}
+    }
 
 
     private fun checkMultiplePermission(): Boolean {
@@ -1483,7 +1478,11 @@ class ReSyncActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray, ) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == multiplePermissionId) {
@@ -1521,7 +1520,7 @@ class ReSyncActivity : AppCompatActivity() {
                     if (someDenied) {
                         // here app Setting open because all permission is not granted
                         // and permanent denied
-                      //  appSettingOpen(this)
+                        //  appSettingOpen(this)
 
                         showPermissionDeniedDialog()
 
@@ -1530,12 +1529,10 @@ class ReSyncActivity : AppCompatActivity() {
                     }
 
 
-
                 }
             }
         }
     }
-
 
 
     private fun showPermissionDeniedDialog() {
@@ -1562,22 +1559,19 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-
-
-
-
     private fun download(url: String, finalFolderPath: String, fileName: String) {
-        val managerDownload =  getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val Syn2AppLive = "Syn2AppLive"
         val folder = File(
-            Environment.getExternalStorageDirectory().toString() + "/Download/$Syn2AppLive/$finalFolderPath"
+            Environment.getExternalStorageDirectory()
+                .toString() + "/Download/$Syn2AppLive/$finalFolderPath"
         )
 
         if (!folder.exists()) {
             folder.mkdirs()
         }
 
-       // binding.textTitle.text = fileName.toString()
+        // binding.textTitle.text = fileName.toString()
 
         val destinationFile = File(folder, fileName)
         if (destinationFile.exists()) {
@@ -1587,12 +1581,16 @@ class ReSyncActivity : AppCompatActivity() {
         val request = DownloadManager.Request(Uri.parse(url))
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setTitle(fileName)
-       // request.setDescription("Downloading...")
+        // request.setDescription("Downloading...")
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "$Syn2AppLive/$finalFolderPath/$fileName")
+        request.setDestinationInExternalPublicDir(
+            Environment.DIRECTORY_DOWNLOADS,
+            "$Syn2AppLive/$finalFolderPath/$fileName"
+        )
         val downloadReferenceMain = managerDownload.enqueue(request)
 
-        val sharedPreferences = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE)
+        val sharedPreferences =
+            getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE)
 
         val editor = sharedPreferences.edit()
         editor.putLong(Constants.downloadKey, downloadReferenceMain)

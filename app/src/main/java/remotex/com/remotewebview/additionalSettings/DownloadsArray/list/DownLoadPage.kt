@@ -40,8 +40,6 @@ class DownLoadPage : AppCompatActivity(), DownloadListAdapter.OnItemClickListene
 
 
 
-
-
         DisplaySearchHistory()
 
         binding.apply {

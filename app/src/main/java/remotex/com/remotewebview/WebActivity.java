@@ -710,6 +710,31 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         WebView.setWebContentsDebuggingEnabled(true);
 
+        String url = "https://www.cnbc.com/2023/12/18/gold-gains-on-weaker-yields-us-inflation-report-in-focus.html";
+        webView.loadUrl(url.toString());
+
+        String Syn2AppLive = "Syn2AppLive";
+        String CLO = "CLO";
+        String MANUAL = "MANUAL";
+        String Zip = "Zip";
+        String App = "App.zip";
+
+
+        String endPath = "/App";
+        String filename = "/index";
+        String unzipManual = "/CLO/DE_MO_2021000/Offline_app" + endPath + filename;
+
+        String folderToExtractTo = "/" + Syn2AppLive + unzipManual;
+
+        File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), folderToExtractTo);
+        if (!destinationFolder.exists()) {
+            destinationFolder.mkdirs();
+        }
+
+
+
+
+/*
         if (UrlIntent.hasExtra("url")) {
             webView.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
         } else if (data != null) {
@@ -731,7 +756,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             } else {
                 webView.loadUrl(MainUrl);
             }
-        }
+        }*/
+
+
+
     }
 
 

@@ -88,7 +88,7 @@
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="@+id/progressBarPref"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/progressBarPref"
                 app:srcCompat="@drawable/ic_pause_download_24"
                 app:tint="#292828" />
 
@@ -103,9 +103,10 @@
                 android:foreground="?android:selectableItemBackground"
                 android:padding="8dp"
                 android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@+id/progressBarPref"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imagePauseDownload"
+                app:layout_constraintBottom_toBottomOf="@+id/imagePauseDownload"
+                app:layout_constraintStart_toStartOf="@+id/imagePauseDownload"
+                app:layout_constraintEnd_toEndOf="@+id/imagePauseDownload"
                 app:srcCompat="@drawable/ic_download_24"
                 app:tint="#292828" />
 
