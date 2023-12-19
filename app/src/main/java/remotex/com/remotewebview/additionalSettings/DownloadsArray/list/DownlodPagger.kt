@@ -310,6 +310,7 @@ class DownlodPagger : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("SetTextI18n")
     override fun onResume() {
         super.onResume()

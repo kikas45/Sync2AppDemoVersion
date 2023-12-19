@@ -2672,7 +2672,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             // webSettings.setAppCacheEnabled(true);
             webSettings.setDatabaseEnabled(true);
-            webSettings.setDatabaseEnabled(true);
             webSettings.setDomStorageEnabled(true);
             webSettings.setSupportZoom(false);
 
