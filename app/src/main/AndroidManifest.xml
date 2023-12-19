@@ -63,7 +63,7 @@
             android:name=".additionalSettings.AdditionalSettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".additionalSettings.TvActivityOrAppMode"
+            android:name=".additionalSettings.ReSyncActivity"
             android:exported="false" />
         <activity
             android:name=".additionalSettings.PasswordActivity"
@@ -91,7 +91,7 @@
             android:theme="@style/Theme.RemoteWebViewSettings" />
         <activity android:name=".WelcomeSlider" />
         <activity
-            android:name=".additionalSettings.ReSyncActivity"
+            android:name=".additionalSettings.TvActivityOrAppMode"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

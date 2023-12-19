@@ -3,12 +3,15 @@ package remotex.com.remotewebview.additionalSettings.scanutil
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Environment
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import remotex.com.remotewebview.WebActivity
 import java.io.File
 import java.io.FileInputStream
 import java.util.zip.ZipInputStream
@@ -55,6 +58,7 @@ class ZipWorker(
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun extractZip(zipFilePath: String, destinationPath: String) {
         val buffer = ByteArray(1024)
 
@@ -89,11 +93,19 @@ class ZipWorker(
 
             showNotification("Zip extraction completed")
 
+//            try {
+//                applicationContext.startActivity(Intent(applicationContext, WebActivity::class.java))
+//            }catch (_:Exception){}
+
 
         } catch (e: Exception) {
             e.printStackTrace()
 
           showNotification("Error during zip extraction")
+//            try {
+//                applicationContext.startActivity(Intent(applicationContext, WebActivity::class.java))
+//            }catch (_:Exception){}
+
 
             Log.d("ZIppppp", "extractZip: ${e.message}")
         }

@@ -668,6 +668,53 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         }
 
 
+
+        Intent intent = getIntent();
+        if (intent != null) {
+            String unzipManualValue = intent.getStringExtra("unzipManual");
+            String Syn2AppLive = "Syn2AppLive";
+            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManualValue;
+            File destinationFolder = new File(folderToExtractTo);
+            if (destinationFolder.exists()) {
+                loadOfflineWebviewPage();
+            }else {
+
+                claingTheLongWebView();
+            }
+
+        }
+
+
+
+
+    }
+
+    private void claingTheLongWebView() {
+        @SuppressLint("CommitPrefEdits")
+        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+
+        String imgLunchOnline = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
+
+        if (imgLunchOnline.equals(Constants.imgAllowLunchFromOnline)) {
+            String Syn2AppLive = "Syn2AppLive";
+            String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
+            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManual;
+
+            File destinationFolder = new File(folderToExtractTo);
+            if (destinationFolder.exists()) {
+                loadOfflineWebviewPage();
+            }else {
+
+                loadTheMainWebview();
+            }
+
+        } else {
+            loadTheMainWebview();
+        }
+    }
+
+    private void loadTheMainWebview() {
+
         WebSettings webSettings = webView.getSettings();
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setBuiltInZoomControls(true);
@@ -710,31 +757,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         WebView.setWebContentsDebuggingEnabled(true);
 
-        String url = "https://www.cnbc.com/2023/12/18/gold-gains-on-weaker-yields-us-inflation-report-in-focus.html";
-        webView.loadUrl(url.toString());
 
-        String Syn2AppLive = "Syn2AppLive";
-        String CLO = "CLO";
-        String MANUAL = "MANUAL";
-        String Zip = "Zip";
-        String App = "App.zip";
-
-
-        String endPath = "/App";
-        String filename = "/index";
-        String unzipManual = "/CLO/DE_MO_2021000/Offline_app" + endPath + filename;
-
-        String folderToExtractTo = "/" + Syn2AppLive + unzipManual;
-
-        File destinationFolder = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), folderToExtractTo);
-        if (!destinationFolder.exists()) {
-            destinationFolder.mkdirs();
-        }
-
-
-
-
-/*
         if (UrlIntent.hasExtra("url")) {
             webView.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
         } else if (data != null) {
@@ -756,11 +779,40 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             } else {
                 webView.loadUrl(MainUrl);
             }
-        }*/
-
-
+        }
 
     }
+
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void loadOfflineWebviewPage() {
+        String Syn2AppLive = "Syn2AppLive";
+        String filename = "/index.html";
+        String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
+
+        String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManual;
+        String filePath = "file://" + folderToExtractTo + filename;
+
+        ProgressBar SimpleProgressBar = findViewById(R.id.SimpleProgressBar);
+
+        File destinationFolder = new File(folderToExtractTo);
+        if (destinationFolder.exists()) {
+            webView = findViewById(R.id.webview);
+            webView.setWebViewClient(new WebViewClient());
+
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setSupportZoom(true);
+
+            webView.loadUrl(filePath);
+            SimpleProgressBar.setVisibility(View.GONE);
+
+        }
+
+    }
+
+
+
 
 
     public void showNotifxDialog(final Context context) {

@@ -4,20 +4,25 @@ import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
+import okhttp3.internal.wait
+import remotex.com.remotewebview.WebActivity
 import remotex.com.remotewebview.additionalSettings.scanutil.ZipWorker
 import remotex.com.remotewebview.additionalSettings.utils.Constants
 import remotex.com.remotewebview.databinding.ActivityDownlodPaggerBinding
@@ -28,6 +33,7 @@ class DownlodPagger : AppCompatActivity() {
     private lateinit var binding: ActivityDownlodPaggerBinding
 
     private var isValid = false
+    private var isreadyForWebview = false
 
     private var getToatlFilePath = ""
     private var unzipManual = ""
@@ -61,6 +67,7 @@ class DownlodPagger : AppCompatActivity() {
 
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDownlodPaggerBinding.inflate(layoutInflater)
@@ -84,6 +91,7 @@ class DownlodPagger : AppCompatActivity() {
             closeBs.setOnClickListener {
                 onBackPressed()
             }
+
 
             imagePauseDownload.setOnClickListener {
                 pauseDownload()
@@ -182,14 +190,16 @@ class DownlodPagger : AppCompatActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("Range", "SetTextI18n")
     private fun statusMessage(c: Cursor): String? {
         var msg: String
         when (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
             DownloadManager.STATUS_PENDING -> {
                 msg = "Pending.."
-              binding.imagePauseDownload.visibility = View.VISIBLE
+                binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
+                // binding.textContinuPassword222222.isEnabled = false
 
             }
 
@@ -197,14 +207,17 @@ class DownlodPagger : AppCompatActivity() {
                 msg = "Downloading.."
                 binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
+                //  binding.textContinuPassword222222.isEnabled = false
 
                 isValid = true
+
             }
 
             DownloadManager.STATUS_PAUSED -> {
                 msg = "Resume"
                 binding.imagePauseDownload.visibility = View.INVISIBLE
                 binding.imageResumeDownload.visibility = View.VISIBLE
+                //  binding.textContinuPassword222222.isEnabled = false
 
             }
 
@@ -214,6 +227,18 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imageResumeDownload.visibility = View.VISIBLE
                 binding.imagePauseDownload.isEnabled = false
                 binding.imageResumeDownload.isEnabled = false
+
+
+                binding.textContinuPassword222222.setOnClickListener {
+                    showToastMessage("Please wait...")
+                    handler.postDelayed(Runnable {
+                        val intent = Intent(applicationContext, WebActivity::class.java)
+                        intent.putExtra("unzipManual", unzipManual.toString())
+                        startActivity(intent)
+                        finish()
+                    }, 3000)
+
+                }
 
 
                 val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
