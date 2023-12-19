@@ -714,17 +714,32 @@ public class SettingsActivity extends AppCompatActivity {
 
 
 
-
             if (appModeOrTvMode != null) {
+
+             //   appModeOrTvMode.setChecked(true);
                 appModeOrTvMode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference arg0, Object isChanged) {
                         boolean isItemOn = (Boolean) isChanged;
                         if (isItemOn) {
-                            appModeOrTvMode.setSwitchTextOff("Tv Mode");
+                            appModeOrTvMode.setTitle("App Mode");
+
+                         //   fullscr_switch.setChecked(true);
+                            autoToolbar_switch.setChecked(false);
+                            hide_bottom_switch.setChecked(false);
+                            swipe_switch.setChecked(false);
+                            immersive_switch.setChecked(false);
 
                         } else {
-                            appModeOrTvMode.setSwitchTextOff("App Mode");
+                            appModeOrTvMode.setTitle("Tv Mode");
+
+                          //  fullscr_switch.setChecked(false);
+                            autoToolbar_switch.setChecked(true);
+                            hide_bottom_switch.setChecked(true);
+                            swipe_switch.setChecked(true);
+                            immersive_switch.setChecked(true);
+
+
                         }
                         return true;
                     }

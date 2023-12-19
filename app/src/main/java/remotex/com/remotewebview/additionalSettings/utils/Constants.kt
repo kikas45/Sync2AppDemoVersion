@@ -12,6 +12,8 @@ class Constants {
         const val isActive = "isActive"
         const val QR_CODE_KEY = "QR_CODE_KEY"
         const val IS_FIRST_DOWNLOAD = "IS_FIRST_DOWNLOAD"
+        const val App_Mode = "App_Mode"
+        const val TV_Mode = "TV_Mode"
 
         const val shortcut_website_id = "id_website"
         const val shortcut_messages_id = "id_messages"

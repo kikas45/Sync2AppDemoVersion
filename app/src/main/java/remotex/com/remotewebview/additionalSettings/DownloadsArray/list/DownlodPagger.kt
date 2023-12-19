@@ -79,17 +79,18 @@ class DownlodPagger : AppCompatActivity() {
 
 
 
-        binding.textTitle.setOnClickListener {
-            val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
-            val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
-            showToastMessage("$imagUsemanualOrnotuseManual ")
 
-        }
+
 
         binding.apply {
             closeBs.setOnClickListener {
                 onBackPressed()
+            }
+
+
+            binding.textContinuPassword222222.setOnClickListener {
+                showToastMessage("Please wait for download to be completed..")
             }
 
 
@@ -144,6 +145,7 @@ class DownlodPagger : AppCompatActivity() {
     }
 
     private val runnable: Runnable = object : Runnable {
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun run() {
             getDownloadStatus()
             myHandler!!.postDelayed(this, 500)
@@ -151,6 +153,7 @@ class DownlodPagger : AppCompatActivity() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("SetTextI18n")
     fun getDownloadStatus() {
         try {
@@ -200,7 +203,7 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
                 // binding.textContinuPassword222222.isEnabled = false
-
+                isValid = true
             }
 
             DownloadManager.STATUS_RUNNING -> {
@@ -218,7 +221,7 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imagePauseDownload.visibility = View.INVISIBLE
                 binding.imageResumeDownload.visibility = View.VISIBLE
                 //  binding.textContinuPassword222222.isEnabled = false
-
+                isValid = true
             }
 
             DownloadManager.STATUS_SUCCESSFUL -> {
@@ -228,36 +231,53 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imagePauseDownload.isEnabled = false
                 binding.imageResumeDownload.isEnabled = false
 
-
-                binding.textContinuPassword222222.setOnClickListener {
-                    showToastMessage("Please wait...")
-                    handler.postDelayed(Runnable {
-                        val intent = Intent(applicationContext, WebActivity::class.java)
-                        intent.putExtra("unzipManual", unzipManual.toString())
-                        startActivity(intent)
-                        finish()
-                    }, 3000)
-
-                }
-
-
                 val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
                 val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
                 if (isValid == true) {
                     isValid = false
                     if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI) && !imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
+
                         funUnZipFile()
                     } else {
                         showToastMessage("Download completed")
                     }
                 }
 
+
+
+                binding.textContinuPassword222222.setOnClickListener {
+
+                    val intent = Intent(applicationContext, WebActivity::class.java)
+                    intent.putExtra("unzipManual", unzipManual.toString())
+                    startActivity(intent)
+
+
+                    val textSynfromApiZip222 = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+                    val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
+
+                    if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI) && !imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
+                        showToastMessage("Please wait for file to finish extracting...")
+                        handler.postDelayed(Runnable {
+                            val intent = Intent(applicationContext, WebActivity::class.java)
+                            intent.putExtra("unzipManual", unzipManual.toString())
+                            startActivity(intent)
+                            finish()
+                        },  10000)
+
+
+                    } else {
+                        showToastMessage("File type has to be API")
+                    }
+
+                }
+
+
             }
 
             DownloadManager.STATUS_FAILED -> {
                 msg = "Failed!, Retry.."
-
+                isValid = false
             }
 
             else -> {

@@ -669,19 +669,19 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            String unzipManualValue = intent.getStringExtra("unzipManual");
+        String unzipManualValue = getIntent().getStringExtra("unzipManual");
+        if (unzipManualValue != null) {
             String Syn2AppLive = "Syn2AppLive";
             String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManualValue;
             File destinationFolder = new File(folderToExtractTo);
             if (destinationFolder.exists()) {
                 loadOfflineWebviewPage();
             }else {
-
                 claingTheLongWebView();
             }
 
+        }else {
+            claingTheLongWebView();
         }
 
 
@@ -803,6 +803,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
             webSettings.setSupportZoom(true);
+            webSettings.setAllowFileAccess(true);
+            webSettings.setAllowContentAccess(true);
+
 
             webView.loadUrl(filePath);
             SimpleProgressBar.setVisibility(View.GONE);
