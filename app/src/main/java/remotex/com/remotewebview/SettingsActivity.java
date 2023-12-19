@@ -86,212 +86,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
 
-
-
-
-/*
-    @SuppressLint("InflateParams")
-    private void showExitConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = LayoutInflater.from(this);
-        View dialogView = inflater.inflate(R.layout.custom_confirm_exit_on_setting_dialog, null);
-
-        builder.setView(dialogView);
-
-        final AlertDialog alertDialog = builder.create();
-
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-
-        // Set the background of the AlertDialog to be transparent
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-
-
-        EditText editTextText2 = dialogView.findViewById(R.id.editTextText2);
-
-        TextView textHome = dialogView.findViewById(R.id.textHome);
-        TextView textLoginAdmin2 = dialogView.findViewById(R.id.textLoginAdmin2);
-        TextView textExit = dialogView.findViewById(R.id.textExit);
-        TextView textReSync = dialogView.findViewById(R.id.textReSync);
-        TextView textLaunch = dialogView.findViewById(R.id.textLaunch);
-        TextView textForgetPassword = dialogView.findViewById(R.id.textForgetPassword);
-        TextView textCanCellDialog = dialogView.findViewById(R.id.textCanCellDialog);
-
-        textCanCellDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                alertDialog.dismiss();
-            }
-        });
-
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
-
-        String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
-        SharedPreferences.Editor editor = sharedBiometric.edit();
-
-
-
-        if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
-            editTextText2.setText("********");
-            editTextText2.setEnabled(false);
-            editTextText2.setGravity(Gravity.CENTER);  // Center the text
-        } else {
-            editTextText2.setEnabled(true);
-        }
-
-
-        if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-            textLaunch.setText("Launch offline");
-
-        } else {
-            textLaunch.setText("Launch online");
-        }
-
-
-        @SuppressLint("CommitPrefEdits")
-        SharedPreferences simpleSavedPassword = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
-
-
-        textReSync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword)|| editTextText.equals(simpleAdminPassword)) {
-                    hideKeyBoard(editTextText2);
-                    startActivity(new Intent(getApplicationContext(), ReSyncActivity.class));
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        textExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-
-
-        textForgetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopChangePassowrdDialog();
-                alertDialog.dismiss();
-            }
-        });
-
-
-        textLaunch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-                String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-
-
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword)|| editTextText.equals(simpleAdminPassword)) {
-                    if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-                        String  fileName = "index.html";
-                        File unzipLocation = new File(
-                                Environment.getExternalStorageDirectory().getAbsolutePath(),
-                                "Syn2AppLive/WebPageZip/"+ fileName
-                        );
-
-                        if (unzipLocation.exists()) {;
-                            // String filePath = "file://" + unzipLocation.getAbsolutePath();
-                            String filePath = "https://www.cnbc.com/world/?region=world";
-
-                            showToastMessage(filePath);
-                        } else {
-                            showToastMessage("location not found");
-                        }
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
-                        alertDialog.dismiss();
-
-                    } else {
-                        showToastMessage("App already load online");
-                        hideKeyBoard(editTextText2);
-                        alertDialog.dismiss();
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
-                    }
-                }else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                    showToastMessage("Wrong password");
-                }
-
-
-
-            }
-        });
-
-        textHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideKeyBoard(editTextText2);
-                moveTaskToBack(true);
-
-            }
-        });
-
-
-        textLoginAdmin2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-                if (editTextText.equals(simpleAdminPassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-
-                } else if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                }
-
-
-            }
-        });
-
-
-        alertDialog.show();
-    }
-
-*/
-
-
-
-
-
     @SuppressLint("InflateParams")
     private void showExitConfirmationDialog() {
 
@@ -551,12 +345,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
 
-
-
-
-
-
-
     @SuppressLint("MissingInflatedId")
     private void showPopChangePassowrdDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -713,16 +501,23 @@ public class SettingsActivity extends AppCompatActivity {
             Preference additionalSettingsPreference = findPreference("additional_settings_key");
 
 
+            SharedPreferences sharedBiometric = getContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedBiometric.edit();
+
 
             if (appModeOrTvMode != null) {
 
              //   appModeOrTvMode.setChecked(true);
                 appModeOrTvMode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                     @Override
                     public boolean onPreferenceChange(Preference arg0, Object isChanged) {
                         boolean isItemOn = (Boolean) isChanged;
                         if (isItemOn) {
                             appModeOrTvMode.setTitle("App Mode");
+                            WebActivity.ChangeListener = true;
+                            editor.remove(Constants.MY_TV_OR_APP_MODE);
+                            editor.apply();
 
                          //   fullscr_switch.setChecked(true);
                             autoToolbar_switch.setChecked(false);
@@ -731,9 +526,13 @@ public class SettingsActivity extends AppCompatActivity {
                             immersive_switch.setChecked(false);
 
                         } else {
+                            WebActivity.ChangeListener = true;
                             appModeOrTvMode.setTitle("Tv Mode");
 
-                          //  fullscr_switch.setChecked(false);
+                            editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.MY_TV_OR_APP_MODE);
+                            editor.apply();
+
+                            //  fullscr_switch.setChecked(false);
                             autoToolbar_switch.setChecked(true);
                             hide_bottom_switch.setChecked(true);
                             swipe_switch.setChecked(true);
@@ -989,4 +788,5 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
     }
+
 }

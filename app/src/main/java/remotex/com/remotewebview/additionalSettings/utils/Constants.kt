@@ -14,6 +14,9 @@ class Constants {
         const val IS_FIRST_DOWNLOAD = "IS_FIRST_DOWNLOAD"
         const val App_Mode = "App_Mode"
         const val TV_Mode = "TV_Mode"
+        const val FIRST_TIME_APP_START = "FIRST_TIME_APP_START"
+
+        const val  MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
 
         const val shortcut_website_id = "id_website"
         const val shortcut_messages_id = "id_messages"

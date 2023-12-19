@@ -685,6 +685,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         }
 
 
+     //   loadTheMainWebview();
 
 
     }
@@ -806,6 +807,16 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             webSettings.setAllowFileAccess(true);
             webSettings.setAllowContentAccess(true);
 
+
+//            webSettings.setMediaPlaybackRequiresUserGesture(false);
+//
+//            webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
+//            webView.setWebViewClient(new AdvancedWebViewClient());
+//            webView.setWebChromeClient(new AdvancedWebChromeClient());
+//            webView.setDownloadListener(new Downloader());
+//
+//            WebView.setWebContentsDebuggingEnabled(true);
+//
 
             webView.loadUrl(filePath);
             SimpleProgressBar.setVisibility(View.GONE);
@@ -1244,7 +1255,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
         if (ShowWebButton) {
-            web_button_root_layout.setVisibility(View.VISIBLE);
+            SharedPreferences sharedBiometric = getApplicationContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+            String getTvMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
+
+            if (getTvMode.equals(Constants.MY_TV_OR_APP_MODE)){
+                web_button_root_layout.setVisibility(View.INVISIBLE);
+            }else {
+                web_button_root_layout.setVisibility(View.VISIBLE);
+            }
 
         }
 

@@ -36,6 +36,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 finish()
                 editor.putString(Constants.App_Mode, Constants.App_Mode)
+                editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
                 editor.apply()
             }
 
@@ -43,6 +44,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 finish()
                 editor.putString(Constants.TV_Mode, Constants.TV_Mode)
+                editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
                 editor.apply()
             }
 
@@ -58,20 +60,12 @@ class TvActivityOrAppMode : AppCompatActivity() {
 
         val sharedBiometric: SharedPreferences = applicationContext.getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE)
 
-        val app_mode = sharedBiometric.getString(Constants.App_Mode, "")
-        val tv_mode = sharedBiometric.getString(Constants.TV_Mode, "")
+        val first_time_app_start = sharedBiometric.getString(Constants.FIRST_TIME_APP_START, "")
 
-        if (app_mode.equals(Constants.App_Mode)){
+        if (first_time_app_start.equals(Constants.FIRST_TIME_APP_START)){
             startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
             finish()
         }
-
-        if (tv_mode.equals(Constants.TV_Mode)){
-            startActivity(Intent(applicationContext, SettingsActivity::class.java))
-            finish()
-        }
-
-      //  loadOffkineWebviewPage()
 
     }
 
