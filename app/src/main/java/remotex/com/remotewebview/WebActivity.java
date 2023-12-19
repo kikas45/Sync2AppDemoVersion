@@ -695,11 +695,12 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
 
         String imgLunchOnline = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
+        String getUnzipPath = sharedBiometric.getString(Constants.DOWNLOAD_PATH , "");
 
         if (imgLunchOnline.equals(Constants.imgAllowLunchFromOnline)) {
             String Syn2AppLive = "Syn2AppLive";
-            String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
-            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManual;
+           // String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
+            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + getUnzipPath;
 
             File destinationFolder = new File(folderToExtractTo);
             if (destinationFolder.exists()) {

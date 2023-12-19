@@ -383,6 +383,10 @@ class DownlodPagger : AppCompatActivity() {
         }
 
 
+        val editor = sharedBiometric.edit()
+        editor.putString(Constants.DOWNLOAD_PATH, unzipManual)
+        editor.apply()
+
 
         // This is where we are extracting from
         // val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive/$CLO/$MANUAL/$Zip/$App"
