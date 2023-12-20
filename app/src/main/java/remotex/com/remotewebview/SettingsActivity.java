@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
@@ -64,7 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (!did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) || imgEnablePassword.equals(Constants.imgEnablePassword)) {
             showExitConfirmationDialog();
-        }else {
+        } else {
             //do nothing
         }
 
@@ -79,11 +80,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     }
-
-
-
-
-
 
 
     @SuppressLint("InflateParams")
@@ -109,7 +105,7 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences simpleSavedPassword = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
 
 
-        EditText editTextText2 =binding.editTextText2;
+        EditText editTextText2 = binding.editTextText2;
 
         TextView textHome = binding.textHome;
         TextView textLoginAdmin2 = binding.textLoginAdmin2;
@@ -119,7 +115,6 @@ public class SettingsActivity extends AppCompatActivity {
         TextView textLaunch = binding.textLaunch;
         TextView textForgetPassword = binding.textForgetPasswordHome;
         TextView textCanCellDialog = binding.textCanCellDialog;
-
 
 
         ImageView imgToggle = binding.imgToggle;
@@ -146,8 +141,6 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-
-
         textCanCellDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -166,18 +159,17 @@ public class SettingsActivity extends AppCompatActivity {
         String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
 
-        if (imgEnablePassword.equals(Constants.imgEnablePassword)  ) {
+        if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
             editTextText2.setText(simpleAdminPassword);
             editTextText2.setEnabled(false);
             showToastMessage("edit  input password filled");
-        } else  if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) ) {
+        } else if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord)) {
             editTextText2.setEnabled(true);
             editTextText2.setText(simpleAdminPassword);
-        }else {
+        } else {
             editTextText2.setEnabled(true);
             //editTextText2.setGravity(Gravity.CENTER);
         }
-
 
 
         if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
@@ -219,7 +211,7 @@ public class SettingsActivity extends AppCompatActivity {
                     editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
                     editor.apply();
                     alertDialog.dismiss();
-                }else {
+                } else {
                     editTextText2.setError("Wrong password");
                 }
 
@@ -342,7 +334,6 @@ public class SettingsActivity extends AppCompatActivity {
 
         alertDialog.show();
     }
-
 
 
     @SuppressLint("MissingInflatedId")
@@ -504,32 +495,43 @@ public class SettingsActivity extends AppCompatActivity {
             SharedPreferences sharedBiometric = getContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedBiometric.edit();
 
+            String getTvMode = sharedBiometric.getString(Constants.App_Mode, "");
+            String get_AppMode = sharedBiometric.getString(Constants.App_Mode, "");
 
             if (appModeOrTvMode != null) {
 
-             //   appModeOrTvMode.setChecked(true);
+
+                if (getTvMode.equals(Constants.TV_Mode)) {
+                    appModeOrTvMode.setChecked(true);
+                }
+
+                if (get_AppMode.equals(Constants.App_Mode)) {
+                    appModeOrTvMode.setChecked(false);
+                }
+
+
+                Handler handler1 = new Handler(Looper.getMainLooper());
+                handler1.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        editor.remove(Constants.App_Mode);
+                        editor.remove(Constants.TV_Mode);
+                    }
+
+                }, 300);
+
                 appModeOrTvMode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                     @Override
                     public boolean onPreferenceChange(Preference arg0, Object isChanged) {
                         boolean isItemOn = (Boolean) isChanged;
                         if (isItemOn) {
-                            appModeOrTvMode.setTitle("App Mode");
-                            WebActivity.ChangeListener = true;
-                            editor.remove(Constants.MY_TV_OR_APP_MODE);
-                            editor.apply();
 
-                         //   fullscr_switch.setChecked(true);
-                            autoToolbar_switch.setChecked(false);
-                            hide_bottom_switch.setChecked(false);
-                            swipe_switch.setChecked(false);
-                            immersive_switch.setChecked(false);
-
-                        } else {
                             WebActivity.ChangeListener = true;
                             appModeOrTvMode.setTitle("Tv Mode");
 
                             editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.MY_TV_OR_APP_MODE);
+                            editor.remove(Constants.App_Mode);
                             editor.apply();
 
                             //  fullscr_switch.setChecked(false);
@@ -539,15 +541,28 @@ public class SettingsActivity extends AppCompatActivity {
                             immersive_switch.setChecked(true);
 
 
+                        } else {
+
+                            appModeOrTvMode.setTitle("App Mode");
+                            WebActivity.ChangeListener = true;
+                            editor.remove(Constants.MY_TV_OR_APP_MODE);
+                            editor.putString(Constants.App_Mode, Constants.App_Mode);
+                            editor.apply();
+
+
+                            //   fullscr_switch.setChecked(true);
+                            autoToolbar_switch.setChecked(false);
+                            hide_bottom_switch.setChecked(false);
+                            swipe_switch.setChecked(false);
+                            immersive_switch.setChecked(false);
+
+
                         }
                         return true;
                     }
                 });
 
             }
-
-
-
 
 
             if (additionalSettingsPreference != null) {

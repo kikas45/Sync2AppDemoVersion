@@ -43,7 +43,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
             textTvMode.setOnClickListener {
                 startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 finish()
-                editor.putString(Constants.TV_Mode, Constants.TV_Mode)
+               editor.putString(Constants.TV_Mode, Constants.TV_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
                 editor.apply()
             }
@@ -66,6 +66,8 @@ class TvActivityOrAppMode : AppCompatActivity() {
             startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
             finish()
         }
+
+     //   loadOffkineWebviewPage()
 
     }
 
@@ -92,9 +94,13 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 myWebview.settings.setSupportZoom(true)
                 myWebview.settings.allowFileAccess = true
                 myWebview.settings.allowContentAccess = true
+                myWebview.settings.mediaPlaybackRequiresUserGesture  = true
+                myWebview.settings.setSupportMultipleWindows(true)
                 myWebview.loadUrl(filePath)
             } else {
-                Toast.makeText(applicationContext, "No index,html file found", Toast.LENGTH_SHORT).show()
+             //   Toast.makeText(applicationContext, "No index,html file found", Toast.LENGTH_SHORT).show()
+                Log.d("PowellFilePath", "No file Found..")
+
             }
 
         }

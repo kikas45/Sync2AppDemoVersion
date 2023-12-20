@@ -805,8 +805,17 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
             webSettings.setSupportZoom(true);
+
             webSettings.setAllowFileAccess(true);
             webSettings.setAllowContentAccess(true);
+
+            webSettings.setDomStorageEnabled(true);
+
+
+           //  webSettings.setMediaPlaybackRequiresUserGesture(false);
+           // webSettings.getMediaPlaybackRequiresUserGesture();
+           // webSettings.setLoadsImagesAutomatically(true);
+
 
 
 //            webSettings.setMediaPlaybackRequiresUserGesture(false);
