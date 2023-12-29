@@ -112,13 +112,26 @@ public class SettingsActivity extends AppCompatActivity {
         TextView textExit = binding.textExit;
         TextView textSettings = binding.textSettings;
         TextView textReSync = binding.textReSync;
-        TextView textLaunch = binding.textLaunch;
+        TextView textLaunchOnline = binding.textLaunchOnline;
+        TextView textLaunchOffline = binding.textLaunchOffline;
         TextView textForgetPassword = binding.textForgetPasswordHome;
         TextView textCanCellDialog = binding.textCanCellDialog;
 
 
         ImageView imgToggle = binding.imgToggle;
         ImageView imgToggleNzotVisible = binding.imgToggleNzotVisible;
+
+
+        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedBiometric.edit();
+
+        String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
+
+        String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
+        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
+        String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+
 
         imgToggle.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,19 +157,22 @@ public class SettingsActivity extends AppCompatActivity {
         textCanCellDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                alertDialog.dismiss();
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+                String editTextText = editTextText2.getText().toString().trim();
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+                    alertDialog.dismiss();
+                    hideKeyBoard(editTextText2);
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+                    alertDialog.dismiss();
+                } else {
+                    editTextText2.setError("Wrong password");
+                }
+
+
             }
         });
 
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
-
-        SharedPreferences.Editor editor = sharedBiometric.edit();
-
-
-        String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
-        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
-        String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
 
         if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
@@ -168,14 +184,14 @@ public class SettingsActivity extends AppCompatActivity {
             editTextText2.setText(simpleAdminPassword);
         } else {
             editTextText2.setEnabled(true);
-            //editTextText2.setGravity(Gravity.CENTER);
         }
 
+        textLaunchOffline.setVisibility(View.GONE);
 
         if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-            textLaunch.setText("Launch offline");
+            textLaunchOnline.setText("Launch offline");
         } else {
-            textLaunch.setText("Launch online");
+            textLaunchOnline.setText("Launch online");
         }
 
 
@@ -205,7 +221,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
                 String editTextText = editTextText2.getText().toString().trim();
-                if (editTextText.equals(simpleAdminPassword)) {
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
                     alertDialog.dismiss();
                     hideKeyBoard(editTextText2);
                     editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
@@ -237,7 +253,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-        textLaunch.setOnClickListener(new View.OnClickListener() {
+        textLaunchOnline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
@@ -246,37 +262,25 @@ public class SettingsActivity extends AppCompatActivity {
 
                 String editTextText = editTextText2.getText().toString().trim();
 
-                showToastMessage("Logic ongoing");
 
-       /*         if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
                     if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-                        String fileName = "index.html";
-                        File unzipLocation = new File(
-                                Environment.getExternalStorageDirectory().getAbsolutePath(),
-                                "Syn2AppLive/WebPageZip/" + fileName
-                        );
 
-                        if (unzipLocation.exists()) {
-                            ;
-                            //  String filePath = "file://" + unzipLocation.getAbsolutePath();
-                            String filePath = "https://www.cnbc.com/world/?region=world";
+                        Intent intent = new Intent(getApplicationContext(), WebActivity.class);
+                        intent.putExtra("unzipManual", "unzipManual");
 
-
-                            showToastMessage(filePath);
-                        } else {
-                            showToastMessage("location not found");
-                        }
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
 
                         editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
                         editor.apply();
-
                         alertDialog.dismiss();
 
                     } else {
                         showToastMessage("App already load online");
                         hideKeyBoard(editTextText2);
                         alertDialog.dismiss();
-
                         editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
                         editor.apply();
 
@@ -286,10 +290,10 @@ public class SettingsActivity extends AppCompatActivity {
                     editTextText2.setError("Wrong password");
                     showToastMessage("Wrong password");
                 }
-*/
 
             }
         });
+
 
 
         textHome.setOnClickListener(new View.OnClickListener() {
@@ -495,19 +499,46 @@ public class SettingsActivity extends AppCompatActivity {
             SharedPreferences sharedBiometric = getContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedBiometric.edit();
 
-            String getTvMode = sharedBiometric.getString(Constants.App_Mode, "");
+
             String get_AppMode = sharedBiometric.getString(Constants.App_Mode, "");
 
+
+            if (get_AppMode.equals(Constants.App_Mode)) {
+                appModeOrTvMode.setChecked(false);
+
+                appModeOrTvMode.setTitle("App Mode");
+                WebActivity.ChangeListener = true;
+                editor.putString(Constants.App_Mode, Constants.App_Mode);
+                editor.apply();
+
+
+                autoToolbar_switch.setChecked(false);
+                hide_bottom_switch.setChecked(false);
+                swipe_switch.setChecked(false);
+                immersive_switch.setChecked(false);
+                fullscr_switch.setChecked(false);
+
+
+            }else {
+                appModeOrTvMode.setChecked(true);
+
+                WebActivity.ChangeListener = true;
+                appModeOrTvMode.setTitle("Tv Mode");
+
+
+                editor.remove(Constants.App_Mode);
+                editor.apply();
+
+                autoToolbar_switch.setChecked(true);
+                hide_bottom_switch.setChecked(true);
+                swipe_switch.setChecked(true);
+                immersive_switch.setChecked(true);
+                fullscr_switch.setChecked(true);
+
+            }
+
+
             if (appModeOrTvMode != null) {
-
-
-                if (getTvMode.equals(Constants.TV_Mode)) {
-                    appModeOrTvMode.setChecked(true);
-                }
-
-                if (get_AppMode.equals(Constants.App_Mode)) {
-                    appModeOrTvMode.setChecked(false);
-                }
 
 
                 Handler handler1 = new Handler(Looper.getMainLooper());
@@ -515,7 +546,7 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         editor.remove(Constants.App_Mode);
-                        editor.remove(Constants.TV_Mode);
+                     //   editor.remove(Constants.TV_Mode);
                     }
 
                 }, 300);
@@ -530,7 +561,7 @@ public class SettingsActivity extends AppCompatActivity {
                             WebActivity.ChangeListener = true;
                             appModeOrTvMode.setTitle("Tv Mode");
 
-                            editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.MY_TV_OR_APP_MODE);
+                         //   editor.putString(Constants.TV_Mode, Constants.TV_Mode);
                             editor.remove(Constants.App_Mode);
                             editor.apply();
 
@@ -539,13 +570,14 @@ public class SettingsActivity extends AppCompatActivity {
                             hide_bottom_switch.setChecked(true);
                             swipe_switch.setChecked(true);
                             immersive_switch.setChecked(true);
+                            fullscr_switch.setChecked(true);
 
 
                         } else {
 
                             appModeOrTvMode.setTitle("App Mode");
                             WebActivity.ChangeListener = true;
-                            editor.remove(Constants.MY_TV_OR_APP_MODE);
+                        ///    editor.remove(Constants.TV_Mode);
                             editor.putString(Constants.App_Mode, Constants.App_Mode);
                             editor.apply();
 
@@ -555,6 +587,7 @@ public class SettingsActivity extends AppCompatActivity {
                             hide_bottom_switch.setChecked(false);
                             swipe_switch.setChecked(false);
                             immersive_switch.setChecked(false);
+                            fullscr_switch.setChecked(false);
 
 
                         }

@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import remotex.com.remotewebview.WebActivity
 import java.io.File
 import java.io.FileInputStream
@@ -28,7 +29,7 @@ class ZipWorker(
             val destinationPath = inputData.getString("destinationPath")
 
             funUnZipFile(zipFilePath!!, destinationPath!!)
-            
+
             Result.success()
         } catch (e: Exception) {
 
@@ -58,7 +59,8 @@ class ZipWorker(
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+
+
     fun extractZip(zipFilePath: String, destinationPath: String) {
         val buffer = ByteArray(1024)
 
@@ -93,46 +95,36 @@ class ZipWorker(
 
             showNotification("Zip extraction completed")
 
-//            try {
-//                applicationContext.startActivity(Intent(applicationContext, WebActivity::class.java))
-//            }catch (_:Exception){}
-
-
         } catch (e: Exception) {
             e.printStackTrace()
 
-          showNotification("Error during zip extraction")
-//            try {
-//                applicationContext.startActivity(Intent(applicationContext, WebActivity::class.java))
-//            }catch (_:Exception){}
-
-
+            showNotification("Error during zip extraction")
             Log.d("ZIppppp", "extractZip: ${e.message}")
         }
     }
 
 
-
     private fun showNotification(message: String) {
         try {
 
-            val notificationManager: NotificationManager =
-                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val notificationManager: NotificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
             // Create a notification channel for Android Oreo and higher
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelId = "zip_extraction_channel"
                 val channelName = "Zip Extraction Channel"
-                val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
+                val channel =
+                    NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH)
                 notificationManager.createNotificationChannel(channel)
             }
 
             // Build the notification
-            val notificationBuilder = NotificationCompat.Builder(applicationContext, "zip_extraction_channel")
-                .setContentTitle("Zip Extraction")
-                .setContentText(message)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            val notificationBuilder =
+                NotificationCompat.Builder(applicationContext, "zip_extraction_channel")
+                    .setContentTitle("Zip Extraction")
+                    .setContentText(message)
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
             // Show the notification
             notificationManager.notify(1, notificationBuilder.build())
@@ -142,3 +134,73 @@ class ZipWorker(
         Log.d("NOTIFICATION", message)
     }
 }
+
+
+
+
+/*
+
+fun extractZip(zipFilePath: String, destinationPath: String) {
+    val buffer = ByteArray(1024)
+
+    try {
+        showNotification("Zip extraction started")
+
+        val zipInputStream = ZipInputStream(FileInputStream(zipFilePath))
+        var entry = zipInputStream.nextEntry
+        var totalBytesRead = 0L
+        val totalSize = File(zipFilePath).length()
+
+        while (entry != null) {
+            val entryFile = File(destinationPath, entry.name)
+            val entryDir = File(entryFile.parent)
+
+            if (!entryDir.exists()) {
+                entryDir.mkdirs()
+            }
+
+            val outputStream = entryFile.outputStream()
+
+            var len = zipInputStream.read(buffer)
+            while (len > 0) {
+                outputStream.write(buffer, 0, len)
+                totalBytesRead += len.toLong()
+
+                // Update progress
+                setProgressAsync(workDataOf("progress" to (totalBytesRead * 100 / totalSize)))
+
+                len = zipInputStream.read(buffer)
+            }
+
+            outputStream.close()
+            zipInputStream.closeEntry()
+            entry = zipInputStream.nextEntry
+        }
+
+        zipInputStream.close()
+
+        showNotification("Zip extraction completed")
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+
+        showNotification("Error during zip extraction")
+        Log.d("ZIppppp", "extractZip: ${e.message}")
+    }
+}
+// Add the following code to your MainActivity or wherever you want to display the progress
+WorkManager.getInstance(applicationContext)
+.getWorkInfoByIdLiveData(workRequest.id)
+.observe(this, { workInfo ->
+    if (workInfo != null && workInfo.state.isFinished) {
+        // Work has finished, update UI or dismiss progress bar
+    } else {
+        val progress = workInfo?.progress?.getInt("progress", -1)
+        if (progress != null && progress != -1) {
+            // Update your progress bar with the 'progress' value
+            // You can use it directly or calculate percentage, etc.
+            updateProgressBar(progress)
+        }
+    }
+})
+*/

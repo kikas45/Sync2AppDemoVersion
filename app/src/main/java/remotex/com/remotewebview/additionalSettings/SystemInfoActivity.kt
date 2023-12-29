@@ -9,6 +9,8 @@ import android.net.ConnectivityManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -29,6 +31,13 @@ class SystemInfoActivity : AppCompatActivity() {
 
 
     private lateinit var binding: ActivitySystemInfoBinding
+
+
+    private val handler:Handler by lazy {
+        Handler(Looper.getMainLooper())
+    }
+
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +66,6 @@ class SystemInfoActivity : AppCompatActivity() {
 //            val deviceInformation = deviceInfoBuilder.toString()
 //
 //            Log.d("DeviceInfo", deviceInformation)
-
 
 
             val deviceInfoBuilder = StringBuilder()
@@ -94,6 +102,7 @@ class SystemInfoActivity : AppCompatActivity() {
             }
 
 
+            startNetWorkCall()
 
 
             textTextInfo.text = "Device name"
@@ -125,9 +134,27 @@ class SystemInfoActivity : AppCompatActivity() {
 
     }
 
+    private fun startNetWorkCall() {
+        binding.progressBar.visibility = View.VISIBLE
+        binding.viewCover.visibility = View.VISIBLE
+        binding.textErrorText.visibility = View.VISIBLE
+
+        handler.postDelayed(Runnable {
+            if (isNetworkAvailable()){
+                fetchData()
+            }else{
+                showToastMessage("No Internet Connection")
+                binding.progressBar.visibility = View.GONE
+                binding.viewCover.visibility = View.GONE
+                binding.textErrorText.visibility = View.GONE
+            }
+
+        }, 1000)
+    }
+
 
     @SuppressLint("MissingInflatedId")
-    private fun showPopHardWFailed() {
+    private fun showPopHardWFailed( deviceName:String, model:String, manufacturer:String, brand:String, osVersion:String, sdkVersion:String, buildNumber:String) {
 
         val binding: CustomHardwareFailedBinding =
             CustomHardwareFailedBinding.inflate(layoutInflater)
@@ -141,8 +168,21 @@ class SystemInfoActivity : AppCompatActivity() {
         alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
 
-
         binding.apply {
+
+            val deviceInfoBuilder = StringBuilder()
+            deviceInfoBuilder.append("Device name: ").append(deviceName).append("\n")
+            deviceInfoBuilder.append("Model: ").append(model).append("\n")
+            deviceInfoBuilder.append("Manufacturer: ").append(manufacturer).append("\n")
+            deviceInfoBuilder.append("Brand: ").append(brand).append("\n")
+            deviceInfoBuilder.append("OS Version: ").append(osVersion).append("\n")
+            deviceInfoBuilder.append("SDK Version: ").append(sdkVersion).append("\n")
+            deviceInfoBuilder.append("Build Number: ").append(buildNumber).append("\n")
+
+            val deviceInformation = deviceInfoBuilder.toString()
+
+
+            textDisplayResult.text = "Your hardware is not compatible with this application\n" +  deviceInformation
 
 
 
@@ -162,7 +202,7 @@ class SystemInfoActivity : AppCompatActivity() {
 
 
     @SuppressLint("MissingInflatedId")
-    private fun showPopHardWareApproved() {
+    private fun showPopHardWareApproved(deviceName:String, model:String, manufacturer:String, brand:String, osVersion:String, sdkVersion:String, buildNumber:String) {
 
         val binding: CustomHardwareApprovedBinding =
             CustomHardwareApprovedBinding.inflate(layoutInflater)
@@ -180,6 +220,23 @@ class SystemInfoActivity : AppCompatActivity() {
 
 
         binding.apply {
+
+
+            val deviceInfoBuilder = StringBuilder()
+            deviceInfoBuilder.append("Device name: ").append(deviceName).append("\n")
+            deviceInfoBuilder.append("Model: ").append(model).append("\n")
+            deviceInfoBuilder.append("Manufacturer: ").append(manufacturer).append("\n")
+            deviceInfoBuilder.append("Brand: ").append(brand).append("\n")
+            deviceInfoBuilder.append("OS Version: ").append(osVersion).append("\n")
+            deviceInfoBuilder.append("SDK Version: ").append(sdkVersion).append("\n")
+            deviceInfoBuilder.append("Build Number: ").append(buildNumber).append("\n")
+
+            val deviceInformation = deviceInfoBuilder.toString()
+
+
+            textDisplayResult.text =  "Your hardware is not compatible with this application\n" +  deviceInformation
+
+
 
             textContinuPassword2.setOnClickListener {
                 alertDialog.dismiss()
@@ -220,7 +277,8 @@ class SystemInfoActivity : AppCompatActivity() {
 
                         logAndCompareDataOnTypes(deviceName, model, manufacturer, brand, osVersion, sdkVersion, buildNumber)
 
-                    } else {
+
+                 } else {
                         showToastMessage("Failed to fetch data")
                         binding.progressBar.visibility = View.GONE
                         binding.viewCover.visibility = View.GONE
@@ -264,10 +322,19 @@ class SystemInfoActivity : AppCompatActivity() {
                 && buildNumber.isNotEmpty()  && buildNumber== Build.DISPLAY.toString()
 
             ){
-                showPopHardWareApproved()
+                showPopHardWareApproved( deviceName, model, manufacturer, brand, osVersion, sdkVersion, buildNumber)
                 binding.textBtnhardWareAprroved.setBackgroundResource(R.drawable.round_edit_text_solid_green_design)
+                binding.textBtnhardWareAprroved.text = "HARDWARE APPROVED"
+                binding.imageNotApproved!!.visibility = View.INVISIBLE
+                binding.imageApproved!!.visibility = View.VISIBLE
             }else{
-                showPopHardWFailed()
+                showPopHardWFailed( deviceName, model, manufacturer, brand, osVersion, sdkVersion, buildNumber)
+                binding.textBtnhardWareAprroved.setBackgroundResource(R.drawable.round_edit_text_solid_red_design)
+                binding.textBtnhardWareAprroved.text = "HARDWARE NOT APPROVED"
+                binding.imageNotApproved!!.visibility = View.VISIBLE
+                binding.imageApproved!!.visibility = View.INVISIBLE
+
+
             }
 
     }

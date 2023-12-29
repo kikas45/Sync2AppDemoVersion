@@ -32,7 +32,7 @@
             android:layout_marginTop="12dp"
             android:elegantTextHeight="true"
             android:gravity="center"
-            android:text="Testing connection..."
+            android:text="Testing connection"
             android:textColor="@color/deep_blue"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="@+id/progressBar2"

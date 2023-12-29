@@ -43,7 +43,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
             textTvMode.setOnClickListener {
                 startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 finish()
-               editor.putString(Constants.TV_Mode, Constants.TV_Mode)
+           //    editor.putString(Constants.TV_Mode, Constants.TV_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
                 editor.apply()
             }

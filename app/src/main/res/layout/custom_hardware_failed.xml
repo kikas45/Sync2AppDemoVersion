@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/cardDesignAccountNumber"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|top"
         android:layout_marginStart="40dp"
         android:layout_marginTop="20dp"
@@ -52,12 +52,12 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView9" />
+            app:layout_constraintTop_toBottomOf="@+id/textDisplayResult" />
 
         <ImageView
             android:id="@+id/imagSucessful"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -66,20 +66,27 @@
             app:tint="@color/red" />
 
         <TextView
-            android:id="@+id/textView9"
-            android:layout_width="wrap_content"
+            android:id="@+id/textDisplayResult"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="25dp"
             android:layout_marginBottom="8dp"
             android:elegantTextHeight="true"
-            android:gravity="center"
-            android:text="Your hardware\n is not compatible\n with this application"
+            android:justificationMode="inter_word"
+            android:lineHeight="23sp"
+            android:text="Your hardware is not compatible with this application"
+            android:textAlignment="inherit"
             android:textColor="@color/black"
-            android:textSize="14sp"
+            android:textSize="15sp"
             app:layout_constraintBottom_toTopOf="@+id/textContinuPassword2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imagSucessful" />
+
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

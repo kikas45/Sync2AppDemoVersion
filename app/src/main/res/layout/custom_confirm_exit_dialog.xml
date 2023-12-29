@@ -170,7 +170,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textHome" />
 
         <TextView
-            android:id="@+id/textLaunch"
+            android:id="@+id/textLaunchOnline"
             style="@style/cardDesignBuyGift222"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -183,10 +183,29 @@
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="Launch"
+            android:text="Launch online"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textExit" />
+
+        <TextView
+            android:id="@+id/textLaunchOffline"
+            style="@style/cardDesignBuyGift222"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:gravity="center_horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="Launch offline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textLaunchOnline" />
 
         <TextView
             android:id="@+id/textReSync"
@@ -205,7 +224,7 @@
             android:text="ReSync"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textLaunch" />
+            app:layout_constraintTop_toBottomOf="@+id/textLaunchOffline" />
 
         <TextView
             android:id="@+id/textSettings"

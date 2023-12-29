@@ -13,7 +13,7 @@ class Constants {
         const val QR_CODE_KEY = "QR_CODE_KEY"
         const val IS_FIRST_DOWNLOAD = "IS_FIRST_DOWNLOAD"
         const val App_Mode = "App_Mode"
-        const val TV_Mode = "TV_Mode"
+      //  const val TV_Mode = "TV_Mode"
         const val DOWNLOAD_PATH = "DOWNLOAD_PATH"
         const val FIRST_TIME_APP_START = "FIRST_TIME_APP_START"
 
@@ -40,6 +40,7 @@ class Constants {
 
         const val imagSwtichEnableSyncFromAPI = "imagSwtichEnableSyncFromAPI"
         const val MY_DOWNLOADER_CLASS = "MY_DOWNLOADER_CLASS"
+        const val SAVE_M_DOWNLOAD_PATH = "SAVE_M_DOWNLOAD_PATH"
         const val downloadKey = "downloadKey"
         //   const val password_added = "password_added"
 

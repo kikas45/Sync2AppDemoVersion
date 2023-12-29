@@ -130,6 +130,15 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
+    private val savedDownloadPath: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SAVE_M_DOWNLOAD_PATH,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
+
     var manager: DownloadManager? = null
 
     private val handler: Handler by lazy {
@@ -157,7 +166,7 @@ class ReSyncActivity : AppCompatActivity() {
 
             textTitle.setOnClickListener {
 
-                startActivity(Intent(applicationContext, DownlodPagger::class.java))
+              //  startActivity(Intent(applicationContext, DownlodPagger::class.java))
             }
 
 
@@ -176,10 +185,6 @@ class ReSyncActivity : AppCompatActivity() {
 
 
 
-            textDownloadStartFiles.setOnClickListener {
-                showPopDownloadOnstartFiles()
-            }
-
 
 
             textTestConnectionAPPer.setOnClickListener {
@@ -192,14 +197,14 @@ class ReSyncActivity : AppCompatActivity() {
 
 
             textDownloadZipSyncOrApiSyncNow.setOnClickListener {
+
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 if (checkMultiplePermission()) {
                     doOperation()
                 }
+
             }
         }
-
-
     }
 
 
@@ -283,7 +288,7 @@ class ReSyncActivity : AppCompatActivity() {
 
     private fun httpNetworkTester(getFolderClo: String, getFolderSubpath: String) {
         handler.postDelayed(Runnable {
-            showCustomProgressDialog("Testing connection..")
+            showCustomProgressDialog("Testing connection")
 
 
 
@@ -343,7 +348,7 @@ class ReSyncActivity : AppCompatActivity() {
 
     private fun httpNetSingleUrlTest(baseUrl33: String) {
         handler.postDelayed(Runnable {
-            showCustomProgressDialog("Testing connection...")
+            showCustomProgressDialog("Testing connection")
 
 
             val lastString = baseUrl33.substringAfterLast("/")
@@ -387,43 +392,30 @@ class ReSyncActivity : AppCompatActivity() {
 
     private fun funUnZipFile() {
 
-        val Syn2AppLive = "Syn2AppLive"
-        val CLO = "CLO"
-        val MANUAL = "MANUAL"
-        val Zip = "Zip"
-        val App = "App.zip"
+
+        val getFolderClo = savedDownloadPath.getString("getFolderClo", "")
+        val getFolderSubpath = savedDownloadPath.getString("getFolderSubpath", "")
+        val Zip = savedDownloadPath.getString("Zip", "")
+        val fileNamy = savedDownloadPath.getString("fileNamy", "")
+
+        val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+        val finalFolderPathDesired = "/$getFolderClo/$getFolderSubpath/Offline_app"
 
 
-        //  showToastMessage(getToatlFilePath)
+
+        val directoryPathString = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
 
 
-        // This is the path we are extracting to
-        val folderToExtractTo = "/$Syn2AppLive" + unzipManual
+        val destinationFolder = File(Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPathDesired)
 
-        val destinationFolder = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            folderToExtractTo
-        )
         if (!destinationFolder.exists()) {
             destinationFolder.mkdirs()
         }
 
 
-        // This is where we are extracting from , to get the file from
-        // val filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive/$CLO/$MANUAL/$Zip/$App"
-        val filePath =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/$Syn2AppLive" + getToatlFilePath
-
-
-        val downloadedFile = File(filePath)
-
-        if (downloadedFile.exists()) {
-            //   showToastMessage("File Name: ${downloadedFile.name}")
-
-            startZipExtractionWork(filePath, destinationFolder.toString())
-
-        } else {
-            // showToastMessage("File does not exist in the folder.")
+        val myFile = File(directoryPathString, fileNamy)
+        if (myFile.exists()) {
+            startZipExtractionWork(myFile.toString(), destinationFolder.toString())
         }
 
 
@@ -457,20 +449,16 @@ class ReSyncActivity : AppCompatActivity() {
                     c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)).toLong()
                 val dl_progress =
                     (bytes_downloaded.toDouble() / bytes_total.toDouble() * 100f).toInt()
-                binding.progressBarPref.setProgress(dl_progress)
-                binding.downloadBytes.setText(
-                    bytesIntoHumanReadable(
-                        bytes_downloaded.toString().toLong()
-                    ) + "/" + bytesIntoHumanReadable(bytes_total.toString().toLong())
-                )
+              ///  binding.progressBarPref.setProgress(dl_progress)
+              //  binding.downloadBytes.setText(bytesIntoHumanReadable(bytes_downloaded.toString().toLong()) + "/" + bytesIntoHumanReadable(bytes_total.toString().toLong()))
 
 
 
                 if (c == null) {
-                    binding.textView10.setText(statusMessage(c))
+                  //  binding.textView10.setText(statusMessage(c))
                 } else {
                     c.moveToFirst()
-                    binding.textView10.setText(statusMessage(c))
+                  //  binding.textView10.setText(statusMessage(c))
                 }
             }
         } catch (ignored: java.lang.Exception) {
@@ -499,16 +487,6 @@ class ReSyncActivity : AppCompatActivity() {
 
             DownloadManager.STATUS_SUCCESSFUL -> {
                 msg = "Completed"
-                //   funUnZipFile()
-
-                if (isValid == true) {
-                    isValid = false
-                    if (binding.imagSwtichEnableSyncFromAPI.isChecked && !binding.imagSwtichEnableManualOrNot.isChecked) {
-                        funUnZipFile()
-                    } else {
-                        showToastMessage("Download completed")
-                    }
-                }
 
             }
 
@@ -676,11 +654,9 @@ class ReSyncActivity : AppCompatActivity() {
 
 
             if (imgEnableFileOnSyncChange.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
-                // textSyncOnFileChangeIntervals.setText("Sync on file change")
-                textSyncOnFileChangeIntervals.setText("Download on files at set Intervals")
+                textSyncOnFileChangeIntervals.setText("Download on Intervals")
             } else {
-                // textSyncOnFileChangeIntervals.setText("Sync on file intervals")
-                textSyncOnFileChangeIntervals.setText("Download on files on file change")
+                textSyncOnFileChangeIntervals.setText("Download on change")
             }
 
 
@@ -692,13 +668,13 @@ class ReSyncActivity : AppCompatActivity() {
                         "imagSwtichEnableSyncOnFilecahnge"
                     )
                     editor.apply()
-                    textSyncOnFileChangeIntervals.setText("Sync on file change")
+                    textSyncOnFileChangeIntervals.setText("Download on Intervals")
                 } else {
 
                     editor.remove("imagSwtichEnableSyncOnFilecahnge")
                     editor.apply()
 
-                    textSyncOnFileChangeIntervals.setText("Sync on file intervals")
+                    textSyncOnFileChangeIntervals.setText("Download on change")
                 }
             }
 
@@ -772,17 +748,17 @@ class ReSyncActivity : AppCompatActivity() {
 
 
             // enable satrt file for first synct
-        /*    val textSynfromApiZip222 =
-                sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+            /*    val textSynfromApiZip222 =
+                    sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
 
-            if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
-                textSynfromApiZip.setText("Use ZIP Sync")
-                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-            } else {
-                textSynfromApiZip.setText("Use API Sync")
-                textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-            }
-*/
+                if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+                    textSynfromApiZip.setText("Use ZIP Sync")
+                    textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
+                } else {
+                    textSynfromApiZip.setText("Use API Sync")
+                    textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
+                }
+    */
 
             imagSwtichEnableSyncFromAPI.isChecked = true
 
@@ -1079,7 +1055,7 @@ class ReSyncActivity : AppCompatActivity() {
 
     private fun httpNetworkDownloadsMultiplePaths(getFolderClo: String, getFolderSubpath: String) {
         handler.postDelayed(Runnable {
-            showCustomProgressDialog("Please wait...")
+            showCustomProgressDialog("Please wait")
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
@@ -1144,7 +1120,7 @@ class ReSyncActivity : AppCompatActivity() {
 
     private fun httpNetSingleDwonload(baseUrl: String) {
         handler.postDelayed(Runnable {
-            showCustomProgressDialog("Please wait...")
+            showCustomProgressDialog("Please wait")
             val lastString = baseUrl.substringAfterLast("/")
             val fileNameWithoutExtension = lastString.substringBeforeLast(".")
 
@@ -1249,17 +1225,31 @@ class ReSyncActivity : AppCompatActivity() {
         Log.d("startMyDownlaodsMutiplesPath", ": $unzipManual")
 
 
-        download(baseUrl, patterThreePath, fileName)
+        download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
         // isValid = true
         getDownloadStatus();
 
         val intent = Intent(applicationContext, DownlodPagger::class.java)
         intent.putExtra("baseUrl", baseUrl)
+        intent.putExtra("getFolderClo", getFolderClo)
+        intent.putExtra("getFolderSubpath", getFolderSubpath)
+        intent.putExtra("Zip", Zip)
+        intent.putExtra("fileName", fileName)
+        intent.putExtra("Extracted", Extracted)
+
         intent.putExtra("getToatlFilePath", getToatlFilePath)
         intent.putExtra("unzipManual", unzipManual)
-        intent.putExtra("fileName", fileName)
         intent.putExtra("patterThreePath", patterThreePath)
         startActivity(intent)
+
+        /// similar but used on under second cancel downoad in danwload pager
+        val editor = sharedP.edit()
+        editor.putString("getFolderClo", getFolderClo)
+        editor.putString("getFolderSubpath", getFolderSubpath)
+        editor.putString("Zip", Zip)
+        editor.putString("fileName", fileName)
+        editor.putString("Extracted", Extracted)
+        editor.apply()
 
 
     }
@@ -1278,17 +1268,33 @@ class ReSyncActivity : AppCompatActivity() {
         val Extracted = "Manual_offline_app"
         unzipManual = "/$MANUAL/$Extracted"
 
-        download(baseUrl, manualPath, fileNamy)
+      //  download(baseUrl, manualPath, fileNamy, Zip )
+        download(baseUrl, MANUAL, "DEMO_MANUAL", Zip, fileNamy, Extracted)
         //   isValid = true
         getDownloadStatus();
 
         val intent = Intent(applicationContext, DownlodPagger::class.java)
         intent.putExtra("baseUrl", baseUrl)
+        intent.putExtra("getFolderClo", MANUAL)
+        intent.putExtra("getFolderSubpath", "DEMO_MANUAL")
+        intent.putExtra("Zip", Zip)
+        intent.putExtra("fileName", fileNamy)
+        intent.putExtra("Extracted", Extracted)
+
         intent.putExtra("getToatlFilePath", getToatlFilePath)
         intent.putExtra("unzipManual", unzipManual)
-        intent.putExtra("fileName", fileNamy)
         intent.putExtra("patterThreePath", patterThreePath)
         startActivity(intent)
+
+        /// similar but used on under second cancel downoad in danwload pager
+        val editor = sharedP.edit()
+        editor.putString("getFolderClo", MANUAL)
+        editor.putString("getFolderSubpath", "DEMO_MANUAL")
+        editor.putString("Zip", Zip)
+        editor.putString("fileName", fileNamy)
+        editor.putString("Extracted", Extracted)
+        editor.apply()
+
 
 
     }
@@ -1415,42 +1421,6 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-    @SuppressLint("MissingInflatedId")
-    private fun showPopDownloadFileExist() {
-
-        val binding: CustomDownloadAlreadyExistLayoutBinding =
-            CustomDownloadAlreadyExistLayoutBinding.inflate(layoutInflater)
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(binding.root)
-
-        val alertDialog = alertDialogBuilder.create()
-        // alertDialog.setCancelable(false)
-
-
-        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-
-        binding.apply {
-
-            textBtnDownloadOkay.setOnClickListener {
-                alertDialog.dismiss()
-            }
-
-            textBtnExtractZip.setOnClickListener {
-                alertDialog.dismiss()
-                //funUnZipFile()
-                //  isValid = true
-            }
-
-        }
-
-
-        alertDialog.show()
-
-
-    }
-
-
     private fun doOperation() {
         testAndDownLoadZipConnection()
     }
@@ -1559,44 +1529,60 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-    private fun download(url: String, finalFolderPath: String, fileName: String) {
-        val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+    private fun download(url: String, getFolderClo:String,  getFolderSubpath:String, Zip: String, fileNamy: String, Extracted:String) {
+        val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
         val Syn2AppLive = "Syn2AppLive"
-        val folder = File(
-            Environment.getExternalStorageDirectory()
-                .toString() + "/Download/$Syn2AppLive/$finalFolderPath"
-        )
+
+
+        val editior = savedDownloadPath.edit()
+        editior.putString("getFolderClo", getFolderClo)
+        editior.putString("getFolderSubpath", getFolderSubpath)
+        editior.putString("Zip", Zip)
+        editior.putString("fileNamy", fileNamy)
+        editior.putString("Extracted", Extracted)
+        editior.apply()
+
+
+        val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
+
+        val myFile = File(directoryPath, fileNamy)
+
+        if (myFile.exists()) {
+            myFile.delete()
+          //  showToastMessage("File deleted successfully")
+        } else {
+          //  showToastMessage("File does not exist")
+        }
+
+
+        val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+
+        val folder = File(Environment.DIRECTORY_DOWNLOADS.toString() + "/$Syn2AppLive/$finalFolderPath")
 
         if (!folder.exists()) {
             folder.mkdirs()
         }
 
-        // binding.textTitle.text = fileName.toString()
 
-        val destinationFile = File(folder, fileName)
-        if (destinationFile.exists()) {
-            destinationFile.delete()
-        }
-
+        // Continue with the download logic
         val request = DownloadManager.Request(Uri.parse(url))
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-        request.setTitle(fileName)
+        request.setTitle(fileNamy)
         // request.setDescription("Downloading...")
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
         request.setDestinationInExternalPublicDir(
-            Environment.DIRECTORY_DOWNLOADS,
-            "$Syn2AppLive/$finalFolderPath/$fileName"
+            Environment.DIRECTORY_DOWNLOADS, "/$Syn2AppLive/$finalFolderPath/$fileNamy"
         )
         val downloadReferenceMain = managerDownload.enqueue(request)
 
-        val sharedPreferences =
-            getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE)
+        val sharedPreferences = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE)
 
         val editor = sharedPreferences.edit()
         editor.putLong(Constants.downloadKey, downloadReferenceMain)
         editor.apply()
-
     }
+
+
 
 
 }

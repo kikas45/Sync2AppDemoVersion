@@ -96,6 +96,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -105,11 +107,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.text.Html;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -143,7 +143,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -203,7 +202,7 @@ import remotex.com.remotewebview.glidetovectoryou.GlideToVectorYou;
 import remotex.com.remotewebview.glidetovectoryou.GlideToVectorYouListener;
 
 
-@RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+
 public class WebActivity extends AppCompatActivity implements ObservableScrollViewCallbacks {
 
     public static final int FILECHOOSER_RESULTCODE = 5173;
@@ -230,6 +229,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     private static String READ_STORAGE_PERMISSION;
 
     private int REQUEST_CODE = 11;
+
+    private ConnectivityReceiver connectivityReceiver;
 
 
     RelativeLayout drawer_menu;
@@ -317,6 +318,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 //    Toolbar toolbar;
 
     LinearLayout bottomToolBar;
+    LinearLayout btm;
     ProgressBar tbarprogress;
     ProgressBar HorizontalProgressBar;
     ProgressDialog progressDialog;
@@ -416,6 +418,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     ImageView drawer_header_img;
     TextView drawer_header_text;
     LinearLayout drawerHeaderBg;
+    LinearLayout bottom_toolbar_container;
     Handler handler = new Handler();
     Runnable runnable;
     TextView toolbartitleText;
@@ -433,6 +436,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     private WebChromeClient.CustomViewCallback mCustomViewCallback;
     private InterstitialAd mInterstitialAd;
     private RelativeLayout windowContainer;
+    private RelativeLayout native_drawer_menu;
     private ProgressBar windowProgressbar;
     private RelativeLayout mContainer;
     private String mCM;
@@ -465,7 +469,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         return true;
     }
 
-    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface", "JavascriptInterface", "ClickableViewAccessibility"})
+    @SuppressLint({"SetJavaScriptEnabled", "AddJavascriptInterface", "JavascriptInterface", "ClickableViewAccessibility", "CutPasteId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -478,6 +482,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         setContentView(R.layout.webactivity_layout);
 
+
+        connectivityReceiver = new ConnectivityReceiver();
+
+        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(connectivityReceiver, intentFilter);
 
 
 
@@ -517,6 +526,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         errorReloadButton = findViewById(R.id.ErrorReloadButton);
         drawer_menu = findViewById(R.id.native_drawer_menu);
         drawer_menu_btn = findViewById(R.id.drawer_menu_Btn);
+        btm = findViewById(R.id.btm);
 
         mAdView = findViewById(R.id.adView);
 
@@ -565,6 +575,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         drawer_header_text = findViewById(R.id.drawer_header_text);
         drawerHeaderBg = findViewById(R.id.drawerheaderBg);
         toolbartitleText = findViewById(R.id.toolbarTitleText);
+        bottom_toolbar_container = findViewById(R.id.bottom_toolbar_container);
 
 
         webView.setOnTouchListener(new View.OnTouchListener() {
@@ -669,12 +680,24 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
 
+
+
+    }
+
+    private void stratDiffrentWebviewTypes() {
         String unzipManualValue = getIntent().getStringExtra("unzipManual");
         if (unzipManualValue != null) {
-            String Syn2AppLive = "Syn2AppLive";
-            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManualValue;
-            File destinationFolder = new File(folderToExtractTo);
-            if (destinationFolder.exists()) {
+            String filename = "/index.html";
+            SharedPreferences savedDownloadPath = getSharedPreferences(Constants.SAVE_M_DOWNLOAD_PATH, MODE_PRIVATE);
+            String getFolderClo = savedDownloadPath.getString("getFolderClo", "");
+            String getFolderSubpath = savedDownloadPath.getString("getFolderSubpath", "");
+            String Extracted = savedDownloadPath.getString("Extracted", "");
+
+            String finalFolderPathDesired = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Extracted;
+            String destinationFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/" + finalFolderPathDesired;
+
+            File myFile = new File(destinationFolder, filename);
+            if (myFile.exists()) {
                 loadOfflineWebviewPage();
             }else {
                 claingTheLongWebView();
@@ -684,36 +707,59 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             claingTheLongWebView();
         }
 
-
-     //   loadTheMainWebview();
-
-
     }
 
     private void claingTheLongWebView() {
         @SuppressLint("CommitPrefEdits")
         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-
         String imgLunchOnline = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
-        String getUnzipPath = sharedBiometric.getString(Constants.DOWNLOAD_PATH , "");
 
         if (imgLunchOnline.equals(Constants.imgAllowLunchFromOnline)) {
-            String Syn2AppLive = "Syn2AppLive";
-           // String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
-            String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + getUnzipPath;
 
-            File destinationFolder = new File(folderToExtractTo);
-            if (destinationFolder.exists()) {
+            String filename = "/index.html";
+            SharedPreferences savedDownloadPath = getSharedPreferences(Constants.SAVE_M_DOWNLOAD_PATH, MODE_PRIVATE);
+            String getFolderClo = savedDownloadPath.getString("getFolderClo", "");
+            String getFolderSubpath = savedDownloadPath.getString("getFolderSubpath", "");
+            String Extracted = savedDownloadPath.getString("Extracted", "");
+
+            String finalFolderPathDesired = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Extracted;
+            String destinationFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/" + finalFolderPathDesired;
+
+            File myFile = new File(destinationFolder, filename);
+            if (myFile.exists()) {
                 loadOfflineWebviewPage();
             }else {
-
                 loadTheMainWebview();
             }
 
-        } else {
+        }
+
+        else {
             loadTheMainWebview();
         }
     }
+
+
+   private void loadOffline_When_No_Internet_connection(){
+
+           String filename = "/index.html";
+           SharedPreferences savedDownloadPath = getSharedPreferences(Constants.SAVE_M_DOWNLOAD_PATH, MODE_PRIVATE);
+           String getFolderClo = savedDownloadPath.getString("getFolderClo", "");
+           String getFolderSubpath = savedDownloadPath.getString("getFolderSubpath", "");
+           String Extracted = savedDownloadPath.getString("Extracted", "");
+
+           String finalFolderPathDesired = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Extracted;
+           String destinationFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/" + finalFolderPathDesired;
+
+           File myFile = new File(destinationFolder, filename);
+           if (myFile.exists()) {
+               loadOfflineWebviewPage();
+           }else {
+               loadTheMainWebview();
+               showToastMessage("unable to find index file");
+           }
+
+   }
 
     private void loadTheMainWebview() {
 
@@ -788,17 +834,34 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     @SuppressLint("SetJavaScriptEnabled")
     private void loadOfflineWebviewPage() {
-        String Syn2AppLive = "Syn2AppLive";
-        String filename = "/index.html";
-        String unzipManual = "/CLO/DE_MO_2021000/Offline_app/";
 
-        String folderToExtractTo = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + Syn2AppLive + unzipManual;
-        String filePath = "file://" + folderToExtractTo + filename;
+        bottomToolBar.setVisibility(View.GONE);
+        web_button_root_layout.setVisibility(View.GONE);
+        x_toolbar.setVisibility(View.GONE);
+        drawer_menu.setVisibility(View.GONE);
+        btm.setVisibility(View.GONE);
+        bottom_toolbar_container.setVisibility(View.GONE);
+
+
+        String filename = "/index.html";
+
+
+        SharedPreferences savedDownloadPath = getSharedPreferences(Constants.SAVE_M_DOWNLOAD_PATH, MODE_PRIVATE);
+        String getFolderClo = savedDownloadPath.getString("getFolderClo", "");
+        String getFolderSubpath = savedDownloadPath.getString("getFolderSubpath", "");
+        String Extracted = savedDownloadPath.getString("Extracted", "");
+
+        String finalFolderPathDesired = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Extracted;
+
+        String destinationFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/" + finalFolderPathDesired;
+
+        String filePath = "file://" + destinationFolder + filename;
 
         ProgressBar SimpleProgressBar = findViewById(R.id.SimpleProgressBar);
 
-        File destinationFolder = new File(folderToExtractTo);
-        if (destinationFolder.exists()) {
+        File myFile = new File(destinationFolder, filename);
+
+        if (myFile.exists()) {
             webView = findViewById(R.id.webview);
             webView.setWebViewClient(new WebViewClient());
 
@@ -808,25 +871,15 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             webSettings.setAllowFileAccess(true);
             webSettings.setAllowContentAccess(true);
-
             webSettings.setDomStorageEnabled(true);
 
+         //   webSettings.setMediaPlaybackRequiresUserGesture(false);
+         //   webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
-           //  webSettings.setMediaPlaybackRequiresUserGesture(false);
-           // webSettings.getMediaPlaybackRequiresUserGesture();
-           // webSettings.setLoadsImagesAutomatically(true);
+            webSettings.setLoadWithOverviewMode(true);
+            webSettings.setUseWideViewPort(true);
+            webSettings.setLoadsImagesAutomatically(true);
 
-
-
-//            webSettings.setMediaPlaybackRequiresUserGesture(false);
-//
-//            webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
-//            webView.setWebViewClient(new AdvancedWebViewClient());
-//            webView.setWebChromeClient(new AdvancedWebChromeClient());
-//            webView.setDownloadListener(new Downloader());
-//
-//            WebView.setWebContentsDebuggingEnabled(true);
-//
 
             webView.loadUrl(filePath);
             SimpleProgressBar.setVisibility(View.GONE);
@@ -835,6 +888,45 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     }
 
+
+    public class ConnectivityReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            try {
+                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+
+                    try {
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                try {
+                                    stratDiffrentWebviewTypes();
+                                } catch ( Exception ignored ) {
+                                }
+                            }
+                        }, 5000);
+
+                    } catch ( Exception ignored ) {
+                    }
+                } else {
+
+                    try {
+                        loadOffline_When_No_Internet_connection();
+                    } catch ( Exception ignored ) {
+                    }
+                }
+
+
+            } catch ( Exception ignored ) {
+            }
+        }
+
+    }
 
 
 
@@ -1045,7 +1137,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             editor.remove(did_user_input_passowrd);
             editor.apply();
 
-         //   showToastMessage("Settings is called");
+            //   showToastMessage("Settings is called");
 
         } else if (command.equals("webGoBack")) {
             if (webView.canGoBack()) {
@@ -1168,14 +1260,17 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             finish();
         }
 
-        if (getUrlFromScanner != null) {
-            if ((getUrlFromScanner.startsWith("https://") || getUrlFromScanner.startsWith("http://"))) {
-                webView.loadUrl(getUrlFromScanner);
-            } else {
-                Toast.makeText(mContext, "Required to perform other task", Toast.LENGTH_SHORT).show();
-            }
 
-        }
+        try {
+            if (getUrlFromScanner != null) {
+                if ((getUrlFromScanner.startsWith("https://") || getUrlFromScanner.startsWith("http://"))) {
+                    webView.loadUrl(getUrlFromScanner);
+                } else {
+                    Toast.makeText(mContext, "Required to perform other task", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }catch ( Exception e ){}
 
 
 //        this.recreate();
@@ -1194,35 +1289,39 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     @Override
     protected void onDestroy() {
-        isAppOpen = false;
-        if (LoadLastWebPageOnAccidentalExit) {
-            preferences.edit().putString("lasturl", webView.getOriginalUrl()).apply();
-        }
+        try {
+
+            isAppOpen = false;
+            if (LoadLastWebPageOnAccidentalExit) {
+                preferences.edit().putString("lasturl", webView.getOriginalUrl()).apply();
+            }
+
+
+            unregisterReceiver(connectivityReceiver);
+
+            if (connectivityReceiver != null) {
+                connectivityReceiver = null;
+            }
+
+            // Saving a value in SharedPreferences
+            SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedBiometric.edit();
+            String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
+            editor.remove(did_user_input_passowrd);
+            editor.apply();
+
+
+        }catch ( Exception e ){}
 
         super.onDestroy();
 
-        // Saving a value in SharedPreferences
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedBiometric.edit();
-        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
-        editor.remove(did_user_input_passowrd);
-        editor.apply();
 
-       // showToastMessage("On destroy");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
 
-//        // Saving a value in SharedPreferences
-//        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedBiometric.edit();
-//        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
-//        editor.remove(did_user_input_passowrd);
-//        editor.apply();
-//
-//        showToastMessage("On Stop");
 
     }
 
@@ -1266,12 +1365,12 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         if (ShowWebButton) {
             SharedPreferences sharedBiometric = getApplicationContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-            String getTvMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
+            String getTvMode = sharedBiometric.getString(Constants.App_Mode, "");
 
-            if (getTvMode.equals(Constants.MY_TV_OR_APP_MODE)){
-                web_button_root_layout.setVisibility(View.INVISIBLE);
-            }else {
+            if (getTvMode.equals(Constants.App_Mode)){
                 web_button_root_layout.setVisibility(View.VISIBLE);
+            }else {
+                web_button_root_layout.setVisibility(View.INVISIBLE);
             }
 
         }
@@ -2374,17 +2473,27 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
 
 //            webView.setAlpha(0.9F);
-            if (AllowOnlyHostUrlInApp) {
-                if (!url.contains(constants.filterdomain)) {
-                    webView.stopLoading();
 
-                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                    return true;
+
+            try {
+                if (AllowOnlyHostUrlInApp) {
+                    if (!url.contains(constants.filterdomain)) {
+                        webView.stopLoading();
+
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        return true;
+                    }
                 }
+
+                if (url.startsWith("http://") || url.startsWith("file:///") || url.startsWith("https://") || url.startsWith("setup://"))
+                    return false;
+
+            }catch ( Exception e ){
+                Log.i(TAG, "shouldOverrideUrlLoading Exception:" + e.getMessage());
+                Toast.makeText(mContext, "Invalid JSON format :" + e.getMessage(), Toast.LENGTH_LONG).show();
+
             }
 
-            if (url.startsWith("http://") || url.startsWith("file:///") || url.startsWith("https://") || url.startsWith("setup://"))
-                return false;
 
 
             //Custom App Opening Handler
@@ -2417,6 +2526,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             } catch ( Exception e ) {
                 Log.i(TAG, "shouldOverrideUrlLoading Exception:" + e.getMessage());
                 Toast.makeText(mContext, "The app or ACTIVITY not found. Error Message:" + e.getMessage(), Toast.LENGTH_SHORT).show();
+
                 e.printStackTrace();
             }
 
@@ -2865,7 +2975,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         TextView textExit = binding.textExit;
         TextView textSettings = binding.textSettings;
         TextView textReSync = binding.textReSync;
-        TextView textLaunch = binding.textLaunch;
+        TextView textLaunchOnline = binding.textLaunchOnline;
+        TextView textLaunchOffline = binding.textLaunchOffline;
         TextView textForgetPassword = binding.textForgetPasswordHome;
         TextView textCanCellDialog = binding.textCanCellDialog;
 
@@ -2918,22 +3029,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         if (imgEnablePassword.equals(Constants.imgEnablePassword)  ) {
             editTextText2.setText(simpleAdminPassword);
             editTextText2.setEnabled(false);
-            showToastMessage("edit  input password filled");
         } else  if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) ) {
             editTextText2.setEnabled(true);
             editTextText2.setText(simpleAdminPassword);
         }else {
             editTextText2.setEnabled(true);
-            //editTextText2.setGravity(Gravity.CENTER);
-        }
-
-
-
-
-        if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-            textLaunch.setText("Launch offline");
-        } else {
-            textLaunch.setText("Launch online");
         }
 
 
@@ -2995,57 +3095,53 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         });
 
 
-        textLaunch.setOnClickListener(new View.OnClickListener() {
+        textLaunchOffline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-                String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
                 String editTextText = editTextText2.getText().toString().trim();
 
-                showToastMessage("Logic ongoing");
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
 
-     /*           if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-                        String fileName = "index.html";
-                        File unzipLocation = new File(
-                                Environment.getExternalStorageDirectory().getAbsolutePath(),
-                                "Syn2AppLive/WebPageZip/" + fileName
-                        );
+                    loadOffline_When_No_Internet_connection();
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
 
-                        if (unzipLocation.exists()) {
-                            ;
-                            //  String filePath = "file://" + unzipLocation.getAbsolutePath();
-                            String filePath = "https://www.cnbc.com/world/?region=world";
+                    alertDialog.dismiss();
 
-
-                            webView.loadUrl(filePath);
-                            showToastMessage(filePath);
-                        } else {
-                            showToastMessage("location not found");
-                        }
-
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
-
-                        alertDialog.dismiss();
-
-                    } else {
-                        showToastMessage("App already load online");
-                        hideKeyBoard(editTextText2);
-                        alertDialog.dismiss();
-
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
-
-                    }
                 } else {
                     hideKeyBoard(editTextText2);
                     editTextText2.setError("Wrong password");
                     showToastMessage("Wrong password");
                 }
-*/
+
+            }
+        });
+
+
+        textLaunchOnline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+
+                String editTextText = editTextText2.getText().toString().trim();
+
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+
+                    loadTheMainWebview();
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+
+                    alertDialog.dismiss();
+
+                } else {
+                    hideKeyBoard(editTextText2);
+                    editTextText2.setError("Wrong password");
+                    showToastMessage("Wrong password");
+                }
 
             }
         });
