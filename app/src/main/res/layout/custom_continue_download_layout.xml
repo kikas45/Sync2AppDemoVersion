@@ -76,14 +76,14 @@
             android:elegantTextHeight="true"
             android:ellipsize="end"
             android:gravity="center"
-            android:maxLines="7"
+            android:maxLines="3"
             android:textColor="@color/deep_blue"
-            android:textSize="14sp"
+            android:textSize="11sp"
             app:layout_constraintBottom_toTopOf="@+id/textContinuPassword2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textSucessful"
-            tools:text="The url AJHvjhsajkcbsjkcbjksbjkbkjbjkbajkbjkbxjkbxjkbxjkbxjkbxjkzbxjkzbxjkzbxjkzbxjkzbxjkzbxjkzbxjkbxjkbzxkljbkzbxkbxkbxkbxckbxckaVJjbjbjbJbjBJxbzjXBjzBXjbzxjzbxjbxzjbzxjbxjzbxjzxbzjxbjxbjxbjxbzjxbzjkxbis invalid" />
+            tools:text="The url invalid" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

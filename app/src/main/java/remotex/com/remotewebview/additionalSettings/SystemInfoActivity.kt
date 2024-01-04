@@ -182,7 +182,7 @@ class SystemInfoActivity : AppCompatActivity() {
             val deviceInformation = deviceInfoBuilder.toString()
 
 
-            textDisplayResult.text = "Your hardware is not compatible with this application\n" +  deviceInformation
+            textDisplayResult.text = deviceInformation
 
 
 
@@ -233,8 +233,9 @@ class SystemInfoActivity : AppCompatActivity() {
 
             val deviceInformation = deviceInfoBuilder.toString()
 
+            Log.d("DeviceInfo", deviceInformation)
 
-            textDisplayResult.text =  "Your hardware is not compatible with this application\n" +  deviceInformation
+            textDisplayResult.text =  deviceInformation
 
 
 

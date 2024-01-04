@@ -140,6 +140,17 @@
         app:allowDividerBelow="true"
         app:iconSpaceReserved="true" />
 
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:icon="@drawable/ic_qr_code_scanner_24"
+        android:key="hideQRCode"
+        android:title="Hide QR Code"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:iconSpaceReserved="true" />
+
+
     <EditTextPreference
         android:defaultValue=""
         android:dialogMessage="Warning: if not a valid config url, app will not start - click retry button 3 times to setup again or clear appdata "
@@ -155,7 +166,7 @@
     <Preference
         android:icon="@drawable/ic_settings_additional_suggest_24"
         android:key="additional_settings_key"
-        android:title="Additional Settings"
+        android:title="App Admin"
         app:allowDividerAbove="true"
         app:allowDividerBelow="true"
         app:shouldDisableView="true"

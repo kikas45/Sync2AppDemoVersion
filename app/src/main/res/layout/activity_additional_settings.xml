@@ -42,7 +42,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:maxLines="1"
-            android:text="Additional Settings"
+            android:text=" App Admin"
             android:textSize="18sp"
             android:gravity="center|start"
             app:layout_constraintBottom_toBottomOf="@+id/close_bs"

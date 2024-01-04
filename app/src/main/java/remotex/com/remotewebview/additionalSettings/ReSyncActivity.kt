@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.preference.PreferenceManager
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
@@ -31,12 +32,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import androidx.work.workDataOf
 import kotlinx.coroutines.launch
+import remotex.com.remotewebview.R
 import remotex.com.remotewebview.additionalSettings.DownloadsArray.list.DownlodPagger
 import remotex.com.remotewebview.additionalSettings.scanutil.ZipWorker
 import remotex.com.remotewebview.additionalSettings.urlchecks.checkUrlExistence
@@ -44,8 +47,6 @@ import remotex.com.remotewebview.additionalSettings.urlchecks.isUrlValid
 import remotex.com.remotewebview.additionalSettings.utils.Constants
 import remotex.com.remotewebview.databinding.ActivityReSyncBinding
 import remotex.com.remotewebview.databinding.CustomContinueDownloadLayoutBinding
-import remotex.com.remotewebview.databinding.CustomDownloadAlreadyExistLayoutBinding
-import remotex.com.remotewebview.databinding.CustomDownloadOnStartFileLayoutBinding
 import remotex.com.remotewebview.databinding.ProgressDialogLayoutBinding
 import java.io.File
 import java.util.Calendar
@@ -149,10 +150,17 @@ class ReSyncActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper())
     }
 
+    var preferences: SharedPreferences? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        if (preferences!!.getBoolean("darktheme", false)) {
+            setTheme(R.style.DarkThemeSettings)
+        }
+
         binding = ActivityReSyncBinding.inflate(layoutInflater)
         setContentView(binding.root)
         manager = applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager?
@@ -160,17 +168,22 @@ class ReSyncActivity : AppCompatActivity() {
 
         binding.apply {
 
-            editTextCLOpath.setText("CLO")
-            editTextSubPathFolder.setText("DE_MO_2021000")
+            val getSavedCLOImPutFiled = sharedP.getString(Constants.getSavedCLOImPutFiled, "")
+            val getSaveSubFolderInPutFiled = sharedP.getString(Constants.getSaveSubFolderInPutFiled, "")
+            val getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "")
 
+            if (!getSavedCLOImPutFiled.isNullOrEmpty()){
+                editTextCLOpath.setText(getSavedCLOImPutFiled)
+            }
 
-            textTitle.setOnClickListener {
-
-              //  startActivity(Intent(applicationContext, DownlodPagger::class.java))
+            if (!getSaveSubFolderInPutFiled.isNullOrEmpty()){
+                editTextSubPathFolder.setText(getSaveSubFolderInPutFiled)
             }
 
 
-
+            if (!getSavedEditTextInputSynUrlZip.isNullOrEmpty()){
+                editTextInputSynUrlZip.setText(getSavedEditTextInputSynUrlZip)
+            }
 
             closeBs.setOnClickListener {
                 onBackPressed()
@@ -180,13 +193,6 @@ class ReSyncActivity : AppCompatActivity() {
             initViewTooggle()
 
 
-
-            editTextInputSynUrlZip.setText(baseUrl222)
-
-
-
-
-
             textTestConnectionAPPer.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 try {
@@ -194,6 +200,11 @@ class ReSyncActivity : AppCompatActivity() {
                 } catch (_: Exception) {
                 }
             }
+
+            textTitle.setOnClickListener {
+                deleteMySy2nAppliveFolder()
+            }
+
 
 
             textDownloadZipSyncOrApiSyncNow.setOnClickListener {
@@ -205,6 +216,12 @@ class ReSyncActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    private fun saveValuesForMySy2nAppliveFiolder() {
+        val editor = sharedBiometric.edit()
+        editor.putString(Constants.DELETE_SYN2APP_FOLDER, "DELETE_SYN2APP_FOLDER" )
+        editor.apply()
     }
 
 
@@ -230,12 +247,17 @@ class ReSyncActivity : AppCompatActivity() {
             val getFolderClo = editTextCLOpath.text.toString().trim()
             val getFolderSubpath = editTextSubPathFolder.text.toString().trim()
 
+            val editor = sharedP.edit()
             if (isNetworkAvailable()) {
                 if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
                             if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
                                 httpNetworkTester(getFolderClo, getFolderSubpath)
+                                editor.putString(Constants.getSavedCLOImPutFiled,getFolderClo)
+                                editor.putString(Constants.getSaveSubFolderInPutFiled,getFolderSubpath)
+                                editor.apply()
+
                             } else {
                                 editTextCLOpath.error = "Input a valid path e.g CLO"
                                 editTextSubPathFolder.error = "Input a valid path e.g DE_MO_2021000"
@@ -256,6 +278,7 @@ class ReSyncActivity : AppCompatActivity() {
             }
 
 
+
             /// when the button is checked
             if (isNetworkAvailable()) {
                 if (imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
@@ -265,6 +288,8 @@ class ReSyncActivity : AppCompatActivity() {
                             val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
                             if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
                                 httpNetSingleUrlTest(editInputUrl)
+                                editor.putString(Constants.getSavedEditTextInputSynUrlZip,editInputUrl)
+                                editor.apply()
                             } else {
                                 showToastMessage("Invalid url format")
                                 binding.editTextInputSynUrlZip.error = "Invalid url format"
@@ -291,6 +316,7 @@ class ReSyncActivity : AppCompatActivity() {
             showCustomProgressDialog("Testing connection")
 
 
+            val editor = sharedP.edit()
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
                 val baseUrl =
@@ -299,12 +325,7 @@ class ReSyncActivity : AppCompatActivity() {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                            showPopsForMyConnectionTest(
-                                getFolderClo,
-                                getFolderSubpath,
-                                "Successful"
-                            )
-
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Successful")
                         } else {
                             showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
@@ -324,12 +345,7 @@ class ReSyncActivity : AppCompatActivity() {
                     try {
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
-                            showPopsForMyConnectionTest(
-                                getFolderClo,
-                                getFolderSubpath,
-                                "Successful"
-                            )
-
+                            showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Successful")
                         } else {
                             showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
                         }
@@ -351,6 +367,7 @@ class ReSyncActivity : AppCompatActivity() {
             showCustomProgressDialog("Testing connection")
 
 
+
             val lastString = baseUrl33.substringAfterLast("/")
             val fileNameWithoutExtension = lastString.substringBeforeLast(".")
 
@@ -358,9 +375,7 @@ class ReSyncActivity : AppCompatActivity() {
                 try {
                     val result = checkUrlExistence(baseUrl33)
                     if (result) {
-
                         showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Successful")
-
                     } else {
 
                         showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
@@ -996,6 +1011,7 @@ class ReSyncActivity : AppCompatActivity() {
         binding.apply {
             val getFolderClo = editTextCLOpath.text.toString().trim()
             val getFolderSubpath = editTextSubPathFolder.text.toString().trim()
+            val editor = sharedP.edit()
 
             if (isNetworkAvailable()) {
                 if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
@@ -1003,6 +1019,10 @@ class ReSyncActivity : AppCompatActivity() {
                         CP_server -> {
                             if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
                                 httpNetworkDownloadsMultiplePaths(getFolderClo, getFolderSubpath)
+                                editor.putString(Constants.getSavedCLOImPutFiled,getFolderClo)
+                                editor.putString(Constants.getSaveSubFolderInPutFiled,getFolderSubpath)
+                                editor.apply()
+
                             } else {
                                 editTextCLOpath.error = "Input a valid path e.g CLO"
                                 editTextSubPathFolder.error = "Input a valid path e.g DE_MO_2021000"
@@ -1032,6 +1052,9 @@ class ReSyncActivity : AppCompatActivity() {
                             val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
                             if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
                                 httpNetSingleDwonload(editInputUrl)
+                                editor.putString(Constants.getSavedEditTextInputSynUrlZip,editInputUrl)
+                                editor.apply()
+
                             } else {
                                 showToastMessage("Invalid url format")
                                 binding.editTextInputSynUrlZip.error = "Invalid url format"
@@ -1056,6 +1079,7 @@ class ReSyncActivity : AppCompatActivity() {
     private fun httpNetworkDownloadsMultiplePaths(getFolderClo: String, getFolderSubpath: String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Please wait")
+
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
@@ -1101,7 +1125,6 @@ class ReSyncActivity : AppCompatActivity() {
                                 "Api",
                                 "update.csv"
                             )
-
                         } else {
                             //  showPopConnectionSucessful(baseUrl, "Failed!")
                             showPopsForMyConnectionTest(getFolderClo, getFolderSubpath, "Failed!")
@@ -1123,6 +1146,7 @@ class ReSyncActivity : AppCompatActivity() {
             showCustomProgressDialog("Please wait")
             val lastString = baseUrl.substringAfterLast("/")
             val fileNameWithoutExtension = lastString.substringBeforeLast(".")
+
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
@@ -1149,7 +1173,6 @@ class ReSyncActivity : AppCompatActivity() {
                         if (result) {
                             //  showPopContinueToDownloading(baseUrl, "API", "App.zip" )
                             startDownloadSingles(baseUrl, "API", "App.zip")
-
                         } else {
 
                             showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
@@ -1189,7 +1212,10 @@ class ReSyncActivity : AppCompatActivity() {
 
             val patterTexT = "/$getFolderClo/$getFolderSubpath"
 
-            textYourUrlTest.text = "Your Directory is :\n$rootfolder$patterTexT"
+          //  textYourUrlTest.text = "Your Directory is :\n$rootfolder$patterTexT"
+
+            val userPath = "User\n-$getFolderClo\n-license-$getFolderSubpath"
+            textYourUrlTest.text = userPath
 
             textSucessful.text = message
 
@@ -1342,9 +1368,6 @@ class ReSyncActivity : AppCompatActivity() {
             if (myHandler != null) {
                 myHandler!!.removeCallbacks(runnable)
             }
-            // Unregister the BroadcastReceiver to avoid memory leaks
-            // unregisterReceiver(downloadReceiver)
-
         } catch (ignored: java.lang.Exception) {
         }
     }
@@ -1389,51 +1412,124 @@ class ReSyncActivity : AppCompatActivity() {
     }
 
 
-    @SuppressLint("MissingInflatedId")
-    private fun showPopDownloadOnstartFiles() {
+    private fun doOperation() {
+        val getsyn2aapFolderValue = sharedBiometric.getString(Constants.DELETE_SYN2APP_FOLDER, "")
+        if (getsyn2aapFolderValue != "DELETE_SYN2APP_FOLDER"){
 
-        val binding: CustomDownloadOnStartFileLayoutBinding =
-            CustomDownloadOnStartFileLayoutBinding.inflate(layoutInflater)
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(binding.root)
+            deleteMySy2nAppliveFolder()
+            saveValuesForMySy2nAppliveFiolder()
+        }
 
-        val alertDialog = alertDialogBuilder.create()
-        // alertDialog.setCancelable(false)
-
-
-        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        handler.postDelayed(Runnable {
+            testAndDownLoadZipConnection()
+        }, 300)
+    }
 
 
-        binding.apply {
 
-            textSkipBtn.setOnClickListener {
-                alertDialog.dismiss()
 
+/*
+
+    private fun deleteMySy2nAppliveFolder() {
+        val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/DE_MO_2021000/Api/"
+
+        val directory = File(directoryPath)
+
+        if (directory.exists() && directory.isDirectory) {
+            val files = directory.listFiles()
+
+            if (files != null && files.isNotEmpty()) {
+                // Assuming you want to delete the first file in the directory
+                val myFile = files[0]
+
+                val myFileName = myFile.name
+
+                showToastMessage(myFileName)
+
+                if (myFile.exists()) {
+                    myFile.delete()
+                    showToastMessage("File $myFileName deleted successfully")
+                } else {
+                    showToastMessage("File $myFileName does not exist")
+                }
+            } else {
+                showToastMessage("No files in the directory")
             }
+        } else {
+            showToastMessage("Directory does not exist or is not a directory")
+        }
+    }
+*/
+
+
+/*
+    val directoryPathPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
+
+    val myFile = File(directoryPathPath)
+
+    if (myFile.exists()) {
+        myFile.deleteRecursively()
+        //    showToastMessage("File deleted successfully")
+    } else {
+        //   showToastMessage("File does not exist")
+    }
+*/
+
+
+
+    private fun deleteMySy2nAppliveFolder() {
+
+
+
+/*            val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/CLO/DE_MO_2021000/Zip/App.zip"
+
+            val  nameOfpackage = this.packageName
+
+            val fileUri = FileProvider.getUriForFile(
+                applicationContext,
+                "$nameOfpackage.fileprovider",
+                File(directoryPath)
+            )
+
+            DeleteRecursive(fileUri)
+
+            */
 
 
         }
 
 
-        alertDialog.show()
+    private fun DeleteRecursive(fileOrDirectory: Uri) {
 
 
     }
 
 
-    private fun doOperation() {
-        testAndDownLoadZipConnection()
+    private fun deleteMySyn2AppLiveFolder(folder: File) {
+        if (folder.exists()) {
+            val files = folder.listFiles()
+            if (files != null) {
+                for (file in files) {
+                    if (file.isDirectory) {
+                        deleteMySyn2AppLiveFolder(file)
+                    } else {
+                        file.delete()
+                    }
+                }
+            }
+            folder.delete()
+            showToastMessage("Folder deleted successfully")
+        } else {
+            showToastMessage("Folder does not exist")
+        }
     }
+
 
 
     private fun checkMultiplePermission(): Boolean {
         val listPermissionNeeded = arrayListOf<String>()
         for (permission in multiplePermissionNameList) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
                 listPermissionNeeded.add(permission)
             }
         }
@@ -1484,14 +1580,7 @@ class ReSyncActivity : AppCompatActivity() {
                         }
                     }
 
-
-                    /// use pop dialog telling the user to grant permisoon
-
                     if (someDenied) {
-                        // here app Setting open because all permission is not granted
-                        // and permanent denied
-                        //  appSettingOpen(this)
-
                         showPermissionDeniedDialog()
 
                     } else {
@@ -1548,10 +1637,10 @@ class ReSyncActivity : AppCompatActivity() {
         val myFile = File(directoryPath, fileNamy)
 
         if (myFile.exists()) {
-            myFile.delete()
-          //  showToastMessage("File deleted successfully")
+            myFile.deleteRecursively()
+            showToastMessage("File deleted successfully")
         } else {
-          //  showToastMessage("File does not exist")
+            showToastMessage("File does not exist")
         }
 
 

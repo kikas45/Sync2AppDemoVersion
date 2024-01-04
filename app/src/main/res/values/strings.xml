@@ -20,7 +20,7 @@
     <string name="internet_error">Something went wrong way</string>
     <string name="navigation_drawer_open">open drawer</string>
     <string name="navigation_drawer_close">close drawer</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">App Settings</string>
     <string name="swipe_refresh">Swipe Refresh</string>
 
     <string name="awaiting_command">Awaiting command</string>

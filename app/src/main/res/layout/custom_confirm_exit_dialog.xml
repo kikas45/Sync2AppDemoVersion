@@ -35,7 +35,6 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
-            android:layout_marginBottom="9dp"
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="sans-serif-medium"
@@ -47,10 +46,9 @@
             android:paddingBottom="8dp"
             android:text="Continue"
             android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textCanCellDialog" />
+            app:layout_constraintTop_toBottomOf="@+id/textAppSettings" />
 
         <TextView
             android:id="@+id/textView4"
@@ -78,9 +76,9 @@
             android:background="@android:color/transparent"
             android:hint="Enter password"
             android:inputType="textPassword"
+            android:paddingStart="24dp"
             android:textColor="@color/black"
             android:textSize="14sp"
-            android:paddingStart="24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView4" />
@@ -129,8 +127,6 @@
             app:tint="#504C4C" />
 
 
-
-
         <TextView
             android:id="@+id/textHome"
             style="@style/cardDesignBuyGift222"
@@ -145,18 +141,18 @@
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="Home"
+            android:text="Device Home"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/divider2" />
+            app:layout_constraintTop_toBottomOf="@+id/textForgetPasswordHome" />
 
         <TextView
             android:id="@+id/textExit"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="24dp"
             android:clickable="true"
             android:focusable="true"
@@ -165,36 +161,40 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:text="Exit"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textCanCellDialog"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textHome" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textCanCellDialog"
+            app:layout_constraintTop_toTopOf="@+id/textCanCellDialog" />
 
         <TextView
             android:id="@+id/textLaunchOnline"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
+            android:layout_marginEnd="4dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:selectableItemBackground"
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="Launch online"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Launch\nonline"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/textLaunchOffline"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textExit" />
+            app:layout_constraintTop_toBottomOf="@+id/textReSync" />
 
         <TextView
             android:id="@+id/textLaunchOffline"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="24dp"
             android:clickable="true"
             android:focusable="true"
@@ -202,10 +202,13 @@
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="Launch offline"
+            android:text="Launch\noffline"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textLaunchOnline"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textLaunchOnline" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textLaunchOnline"
+            app:layout_constraintTop_toTopOf="@+id/textLaunchOnline" />
 
         <TextView
             android:id="@+id/textReSync"
@@ -221,18 +224,18 @@
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="ReSync"
+            android:text="Sync Manager"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textLaunchOffline" />
+            app:layout_constraintTop_toBottomOf="@+id/textHome" />
 
         <TextView
-            android:id="@+id/textSettings"
+            android:id="@+id/textAppAdmin"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="4dp"
             android:layout_marginEnd="24dp"
             android:clickable="true"
             android:focusable="true"
@@ -240,10 +243,34 @@
             android:gravity="center_horizontal"
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
-            android:text="Settings"
+            android:text="App\nAdmin"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/textAppSettings"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textAppSettings"
+            app:layout_constraintTop_toTopOf="@+id/textAppSettings" />
+
+        <TextView
+            android:id="@+id/textAppSettings"
+            style="@style/cardDesignBuyGift222"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:gravity="center_horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="App\nSettings"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/textAppAdmin"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textReSync" />
+            app:layout_constraintTop_toBottomOf="@+id/textLaunchOnline" />
 
         <TextView
             android:id="@+id/textForgetPasswordHome"
@@ -260,18 +287,20 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:text="Forgot Password"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textSettings" />
+            app:layout_constraintTop_toBottomOf="@+id/divider2" />
 
         <TextView
             android:id="@+id/textCanCellDialog"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="24dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="16dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:selectableItemBackground"
@@ -279,9 +308,12 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:text="Cancel"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textExit"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textForgetPasswordHome" />
+            app:layout_constraintTop_toBottomOf="@+id/textLoginAdmin2" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

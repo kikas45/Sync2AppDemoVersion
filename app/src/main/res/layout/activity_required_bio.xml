@@ -78,7 +78,7 @@
                 android:foreground="?selectableItemBackground"
                 android:padding="8dp"
                 android:scaleType="fitXY"
-                android:visibility="visible"
+                android:clickable="true"
                 app:layout_constraintBottom_toTopOf="@+id/textView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

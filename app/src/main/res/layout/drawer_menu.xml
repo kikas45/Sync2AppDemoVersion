@@ -299,8 +299,9 @@
                 android:layout_width="@dimen/drawer_items_iconSize"
                 android:layout_height="@dimen/drawer_items_iconSize"
                 android:layout_gravity="center"
+                style="@style/imageStyleColorTint"
                 android:contentDescription="@string/todo"
-                android:src="@drawable/demo_btn_24" />
+                android:src="@drawable/ic_qr_code_scanner_24" />
 
             <Space
                 android:layout_width="3dp"

@@ -28,6 +28,39 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.3">
 
+
+
+
+        <TextView
+            android:id="@+id/textTitles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="24dp"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="Your hardware is not compatible with this application"
+            style="@style/textColorStyleSyncMangerPlus"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imagSucessful" />
+
+        <TextView
+            android:id="@+id/textDisplayResult"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:text="TextView"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textTitles" />
+
+
         <TextView
             android:id="@+id/textContinuPassword2"
             android:layout_width="120dp"
@@ -64,26 +97,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_failed_circle"
             app:tint="@color/red" />
-
-        <TextView
-            android:id="@+id/textDisplayResult"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="25dp"
-            android:layout_marginBottom="8dp"
-            android:elegantTextHeight="true"
-            android:justificationMode="inter_word"
-            android:lineHeight="23sp"
-            android:text="Your hardware is not compatible with this application"
-            android:textAlignment="inherit"
-            android:textColor="@color/black"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toTopOf="@+id/textContinuPassword2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imagSucessful" />
 
 
 

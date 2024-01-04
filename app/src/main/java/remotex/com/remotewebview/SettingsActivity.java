@@ -63,11 +63,13 @@ public class SettingsActivity extends AppCompatActivity {
         String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
         String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
 
-        if (!did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) || imgEnablePassword.equals(Constants.imgEnablePassword)) {
+    /*    if (!did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) || imgEnablePassword.equals(Constants.imgEnablePassword)) {
             showExitConfirmationDialog();
         } else {
             //do nothing
-        }
+        }*/
+
+        showExitConfirmationDialog();
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -110,7 +112,8 @@ public class SettingsActivity extends AppCompatActivity {
         TextView textHome = binding.textHome;
         TextView textLoginAdmin2 = binding.textLoginAdmin2;
         TextView textExit = binding.textExit;
-        TextView textSettings = binding.textSettings;
+        TextView textSettings = binding.textAppSettings;
+        TextView textAppAdmin = binding.textAppAdmin;
         TextView textReSync = binding.textReSync;
         TextView textLaunchOnline = binding.textLaunchOnline;
         TextView textLaunchOffline = binding.textLaunchOffline;
@@ -157,18 +160,7 @@ public class SettingsActivity extends AppCompatActivity {
         textCanCellDialog.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-                    alertDialog.dismiss();
-                } else {
-                    editTextText2.setError("Wrong password");
-                }
-
+                onBackPressed();
 
             }
         });
@@ -178,20 +170,11 @@ public class SettingsActivity extends AppCompatActivity {
         if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
             editTextText2.setText(simpleAdminPassword);
             editTextText2.setEnabled(false);
-            showToastMessage("edit  input password filled");
         } else if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord)) {
             editTextText2.setEnabled(true);
             editTextText2.setText(simpleAdminPassword);
         } else {
             editTextText2.setEnabled(true);
-        }
-
-        textLaunchOffline.setVisibility(View.GONE);
-
-        if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
-            textLaunchOnline.setText("Launch offline");
-        } else {
-            textLaunchOnline.setText("Launch online");
         }
 
 
@@ -236,10 +219,45 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
+
+        textAppAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+                String editTextText = editTextText2.getText().toString().trim();
+
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+
+                    Intent myactivity = new Intent(SettingsActivity.this, AdditionalSettingsActivity.class);
+                    startActivity(myactivity);
+
+                    alertDialog.dismiss();
+                    hideKeyBoard(editTextText2);
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+
+                } else {
+
+                    hideKeyBoard(editTextText2);
+                    showToastMessage("Wrong password");
+                    editTextText2.setError("Wrong password");
+                }
+            }
+        });
+
+
+
+
         textExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                // Close all activities and exit the app
+                Intent intent = new Intent(getApplicationContext(), WebActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("EXIT", true);
+                startActivity(intent);
+
             }
         });
 
@@ -253,38 +271,28 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-        textLaunchOnline.setOnClickListener(new View.OnClickListener() {
+        textLaunchOffline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-                String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
                 String editTextText = editTextText2.getText().toString().trim();
 
-
                 if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    if (imgLaunch.equals(Constants.imgAllowLunchFromOnline)) {
 
-                        Intent intent = new Intent(getApplicationContext(), WebActivity.class);
-                        intent.putExtra("unzipManual", "unzipManual");
+                    Intent intent = new Intent(getApplicationContext(), WebActivity.class);
+                    intent.putExtra("unzipManual", "unzipManual");
 
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
 
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
-                        alertDialog.dismiss();
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+                    alertDialog.dismiss();
 
-                    } else {
-                        showToastMessage("App already load online");
-                        hideKeyBoard(editTextText2);
-                        alertDialog.dismiss();
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                        editor.apply();
 
-                    }
                 } else {
                     hideKeyBoard(editTextText2);
                     editTextText2.setError("Wrong password");
@@ -293,6 +301,37 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+
+
+        textLaunchOnline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+
+                String editTextText = editTextText2.getText().toString().trim();
+
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+
+                    Intent intent = new Intent(getApplicationContext(), Splash.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+                    alertDialog.dismiss();
+
+
+                } else {
+                    hideKeyBoard(editTextText2);
+                    editTextText2.setError("Wrong password");
+                    showToastMessage("Wrong password");
+                }
+
+            }
+        });
+
 
 
 
@@ -335,6 +374,10 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
         });
+
+
+
+
 
         alertDialog.show();
     }
@@ -419,8 +462,18 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
+/*
     private boolean isValidEmail(String email) {
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+        Pattern pattern = Pattern.compile(emailPattern);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+*/
+
+
+    private boolean isValidEmail(String email) {
+        String emailPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(\\.[a-zA-Z]{2,})?";
         Pattern pattern = Pattern.compile(emailPattern);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
@@ -447,6 +500,7 @@ public class SettingsActivity extends AppCompatActivity {
         // Apply actions to views in the binding
         binding.textEmailSendOkayBtn.setOnClickListener(view -> {
             alertDialog.dismiss();
+            showExitConfirmationDialog();
         });
 
         // Show the AlertDialog
@@ -493,6 +547,7 @@ public class SettingsActivity extends AppCompatActivity {
             SwitchPreference lastpage_switch = findPreference("loadLastUrl");
             SwitchPreference autoToolbar_switch = findPreference("autohideToolbar");
             SwitchPreference appModeOrTvMode = findPreference("appModeOrTvMode");
+            SwitchPreference hideQRCode = findPreference("hideQRCode");
             Preference additionalSettingsPreference = findPreference("additional_settings_key");
 
 
@@ -501,6 +556,16 @@ public class SettingsActivity extends AppCompatActivity {
 
 
             String get_AppMode = sharedBiometric.getString(Constants.App_Mode, "");
+
+            String get_hideQRCode = sharedBiometric.getString(Constants.HIDE_QR_CODE, "");
+
+
+            if (get_hideQRCode.equals(Constants.HIDE_QR_CODE)){
+                hideQRCode.setTitle("Hide QR Code");
+            }else {
+                hideQRCode.setTitle("Show QR Code");
+            }
+
 
 
             if (get_AppMode.equals(Constants.App_Mode)) {
@@ -515,11 +580,11 @@ public class SettingsActivity extends AppCompatActivity {
                 autoToolbar_switch.setChecked(false);
                 hide_bottom_switch.setChecked(false);
                 swipe_switch.setChecked(false);
-                immersive_switch.setChecked(false);
+                //  immersive_switch.setChecked(false);
                 fullscr_switch.setChecked(false);
 
 
-            }else {
+            } else {
                 appModeOrTvMode.setChecked(true);
 
                 WebActivity.ChangeListener = true;
@@ -532,7 +597,7 @@ public class SettingsActivity extends AppCompatActivity {
                 autoToolbar_switch.setChecked(true);
                 hide_bottom_switch.setChecked(true);
                 swipe_switch.setChecked(true);
-                immersive_switch.setChecked(true);
+                //  immersive_switch.setChecked(true);
                 fullscr_switch.setChecked(true);
 
             }
@@ -546,7 +611,7 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         editor.remove(Constants.App_Mode);
-                     //   editor.remove(Constants.TV_Mode);
+                        //   editor.remove(Constants.TV_Mode);
                     }
 
                 }, 300);
@@ -561,7 +626,7 @@ public class SettingsActivity extends AppCompatActivity {
                             WebActivity.ChangeListener = true;
                             appModeOrTvMode.setTitle("Tv Mode");
 
-                         //   editor.putString(Constants.TV_Mode, Constants.TV_Mode);
+                            //   editor.putString(Constants.TV_Mode, Constants.TV_Mode);
                             editor.remove(Constants.App_Mode);
                             editor.apply();
 
@@ -569,7 +634,7 @@ public class SettingsActivity extends AppCompatActivity {
                             autoToolbar_switch.setChecked(true);
                             hide_bottom_switch.setChecked(true);
                             swipe_switch.setChecked(true);
-                            immersive_switch.setChecked(true);
+                            //   immersive_switch.setChecked(true);
                             fullscr_switch.setChecked(true);
 
 
@@ -577,7 +642,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                             appModeOrTvMode.setTitle("App Mode");
                             WebActivity.ChangeListener = true;
-                        ///    editor.remove(Constants.TV_Mode);
+                            ///    editor.remove(Constants.TV_Mode);
                             editor.putString(Constants.App_Mode, Constants.App_Mode);
                             editor.apply();
 
@@ -586,7 +651,7 @@ public class SettingsActivity extends AppCompatActivity {
                             autoToolbar_switch.setChecked(false);
                             hide_bottom_switch.setChecked(false);
                             swipe_switch.setChecked(false);
-                            immersive_switch.setChecked(false);
+                            // immersive_switch.setChecked(false);
                             fullscr_switch.setChecked(false);
 
 
@@ -630,30 +695,53 @@ public class SettingsActivity extends AppCompatActivity {
 
             }
 
-            if (hide_bottom_switch != null) {
-                hide_bottom_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+
+
+
+            /// start of qr code logic
+
+            if (hideQRCode != null) {
+                hideQRCode.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                     @Override
                     public boolean onPreferenceChange(Preference arg0, Object isChanged) {
                         boolean isItemOn = (Boolean) isChanged;
                         if (isItemOn) {
-                            WebActivity.ChangeListener = true;
+                           // WebActivity.ChangeListener = true;
+                            hideQRCode.setTitle("Hide QR Code");
+                            editor.putString(Constants.HIDE_QR_CODE, Constants.HIDE_QR_CODE);
+                            editor.apply();
 
                         } else {
-                            WebActivity.ChangeListener = true;
+                           // WebActivity.ChangeListener = true;
+                            hideQRCode.setTitle("Show QR Code");
+                            editor.remove(Constants.HIDE_QR_CODE);
+                            editor.apply();
                         }
                         return true;
                     }
                 });
 
-                if (swipe_switch != null) {
-                    swipe_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+
+                /// the end of qr code logic
+
+
+
+
+
+
+
+                if (hide_bottom_switch != null) {
+                    hide_bottom_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                         @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                         @Override
                         public boolean onPreferenceChange(Preference arg0, Object isChanged) {
                             boolean isItemOn = (Boolean) isChanged;
                             if (isItemOn) {
                                 WebActivity.ChangeListener = true;
+
                             } else {
                                 WebActivity.ChangeListener = true;
                             }
@@ -661,8 +749,8 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     });
 
-                    if (lastpage_switch != null) {
-                        lastpage_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    if (swipe_switch != null) {
+                        swipe_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                             @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                             @Override
                             public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -675,58 +763,9 @@ public class SettingsActivity extends AppCompatActivity {
                                 return true;
                             }
                         });
-                    }
 
-                    if (location_switch != null) {
-                        location_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-                            @Override
-                            public boolean onPreferenceChange(Preference arg0, Object isChanged) {
-                                boolean isItemOn = (Boolean) isChanged;
-                                if (isItemOn) {
-                                    WebActivity.ChangeListener = true;
-                                } else {
-                                    WebActivity.ChangeListener = true;
-                                }
-                                return true;
-                            }
-                        });
-                    }
-
-
-                    if (dark_switch != null) {
-                        dark_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-                            @Override
-                            public boolean onPreferenceChange(Preference arg0, Object isChanged) {
-                                boolean isItemOn = (Boolean) isChanged;
-                                if (isItemOn) {
-                                    WebActivity.ChangeListener = true;
-
-                                } else {
-                                    WebActivity.ChangeListener = true;
-                                }
-                                return true;
-                            }
-                        });
-                    }
-
-                    if (night_switch != null) {
-                        night_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                            @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
-                            @Override
-                            public boolean onPreferenceChange(Preference arg0, Object isChanged) {
-                                boolean isItemOn = (Boolean) isChanged;
-                                if (isItemOn) {
-                                    WebActivity.ChangeListener = true;
-                                } else {
-                                    WebActivity.ChangeListener = true;
-                                }
-                                return true;
-                            }
-                        });
-                        if (fullscr_switch != null) {
-                            fullscr_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        if (lastpage_switch != null) {
+                            lastpage_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                                 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                                 @Override
                                 public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -739,10 +778,58 @@ public class SettingsActivity extends AppCompatActivity {
                                     return true;
                                 }
                             });
+                        }
+
+                        if (location_switch != null) {
+                            location_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+                                @Override
+                                public boolean onPreferenceChange(Preference arg0, Object isChanged) {
+                                    boolean isItemOn = (Boolean) isChanged;
+                                    if (isItemOn) {
+                                        WebActivity.ChangeListener = true;
+                                    } else {
+                                        WebActivity.ChangeListener = true;
+                                    }
+                                    return true;
+                                }
+                            });
+                        }
 
 
-                            if (nativ_loader_switch != null) {
-                                nativ_loader_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        if (dark_switch != null) {
+                            dark_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+                                @Override
+                                public boolean onPreferenceChange(Preference arg0, Object isChanged) {
+                                    boolean isItemOn = (Boolean) isChanged;
+                                    if (isItemOn) {
+                                        WebActivity.ChangeListener = true;
+
+                                    } else {
+                                        WebActivity.ChangeListener = true;
+                                    }
+                                    return true;
+                                }
+                            });
+                        }
+
+                        if (night_switch != null) {
+                            night_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+                                @Override
+                                public boolean onPreferenceChange(Preference arg0, Object isChanged) {
+                                    boolean isItemOn = (Boolean) isChanged;
+                                    if (isItemOn) {
+                                        WebActivity.ChangeListener = true;
+                                    } else {
+                                        WebActivity.ChangeListener = true;
+                                    }
+                                    return true;
+                                }
+                            });
+                            if (fullscr_switch != null) {
+                                fullscr_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                                     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                                     @Override
                                     public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -755,8 +842,10 @@ public class SettingsActivity extends AppCompatActivity {
                                         return true;
                                     }
                                 });
-                                if (blockAds_switch != null) {
-                                    blockAds_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+
+                                if (nativ_loader_switch != null) {
+                                    nativ_loader_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                                         @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                                         @Override
                                         public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -769,9 +858,8 @@ public class SettingsActivity extends AppCompatActivity {
                                             return true;
                                         }
                                     });
-
-                                    if (immersive_switch != null) {
-                                        immersive_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                    if (blockAds_switch != null) {
+                                        blockAds_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                                             @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                                             @Override
                                             public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -785,8 +873,8 @@ public class SettingsActivity extends AppCompatActivity {
                                             }
                                         });
 
-                                        if (permissions_switch != null) {
-                                            permissions_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                        if (immersive_switch != null) {
+                                            immersive_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                                                 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
                                                 @Override
                                                 public boolean onPreferenceChange(Preference arg0, Object isChanged) {
@@ -795,11 +883,27 @@ public class SettingsActivity extends AppCompatActivity {
                                                         WebActivity.ChangeListener = true;
                                                     } else {
                                                         WebActivity.ChangeListener = true;
-
                                                     }
                                                     return true;
                                                 }
                                             });
+
+                                            if (permissions_switch != null) {
+                                                permissions_switch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                                                    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+                                                    @Override
+                                                    public boolean onPreferenceChange(Preference arg0, Object isChanged) {
+                                                        boolean isItemOn = (Boolean) isChanged;
+                                                        if (isItemOn) {
+                                                            WebActivity.ChangeListener = true;
+                                                        } else {
+                                                            WebActivity.ChangeListener = true;
+
+                                                        }
+                                                        return true;
+                                                    }
+                                                });
+                                            }
                                         }
                                     }
                                 }
@@ -807,34 +911,34 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     }
                 }
-            }
-            if (!constants.ShowServerUrlSetUp) {
-
-                try {
-                    serverUrl_field.setVisible(false);
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                }
-
-            }
-            if (!constants.ShowToolbar) {
-
-                try {
-                    autoToolbar_switch.setVisible(false);
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                }
-
-                if (!constants.ShowBottomBar) {
+                if (!constants.ShowServerUrlSetUp) {
 
                     try {
-                        hide_bottom_switch.setVisible(false);
+                        serverUrl_field.setVisible(false);
                     } catch ( Exception e ) {
                         e.printStackTrace();
+                    }
+
+                }
+                if (!constants.ShowToolbar) {
+
+                    try {
+                        autoToolbar_switch.setVisible(false);
+                    } catch ( Exception e ) {
+                        e.printStackTrace();
+                    }
+
+                    if (!constants.ShowBottomBar) {
+
+                        try {
+                            hide_bottom_switch.setVisible(false);
+                        } catch ( Exception e ) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
         }
-    }
 
+    }
 }

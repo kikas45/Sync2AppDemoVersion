@@ -193,6 +193,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import remotex.com.remotewebview.additionalSettings.AdditionalSettingsActivity;
 import remotex.com.remotewebview.additionalSettings.QRSanActivity;
 import remotex.com.remotewebview.additionalSettings.ReSyncActivity;
 import remotex.com.remotewebview.additionalSettings.utils.Constants;
@@ -482,13 +483,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         setContentView(R.layout.webactivity_layout);
 
-
-        connectivityReceiver = new ConnectivityReceiver();
-
-        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        registerReceiver(connectivityReceiver, intentFilter);
-
-
+        if (getIntent().getBooleanExtra("EXIT", false)) {
+            finish();
+        }
 
         //This Project Developed by ZIDDIQUE ABU (www.zidsworld.com)
 
@@ -756,7 +753,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                loadOfflineWebviewPage();
            }else {
                loadTheMainWebview();
-               showToastMessage("unable to find index file");
+             //  showToastMessage("unable to find index file");
            }
 
    }
@@ -873,8 +870,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             webSettings.setAllowContentAccess(true);
             webSettings.setDomStorageEnabled(true);
 
-         //   webSettings.setMediaPlaybackRequiresUserGesture(false);
-         //   webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+            webSettings.setMediaPlaybackRequiresUserGesture(false);
+           webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
             webSettings.setLoadWithOverviewMode(true);
             webSettings.setUseWideViewPort(true);
@@ -1125,10 +1122,31 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     private void HandleRemoteCommand(String command) {
 
-
         if (command.equals("openSettings")) {
 
             Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
+            startActivity(myactivity);
+
+
+/*
+            @SuppressLint("CommitPrefEdits")
+            SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+
+            String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
+            String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
+
+            if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) || imgEnablePassword.equals(Constants.imgEnablePassword)) {
+                Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
+                startActivity(myactivity);
+            } else {
+                showExitConfirmationDialog();
+            }
+
+*/
+
+
+
+ /*           Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
             startActivity(myactivity);
 
             SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
@@ -1136,7 +1154,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
             editor.remove(did_user_input_passowrd);
             editor.apply();
-
+*/
             //   showToastMessage("Settings is called");
 
         } else if (command.equals("webGoBack")) {
@@ -1249,19 +1267,37 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     @Override
     public void onResume() {
-        isAppOpen = true;
-
-
-        String getUrlFromScanner = getIntent().getStringExtra(Constants.QR_CODE_KEY);
-
-        if (jsonUrl == null) {
-            Intent intent = new Intent(mContext, Splash.class);
-            startActivity(intent);
-            finish();
-        }
-
 
         try {
+
+            isAppOpen = true;
+
+
+            String getUrlFromScanner = getIntent().getStringExtra(Constants.QR_CODE_KEY);
+
+            if (jsonUrl == null) {
+                Intent intent = new Intent(mContext, Splash.class);
+                startActivity(intent);
+                finish();
+            }
+
+
+            SharedPreferences sharedBiometric = getApplicationContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+            String getToHideQRCode = sharedBiometric.getString(Constants.HIDE_QR_CODE, "");
+
+            if (getToHideQRCode.equals(Constants.HIDE_QR_CODE)){
+                drawerItem7.setVisibility(View.INVISIBLE);
+            }else {
+                drawerItem7.setVisibility(View.VISIBLE);
+            }
+
+
+            connectivityReceiver = new ConnectivityReceiver();
+
+            IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(connectivityReceiver, intentFilter);
+
+
             if (getUrlFromScanner != null) {
                 if ((getUrlFromScanner.startsWith("https://") || getUrlFromScanner.startsWith("http://"))) {
                     webView.loadUrl(getUrlFromScanner);
@@ -1322,6 +1358,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     protected void onStop() {
         super.onStop();
 
+        try {
+            unregisterReceiver(connectivityReceiver);
+
+            if (connectivityReceiver != null) {
+                connectivityReceiver = null;
+            }
+        }catch ( Exception e ){}
+
 
     }
 
@@ -1361,6 +1405,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             }
         }, 10000);
+
 
 
         if (ShowWebButton) {
@@ -2035,7 +2080,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     ClearLastUrl();
                     // finish();
 
-                    showExitConfirmationDialog();
+                  //  showExitConfirmationDialog();
+
+                    Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
+                    startActivity(myactivity);
+
+
+                //    showExitConfirmationDialog();
 //                    SharedPreferences sharedBiometric = getSharedPreferences(Constants.IS_PASSWORD_ADDED, Context.MODE_PRIVATE);
 //                    String password_added = sharedBiometric.getString(Constants.password_added, "");
 //
@@ -2613,7 +2664,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     ViewGroup.LayoutParams.MATCH_PARENT));
 
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+/*            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 getWindow().getDecorView().setSystemUiVisibility(
                         View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
                                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
@@ -2622,7 +2673,22 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                 View.SYSTEM_UI_FLAG_FULLSCREEN |
                                 View.SYSTEM_UI_FLAG_IMMERSIVE);
             }
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);*/
+
+
+
+                getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                                View.SYSTEM_UI_FLAG_IMMERSIVE);
+
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+
+
+
         }
 
         @Override
@@ -2973,7 +3039,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         TextView textHome = binding.textHome;
         TextView textLoginAdmin2 = binding.textLoginAdmin2;
         TextView textExit = binding.textExit;
-        TextView textSettings = binding.textSettings;
+        TextView textSettings = binding.textAppSettings;
+        TextView textAppAdmin = binding.textAppAdmin;
         TextView textReSync = binding.textReSync;
         TextView textLaunchOnline = binding.textLaunchOnline;
         TextView textLaunchOffline = binding.textLaunchOffline;
@@ -3061,18 +3128,48 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         textSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
-                startActivity(myactivity);
 
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
                 String editTextText = editTextText2.getText().toString().trim();
 
-                if (editTextText.equals(simpleAdminPassword)) {
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+                    Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
+                    startActivity(myactivity);
                     alertDialog.dismiss();
                     hideKeyBoard(editTextText2);
                     editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
                     editor.apply();
 
+                } else {
+                    hideKeyBoard(editTextText2);
+                    showToastMessage("Wrong password");
+                    editTextText2.setError("Wrong password");
+                }
+            }
+        });
+
+
+        textAppAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+                String editTextText = editTextText2.getText().toString().trim();
+
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+
+                    Intent myactivity = new Intent(WebActivity.this, AdditionalSettingsActivity.class);
+                    startActivity(myactivity);
+
+                    alertDialog.dismiss();
+                    hideKeyBoard(editTextText2);
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                    editor.apply();
+
+                } else {
+                    hideKeyBoard(editTextText2);
+                    showToastMessage("Wrong password");
+                    editTextText2.setError("Wrong password");
                 }
             }
         });
@@ -3098,7 +3195,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         textLaunchOffline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
                 String editTextText = editTextText2.getText().toString().trim();
@@ -3124,16 +3221,22 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         textLaunchOnline.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+
                 String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
                 String editTextText = editTextText2.getText().toString().trim();
 
                 if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
 
-                    loadTheMainWebview();
+                  //  loadTheMainWebview();
                     editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
                     editor.apply();
+
+
+                    Intent intent = new Intent(getApplicationContext(), Splash.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
 
                     alertDialog.dismiss();
 
@@ -3295,6 +3398,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         // Apply actions to views in the binding
         binding.textEmailSendOkayBtn.setOnClickListener(view -> {
             alertDialog.dismiss();
+
         });
 
         // Show the AlertDialog

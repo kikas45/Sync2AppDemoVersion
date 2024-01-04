@@ -198,7 +198,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <TextView
-            android:id="@+id/textContinuPassword2"
+            android:id="@+id/textCancelBtn"
             style="@style/cardDesignBuyGift222"
             android:layout_width="0dp"
             android:layout_height="35dp"
@@ -216,7 +216,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
         <TextView
-            android:id="@+id/textContinuPassword222"
+            android:id="@+id/textRetryBtn"
             style="@style/cardDesignBuyGift"
             android:layout_width="0dp"
             android:layout_height="35dp"
@@ -228,7 +228,7 @@
             android:fontFamily="sans-serif-medium"
             android:foreground="?selectableItemBackground"
             android:gravity="center"
-            android:text="RETRY"
+            android:text="Retry"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
@@ -246,7 +246,7 @@
             android:fontFamily="sans-serif-medium"
             android:foreground="?selectableItemBackground"
             android:gravity="center"
-            android:text="LAUNCH"
+            android:text="Launch"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView9" />

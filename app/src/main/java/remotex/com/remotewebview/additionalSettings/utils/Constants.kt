@@ -16,6 +16,11 @@ class Constants {
       //  const val TV_Mode = "TV_Mode"
         const val DOWNLOAD_PATH = "DOWNLOAD_PATH"
         const val FIRST_TIME_APP_START = "FIRST_TIME_APP_START"
+        const val DELETE_SYN2APP_FOLDER = "DELETE_SYN2APP_FOLDER"
+        const val HIDE_QR_CODE = "HIDE_QR_CODE"
+        const val getSavedCLOImPutFiled = "getSavedCLOImPutFiled"
+        const val getSaveSubFolderInPutFiled = "getSaveSubFolderInPutFiled"
+        const val getSavedEditTextInputSynUrlZip = "getSavedEditTextInputSynUrlZip"
 
         const val  MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
 

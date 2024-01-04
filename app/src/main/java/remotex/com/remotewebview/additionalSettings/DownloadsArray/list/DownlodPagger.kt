@@ -97,10 +97,6 @@ class DownlodPagger : AppCompatActivity() {
 
         manager = getApplicationContext()
             .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-        //  isValid = true
-
-
-
 
 
 
@@ -110,10 +106,6 @@ class DownlodPagger : AppCompatActivity() {
                 onBackPressed()
             }
 
-            textTitle.setOnClickListener {
-             //   showCustomProgressDialog("Please wait")
-             //       funUnZipFile()
-            }
 
             binding.textContinuPassword222222.setOnClickListener {
                 showToastMessage("Please for Complete Download and Zip extraction")
@@ -133,7 +125,7 @@ class DownlodPagger : AppCompatActivity() {
             }
 
 
-            textContinuPassword2.setOnClickListener {
+            textCancelBtn.setOnClickListener {
                 second_cancel_download()
             }
 
@@ -158,7 +150,7 @@ class DownlodPagger : AppCompatActivity() {
                 fileName = fileName22.toString()
             }
 
-            textContinuPassword222.setOnClickListener {
+            textRetryBtn.setOnClickListener {
                 showToastMessage("Please wait..")
                 if (baseUrl22 != null && fileName22 != null){
                     download(baseUrl22, getFolderClo.toString(), getFolderSubpath.toString(), Zip.toString(), fileName22.toString(), Extracted.toString())
@@ -231,7 +223,6 @@ class DownlodPagger : AppCompatActivity() {
                 msg = "Pending.."
                 binding.imagePauseDownload.visibility = View.VISIBLE
                 binding.imageResumeDownload.visibility = View.INVISIBLE
-                // binding.textContinuPassword222222.isEnabled = false
                 isValid = true
             }
 
@@ -249,7 +240,6 @@ class DownlodPagger : AppCompatActivity() {
                 msg = "Resume"
                 binding.imagePauseDownload.visibility = View.INVISIBLE
                 binding.imageResumeDownload.visibility = View.VISIBLE
-                //  binding.textContinuPassword222222.isEnabled = false
                 isValid = true
             }
 
@@ -544,7 +534,7 @@ private fun showToastMessage(messages: String) {
             val myFile = File(directoryPath, fileName)
 
             if (myFile.exists()) {
-                myFile.delete()
+                myFile.deleteRecursively()
                 showToastMessage("File deleted successfully")
             } else {
                 showToastMessage("File does not exist")
@@ -587,10 +577,10 @@ private fun showToastMessage(messages: String) {
         val myFile = File(directoryPath, fileNamy)
 
         if (myFile.exists()) {
-            myFile.delete()
-            //  showToastMessage("File deleted successfully")
+            myFile.deleteRecursively()
+              showToastMessage("File deleted successfully")
         } else {
-            //  showToastMessage("File does not exist")
+              showToastMessage("File does not exist")
         }
 
 

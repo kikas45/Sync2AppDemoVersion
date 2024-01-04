@@ -248,6 +248,11 @@ class AdditionalSettingsActivity : AppCompatActivity() {
             imageChooser()
         }
 
+
+        customimageRadipoButton.setOnClickListener {
+            imageChooser()
+        }
+
         defaultImageFaltImage.setOnClickListener {
             defaultImageRadioButton.isChecked = true
             customimageRadipoButton.isChecked = false
@@ -395,13 +400,13 @@ class AdditionalSettingsActivity : AppCompatActivity() {
                 if (compoundButton.isChecked) {
                     editor.putString("imgEnableSafeMood", "imgEnableSafeMood")
                     editor.apply()
-                    showSnackBar("App will auto start on reboot")
+                    showSnackBar("App will auto-start on reboot")
                 } else {
 
                     // stop lock screen
                     editor.remove("imgEnableSafeMood")
                     editor.apply()
-                    showSnackBar("You have turn off the fixture")
+                    showSnackBar("You have turned off the fixture")
                 }
             }
 
@@ -411,13 +416,13 @@ class AdditionalSettingsActivity : AppCompatActivity() {
                 if (compoundButton.isChecked) {
                     editor.putString(Constants.imgAllowFingerPrint, "imgAllowFingerPrint")
                     editor.apply()
-                    showSnackBar("FingerPrint Sign in  enabled")
+                    showSnackBar("Fingerprint sign-in enabled")
                 } else {
 
                     // stop lock screen
                     editor.remove(Constants.imgAllowFingerPrint)
                     editor.apply()
-                    showSnackBar("FingerPrint Sign in  disabled")
+                    showSnackBar("Fingerprint sign-in disabled")
                 }
             }
 
@@ -427,14 +432,6 @@ class AdditionalSettingsActivity : AppCompatActivity() {
 
     private fun showSnackBar(message: String) {
         Snackbar.make(binding.content, message, Snackbar.LENGTH_LONG).show()
-
-    }
-
-
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finish()
 
     }
 
@@ -551,17 +548,15 @@ class AdditionalSettingsActivity : AppCompatActivity() {
 
     private fun shareMyApk() {
         try {
-            // get the base.apk
+
             val baseApkLocation =
                 applicationContext.packageManager.getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA).sourceDir
-            // get the file
+
             val baseApk = File(baseApkLocation)
 
-            // the path
-            val path = Environment.getExternalStorageDirectory().toString() + "/Download/"
-            // make the directory
+            val path = Environment.getExternalStorageDirectory().toString() + "/Download/Syn2AppLive/APK/"
+
             val dir = File(path)
-            // if the directory doesn't exist, make it
             if (!dir.exists()) {
                 dir.mkdirs()
             }
@@ -586,26 +581,28 @@ class AdditionalSettingsActivity : AppCompatActivity() {
             output.close()
             input.close()
 
-            // get content uri for the file
-            //   val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", destination)
-
-           //  val uri = FileProvider.getUriForFile(this, "remotex.com.remotewebview.additionalSettings" + ".provider", destination)
 
 
-          //  val authority = "remotex.com.remotewebview.additionalSettings.provider"
-          //  val uri = FileProvider.getUriForFile(this, authority, destination)
+            val nameOfApk =  "Syn2App.apk"
+            val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/APK/$nameOfApk"
+
+            val  nameOfpackage = this.packageName
+
+            val fileUri = FileProvider.getUriForFile(
+                applicationContext,
+                "$nameOfpackage.fileprovider",
+                File(directoryPath)
+            )
+
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "application/vnd.android.package-archive"
+                putExtra(Intent.EXTRA_STREAM, fileUri)
+            }
+
+            startActivity(Intent.createChooser(shareIntent, "Share APK using"))
 
 
-            val authority =  applicationInfo.packageName+ ".provider"
-           val uri = FileProvider.getUriForFile(this, authority, destination)
-
-
-
-            // share the file
-            val intent = Intent(Intent.ACTION_SEND)
-            intent.type = "application/vnd.android.package-archive"
-            intent.putExtra(Intent.EXTRA_STREAM, uri)
-            startActivity(Intent.createChooser(intent, "Share Now"))
 
         } catch (e: Exception) {
             Log.d("TAG", "shareMyApk: \"Failed To Share The App${e.message}")

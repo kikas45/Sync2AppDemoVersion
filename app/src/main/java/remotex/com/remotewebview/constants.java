@@ -11,10 +11,19 @@ public class constants {
     public static String CurrVersion;
 
 
+//    public static String ServerUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
+//    public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
+//
+//   public static String splashScreenUrl = "https://sync2app.com/abc/123/logo_3.svg";
+
+
+
     public static String ServerUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
+
     public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 
-   public static String splashScreenUrl = "https://sync2app.com/abc/123/logo_3.svg";
+    public static String splashScreenUrl = "https://sync2app.com/abc/123/logo_3.png";
+
 
     /*Strictly do not change anything below*/
     public static String jsonUrl;
