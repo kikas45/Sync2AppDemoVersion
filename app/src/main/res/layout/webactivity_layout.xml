@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:animateLayoutChanges="true"
     android:layout_height="wrap_content"
@@ -15,159 +14,287 @@
     tools:context=".WebActivity"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:id="@+id/x_toolbar"
-        android:padding="8dp"
-        android:visibility="gone"
-       android:layout_gravity="center"
-        android:orientation="horizontal"
-        android:background="?android:colorPrimary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:visibility="gone"
-            android:id="@+id/drawer_menu_Btn"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_baseline_notes_24"
-            android:layout_width="28dp"
-            android:layout_height="28dp"/>
-
-        <TextView
-            android:id="@+id/toolbarTitleText"
-            android:paddingEnd="15dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_alignParentEnd="true"
-            android:text="@string/app_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-
-    </RelativeLayout>
-            <RelativeLayout
-
-                android:id="@+id/webco"
-                android:orientation="vertical"
-                android:animateLayoutChanges="true"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp">
-
-
-                <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                    android:id="@+id/swipeLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-
-                    <com.github.ksoichiro.android.observablescrollview.ObservableWebView
-                        android:id="@+id/webview"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:animateLayoutChanges="true" />
-
-                </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-                <include layout="@layout/network_error" />
-
-                <ProgressBar
-                    android:id="@+id/SimpleProgressBar"
-                    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-
-                    android:indeterminateDrawable="@drawable/progress_drawable"
-                    android:indeterminate="true"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:background="@drawable/progress_bg"
-                     />
-
-
-                <FrameLayout
-                    android:id="@+id/frameLayoutHorizontalProgress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/app_color_primary"
-                    android:visibility="gone">
-
-                    <ProgressBar
-                        android:id="@+id/progressbar"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="6dp"
-                        android:progressTint="@color/app_color_accent"
-                        android:layout_marginTop="-3dp"
-                        android:progress="20" />
-                </FrameLayout>
-
-                <include layout="@layout/window" />
-                <include layout="@layout/web_button"/>
-                <include layout="@layout/drawer_menu"/>
-
-                <ProgressBar
-                    android:id="@+id/WindowProgressBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_gravity="center"
-                    android:visibility="gone" />
-
-
-            </RelativeLayout>
-
-
-
-
-
-
-
-<!--        <include layout="@layout/url_bar" />-->
-
-
-<!--    <com.google.android.material.navigation.NavigationView-->
-<!--        android:id="@+id/nav_view"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_gravity="start"-->
-<!--        android:fitsSystemWindows="true"-->
-<!--        app:headerLayout="@layout/nav_header_main"-->
-<!--        app:menu="@menu/activity_main_drawer"-->
-<!--        app:theme="@style/NavigationDrawerStyle" />-->
 
     <LinearLayout
-
-
-
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:visibility="visible"
-        android:id="@+id/btm"
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_gravity="center"
+        android:animateLayoutChanges="true"
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
+        android:gravity="center"
+
+        android:orientation="vertical"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintStart_toStartOf="parent"
+        ads:layout_constraintTop_toTopOf="parent"
+        tools:context=".WebActivity">
+
+        <RelativeLayout
+            android:id="@+id/x_toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
-            android:background="@color/white"
             android:layout_gravity="center"
-            android:visibility="gone"
-            ads:adSize="FULL_WIDTHx50"
+            android:background="?android:colorPrimary"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:visibility="gone">
 
-            ads:adUnitId="@string/admobid" />
-                <View
+            <ImageView
+                android:id="@+id/drawer_menu_Btn"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_baseline_notes_24"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/toolbarTitleText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:paddingEnd="15dp"
+                android:text="@string/app_name"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+
+            android:id="@+id/webco"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:animateLayoutChanges="true"
+            android:background="@color/black"
+            android:orientation="vertical">
+
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/swipeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/black"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+
+                <com.github.ksoichiro.android.observablescrollview.ObservableWebView
+                    android:id="@+id/webview"
                     android:layout_width="match_parent"
-                    android:background="@color/view_line"
-                    android:layout_height="0.1dp"/>
-        <include layout="@layout/bottom_toolbar"
-          />
+                    android:layout_height="0dp"
+                    android:animateLayoutChanges="true" />
 
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <include layout="@layout/network_error" />
+
+            <ProgressBar
+                android:id="@+id/SimpleProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+
+                android:layout_gravity="center"
+                android:background="@drawable/progress_bg"
+                android:indeterminate="true"
+                android:indeterminateDrawable="@drawable/progress_drawable"
+                android:visibility="gone" />
+
+
+            <FrameLayout
+                android:id="@+id/frameLayoutHorizontalProgress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/app_color_primary"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:id="@+id/progressbar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="-3dp"
+                    android:progress="20"
+                    android:progressTint="@color/app_color_accent" />
+            </FrameLayout>
+
+            <include layout="@layout/window" />
+
+
+            <include layout="@layout/drawer_menu" />
+
+            <ProgressBar
+                android:id="@+id/WindowProgressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+
+        </RelativeLayout>
+
+
+
+        <LinearLayout
+
+
+            android:id="@+id/btm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <com.google.android.gms.ads.AdView
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@color/white"
+                android:visibility="gone"
+                ads:adSize="FULL_WIDTHx50"
+
+                ads:adUnitId="@string/admobid" />
+
+            <include layout="@layout/bottom_toolbar_po" />
+
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/webx"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+
+        android:layout_gravity="center"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingTop="30dp"
+        android:paddingBottom="30dp"
+        ads:layout_constraintBottom_toTopOf="@+id/bottom_server_layout"
+        ads:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/web_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/round_bg"
+            android:contentDescription="TODO"
+
+            android:onClick="handleWebBtn"
+            android:padding="3dp" />
+
+    </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_server_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="50dp"
+        android:alpha="0.6"
+        android:background="#171616"
+        android:fitsSystemWindows="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="15dp"
+        android:visibility="visible"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/textSyncMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="SM: --"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/textSynIntervals"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textLocation" />
+
+        <TextView
+            android:id="@+id/textLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="LN : --"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/textStatusProcess"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textStatusProcess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="PR: Running"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textLocation"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/countDownTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="CD: --"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/textSynIntervals"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textSynIntervals"
+            app:layout_constraintTop_toTopOf="@+id/textSynIntervals" />
+
+        <TextView
+            android:id="@+id/textSynIntervals"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="ST: --"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/textSyncMode"
+            app:layout_constraintEnd_toStartOf="@+id/countDownTime"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/textSyncMode"
+            app:layout_constraintTop_toTopOf="@+id/textSyncMode" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

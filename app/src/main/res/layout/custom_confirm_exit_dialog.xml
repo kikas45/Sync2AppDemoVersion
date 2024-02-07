@@ -54,14 +54,15 @@
             android:id="@+id/textView4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:elegantTextHeight="true"
             android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:text="Provide Password for access"
+            android:gravity="center|start"
+            android:text="Enter Password"
             android:textColor="@color/black"
             android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imgWifi"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -187,7 +188,7 @@
             app:layout_constraintEnd_toStartOf="@+id/textLaunchOffline"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textReSync" />
+            app:layout_constraintTop_toBottomOf="@+id/textLaunchOnlineJson" />
 
         <TextView
             android:id="@+id/textLaunchOffline"
@@ -229,6 +230,35 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textHome" />
+
+
+
+        <TextView
+            android:id="@+id/textLaunchOnlineJson"
+            style="@style/cardDesignBuyGift222"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:foreground="?android:selectableItemBackground"
+            android:gravity="center_horizontal"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="Launch Online JSON"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textReSync" />
+
+
+
+
+
 
         <TextView
             android:id="@+id/textAppAdmin"
@@ -314,6 +344,49 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textLoginAdmin2" />
+
+        <ImageView
+            android:id="@+id/imagePassowrdSettings"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textView4"
+            app:srcCompat="@drawable/ic_app_settings"
+            app:tint="#504C4C" />
+
+        <ImageView
+            android:id="@+id/imgClearCatch"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:padding="9dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintEnd_toStartOf="@+id/imagePassowrdSettings"
+            app:layout_constraintTop_toTopOf="@+id/textView4"
+            app:srcCompat="@drawable/ic_clear_catch"
+            app:tint="#504C4C" />
+
+        <ImageView
+            android:id="@+id/imgWifi"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintEnd_toStartOf="@+id/imgClearCatch"
+            app:layout_constraintTop_toTopOf="@+id/textView4"
+            app:srcCompat="@drawable/error_wifi"
+            app:tint="#504C4C" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

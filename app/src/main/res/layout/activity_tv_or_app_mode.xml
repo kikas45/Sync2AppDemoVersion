@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:id="@+id/nestedScroll"
         android:fitsSystemWindows="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -33,10 +34,8 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?android:selectableItemBackground"
-                android:gravity="center_horizontal"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:text="TV Mode"
+                android:gravity="center"
+                android:text="TV App Mode"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
@@ -57,18 +56,13 @@
                 android:focusable="true"
                 android:fontFamily="sans-serif-medium"
                 android:foreground="?selectableItemBackground"
-                android:gravity="center_horizontal"
-                android:paddingLeft="18dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:text="App Mode"
+                android:gravity="center"
+                android:text="Mobile App Mode"
                 android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView7"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
 
             <TextView
@@ -119,17 +113,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
- <!--           <WebView
-                android:id="@+id/myWebview"
-                android:layout_width="409dp"
-                android:layout_height="368dp"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="32dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textTvMode" />-->
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="remotex.com.remotewebview">
+    package="sync2app.com.syncapplive">
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true" /> <!-- for Android 13 permission -->
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+        android:required="false" />
+
     <uses-permission
-        android:name="android.permission.CAMERA"
-        tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        android:minSdkVersion="30" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.CAMERA2" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_GPS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.ACCESS_GPS"
+        tools:ignore="ProtectedPermissions,SystemPermissionTypo" />
     <uses-permission android:name="android.permission.ACCESS_ASSISTED_GPS" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
         android:name=".MyApplication"
@@ -44,11 +47,18 @@
         android:theme="@style/Theme.RemoteWebViewLight"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
+
         <activity
-            android:name=".additionalSettings.DownloadsArray.list.DownlodPagger"
+            android:name=".additionalSettings.FileExplorerActivity"
             android:exported="false" />
         <activity
-            android:name=".additionalSettings.DownloadsArray.list.DownLoadPage"
+            android:name=".additionalSettings.TestScreenActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.MaintenanceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.DownloadsArray.list.DownlodPagger"
             android:exported="false" />
         <activity
             android:name=".additionalSettings.RequiredBioActivity"
@@ -70,12 +80,14 @@
             android:exported="false" />
         <activity
             android:name=".additionalSettings.scanutil.CaptureAct"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
             android:theme="@style/zxing_CaptureTheme" />
         <activity
             android:name=".additionalSettings.QRSanActivity"
             android:exported="false" />
+
+
         <activity
             android:name=".Splash"
             android:exported="false" />
@@ -108,17 +120,19 @@
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="@string/deeplink_url"
-                    android:scheme="https" />
+                    android:scheme="https"
+                    tools:ignore="AppLinkUrlError" />
                 <data
                     android:host="@string/deeplink_url"
-                    android:scheme="http" />
+                    android:scheme="http"
+                    tools:ignore="AppLinkUrlError" />
             </intent-filter>
+
         </activity>
 
         <provider
@@ -134,12 +148,12 @@
         </provider>
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="zidsworld.com.remotewebview.provider"
+            android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths" />
+                android:resource="@xml/provider_paths" />
         </provider>
 
         <service
@@ -153,6 +167,36 @@
         <service
             android:name=".RemotexNotifier"
             android:exported="false" />
+
+        <receiver
+            android:name=".additionalSettings.DownloadsArray.devicelock.MyDeviceAdminReceiver"
+            android:description="@string/app_name"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_receiver" />
+
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".additionalSettings.myService.NotificationService"
+            android:directBootAware="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".additionalSettings.myService.RestarterBootReceiver"
+            android:directBootAware="true"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="RestarterBootReceiver" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

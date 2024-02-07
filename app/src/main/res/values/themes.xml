@@ -97,6 +97,11 @@
         <item name="android:textColor">@color/deep_blue</item>
     </style>
 
+    <style name="cardDesignRedOffline">
+        <item name="android:background">@drawable/card_red_design</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="textColorStyle">
         <item name="android:textColor">@color/dark_light_gray</item>
         <item name="android:textSize">16sp</item>
@@ -116,6 +121,10 @@
 
     <style name="dividerBackColor">
         <item name="android:background">#DEE2E4</item>
+    </style>
+
+    <style name="dividerBackColorDeepBlue">
+        <item name="android:background">@color/deep_blue</item>
     </style>
 
     <style name="dividerBackColorDark">

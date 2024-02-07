@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/cardDesignAccountNumber"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="200dp"
         android:layout_gravity="center|top"
         android:layout_marginStart="50dp"
         android:layout_marginTop="20dp"
@@ -34,6 +34,7 @@
             android:layout_width="100dp"
             android:layout_height="40dp"
             android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="32dp"
             android:layout_marginBottom="8dp"
             android:clickable="true"
@@ -49,7 +50,8 @@
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textYourUrlTest" />
 
         <TextView
             android:id="@+id/textSucessful"
@@ -60,7 +62,7 @@
             android:gravity="center"
             android:text="Download Zip"
             android:textColor="@color/deep_blue"
-            android:textSize="19sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -70,16 +72,13 @@
             android:id="@+id/textYourUrlTest"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginTop="16dp"
             android:elegantTextHeight="true"
             android:ellipsize="end"
             android:gravity="center"
-            android:maxLines="3"
+            android:maxLines="2"
             android:textColor="@color/deep_blue"
-            android:textSize="11sp"
-            app:layout_constraintBottom_toTopOf="@+id/textContinuPassword2"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textSucessful"
