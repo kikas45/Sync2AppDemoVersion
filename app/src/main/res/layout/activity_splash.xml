@@ -11,6 +11,8 @@
     tools:ignore="ExtraText">
 
 
+
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,6 +21,28 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+
+            <ImageView
+                android:id="@+id/imageHelper"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:padding="8dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_help_outline_24"
+                app:tint="@color/deep_blue_light" />
+
+
+
+
+
+
+
 
             <ImageView
                 android:id="@+id/splash_image"
@@ -87,6 +111,12 @@
                     app:layout_constraintTop_toBottomOf="@+id/app_name" />
 
 
+
+
+
+
+
+
                 <TextView
                     android:id="@+id/go_settings_Btn"
                     style="@style/cardDesignBuyGift222"
@@ -116,6 +146,9 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/retryntn"
                     app:layout_constraintVertical_bias="0.0" />
+
+
+
 
                 <ImageView
                     android:id="@+id/imageView34"
@@ -170,6 +203,7 @@
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toEndOf="@+id/retryntn"
                     app:layout_constraintTop_toTopOf="@+id/retryntn" />
+
 
 
 
@@ -271,7 +305,8 @@
                     tools:targetApi="lollipop" />
 
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
 

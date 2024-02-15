@@ -41,6 +41,7 @@ import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
+import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
 import sync2app.com.syncapplive.databinding.CustomEmailSucessLayoutBinding;
@@ -147,6 +148,7 @@ public class SettingsActivity extends AppCompatActivity {
         ImageView imagePassowrdSettings = binding.imagePassowrdSettings;
         ImageView imgClearCatch = binding.imgClearCatch;
         ImageView imgWifi = binding.imgWifi;
+        ImageView imgMaintainace = binding.imgMaintainace;
 
 
         ImageView imgToggle = binding.imgToggle;
@@ -361,11 +363,45 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
+        imgMaintainace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+                String editTextText = editTextText2.getText().toString().trim();
+
+                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+
+
+                    hideKeyBoard(editTextText2);
+                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+
+                    editor.putString(Constants.SAVE_NAVIGATION, Constants.SettingsPage);
+                    editor.apply();
+
+                    Intent myactivity = new Intent(SettingsActivity.this, MaintenanceActivity.class);
+                    startActivity(myactivity);
+                    finish();
+
+                    alertDialog.dismiss();
+
+
+                } else {
+
+                    hideKeyBoard(editTextText2);
+                    showToastMessage("Wrong password");
+                    editTextText2.setError("Wrong password");
+                }
+            }
+        });
+
+
         textExit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 stopService(new Intent(SettingsActivity.this, NotificationService.class));
+                stopService(new Intent(SettingsActivity.this, OnChnageService.class));
                 finish();
                 finishAffinity();
 

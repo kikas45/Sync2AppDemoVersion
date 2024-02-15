@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import sync2app.com.syncapplive.AdvancedControls
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import java.io.File
@@ -44,8 +45,10 @@ class NotificationService : Service() {
         Handler(Looper.getMainLooper())
     }
 
+
     var lauchWebView = false
 
+    var manager: DownloadManager? = null
 
     var repEatMyProcess = false
 
@@ -72,6 +75,8 @@ class NotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        manager = getApplicationContext()
+            .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
         registerReceiver(
             downloadCompleteReceiver,
@@ -96,6 +101,10 @@ class NotificationService : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
+
+        showToastMessage("Sync On Interval Activated")
+
+
         myHandler.postDelayed(Runnable {
 
             val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
@@ -108,7 +117,7 @@ class NotificationService : Service() {
 
             if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty() && Zip.isNotEmpty()) {
 
-                showToastMessage("Sync Interval Stated")
+             //  showToastMessage("Sync Interval Stated")
                 makeAPIRequest()
                 SyncIntervalDownload()
                 synReapeatTime();
@@ -133,7 +142,7 @@ class NotificationService : Service() {
 
 
     override fun onDestroy() {
-        Toast.makeText(this, "Sync Cancelled", Toast.LENGTH_SHORT).show()
+       // Toast.makeText(this, "Sync Cancelled", Toast.LENGTH_SHORT).show()
         val editor = myDownloadClass.edit()
         editor.remove(Constants.SynC_Status)
         editor.remove(Constants.SAVED_CN_TIME)
@@ -142,6 +151,9 @@ class NotificationService : Service() {
         unregisterReceiver(downloadCompleteReceiver)
         unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
+
+        // can cell the download
+        second_cancel_download();
 
 
     }
@@ -166,34 +178,39 @@ class NotificationService : Service() {
     private fun startMyOwnForeground() {
 
 
-        val getTimeDefined = myDownloadClass.getString(Constants.getTimeDefined, "")
+        val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
+        val valuesTime = myDownloadClass.getLong(Constants.getTimeDefined, 0).toString()
+
 
         var newsTitle: String
 
-        if (getTimeDefined.equals("Sync interval timer")) {
-            newsTitle = "Sync in  1 Minute"
-        } else {
-            newsTitle = "Sync in $getTimeDefined"
+
+        if (getTimeDefined !=0L) {
+
+            newsTitle = "Sync in $valuesTime Minute"
+
+            val builder = NotificationCompat.Builder(applicationContext, "ChannelId")
+                .setSmallIcon(R.drawable.img_logo_icon)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentText(newsTitle)
+                .setAutoCancel(true)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notificationManager: NotificationManager =
+                    applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                val importance = NotificationManager.IMPORTANCE_DEFAULT
+                val channel = NotificationChannel("ChannelId", "News", importance)
+
+                notificationManager.createNotificationChannel(channel)
+
+                startForeground(2, builder.build())
+            }
+
+
         }
 
 
-        val builder = NotificationCompat.Builder(applicationContext, "ChannelId")
-            .setSmallIcon(R.drawable.img_logo_icon)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setContentText(newsTitle)
-            .setAutoCancel(true)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager: NotificationManager =
-                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel("ChannelId", "News", importance)
-
-            notificationManager.createNotificationChannel(channel)
-
-            startForeground(2, builder.build())
-        }
     }
 
 
@@ -299,102 +316,21 @@ class NotificationService : Service() {
 
 
     private fun SyncIntervalDownload() {
-        val getTimeDefined = myDownloadClass.getString(Constants.getTimeDefined, "")
+        val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
+        if (getTimeDefined != 0L) {
 
-        if (getTimeDefined.equals(Constants.t_2min)) {
-            attemptRequestAgain(2)
+            attemptRequestAgain(getTimeDefined)
+
             if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 2 minute")
-            } else {
-                showToastMessage("No internet Connection") 
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_5min)) {
-            attemptRequestAgain(5)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 5 minute")
+               // showToastMessage("System will Sync in $getTimeDefined minute")
             } else {
                 showToastMessage("No internet Connection")
             }
-
-
-        } else if (getTimeDefined.equals(Constants.t_10min)) {
-            attemptRequestAgain(10)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 10 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_15min)) {
-            attemptRequestAgain(15)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 15 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_30min)) {
-
-            attemptRequestAgain(30)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 30 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_60min)) {
-            attemptRequestAgain(60)
-
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 60 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_120min)) {
-            attemptRequestAgain(120)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 120 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_180min)) {
-            attemptRequestAgain(180)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 180 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else if (getTimeDefined.equals(Constants.t_240min)) {
-            attemptRequestAgain(240)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 240 minute")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
-
-        } else {
-            attemptRequestAgain(1)
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                showToastMessage("System will Sync in 1 Minute Default time")
-            } else {
-                showToastMessage("No internet Connection")
-            }
-
 
         }
+
+
     }
 
 
@@ -451,7 +387,9 @@ class NotificationService : Service() {
     suspend fun extractZip(zipFilePath: String, destinationPath: String) {
         try {
             withContext(Dispatchers.Main) {
-                showToastMessage("Zip extraction started")
+
+                showToastMessage(Constants.Extracting)
+
                 val intent22 = Intent(Constants.RECIVER_PROGRESS)
                 intent22.putExtra(Constants.SynC_Status, Constants.PR_Extracting)
                 sendBroadcast(intent22)
@@ -507,15 +445,17 @@ class NotificationService : Service() {
 
             withContext(Dispatchers.Main) {
                 stratMyACtivity()
-                showToastMessage("Zip completed")
+
+                showToastMessage(Constants.media_ready)
 
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                showToastMessage("Error during zip extraction")
+                showToastMessage(Constants.Error_during_zip_extraction)
                 stratMyACtivity()
+
             }
         }
     }
@@ -534,6 +474,7 @@ class NotificationService : Service() {
 
             lauchWebView = true
 
+          //  showToastMessage("Refresh Web View");
 
             val intent22 = Intent(Constants.RECIVER_PROGRESS)
             intent22.putExtra(Constants.SynC_Status, Constants.PR_running)
@@ -544,6 +485,18 @@ class NotificationService : Service() {
             editor.apply()
 
 
+            // also update the web-view right away
+            val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
+            sendBroadcast(intent)
+
+
+            // send to updte the timmer
+            val intent333 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+            sendBroadcast(intent333)
+
+            //   showToastMessage("send TM, DN")
+
+
         } catch (_: Exception) {
         }
     }
@@ -551,11 +504,6 @@ class NotificationService : Service() {
 
     private fun attemptRequestAgain(minutes: Long) {
         val milliseconds = minutes * 60 * 1000 // Convert minutes to
-
-        val editor = myDownloadClass.edit()
-        editor.putLong(Constants.SaVed_CN_Time, System.currentTimeMillis())
-        editor.apply()
-
 
         countdownTimer = object : CountDownTimer(milliseconds, 1000) {
             @SuppressLint("SetTextI18n")
@@ -565,9 +513,9 @@ class NotificationService : Service() {
 
                     if (lauchWebView == true) {
 
-                        // for loading webvuiew after sync
-                        val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
-                        sendBroadcast(intent)
+                        // for loading/refresh Webview after sync
+                        //  val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
+                        //  sendBroadcast(intent)
 
                         // for getting states
                         val intent22 = Intent(Constants.RECIVER_PROGRESS)
@@ -583,14 +531,18 @@ class NotificationService : Service() {
                         synReapeatTime()
                         lauchWebView = false
 
+                        val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                        sendBroadcast(intent)
+
                     } else {
-                        //  showToastMessage("Sync Already in Progress")
+                        showToastMessage("Sync Already in Progress")
+                        //  showToastMessage("DL error")
                         synReapeatTime()
 
                         val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent)
 
-
+                        val get_key = myDownloadClass.getLong(Constants.downloadKey, 0L)
                     }
 
                     attemptRequestAgain(minutes)
@@ -660,27 +612,49 @@ class NotificationService : Service() {
 
     private fun synReapeatTime() {
         val my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE)
-        val getTimeDefined = my_DownloadClass.getString(Constants.getTimeDefined, "")
-        if (getTimeDefined == Constants.t_2min) {
-            startOrResumeTimer(2)
-        } else if (getTimeDefined == Constants.t_5min) {
-            startOrResumeTimer(5)
-        } else if (getTimeDefined == Constants.t_10min) {
-            startOrResumeTimer(10)
-        } else if (getTimeDefined == Constants.t_15min) {
-            startOrResumeTimer(15)
-        } else if (getTimeDefined == Constants.t_30min) {
-            startOrResumeTimer(30)
-        } else if (getTimeDefined == Constants.t_60min) {
-            startOrResumeTimer(60)
-        } else if (getTimeDefined == Constants.t_120min) {
-            startOrResumeTimer(120)
-        } else if (getTimeDefined == Constants.t_180min) {
-            startOrResumeTimer(180)
-        } else if (getTimeDefined == Constants.t_240min) {
-            startOrResumeTimer(240)
-        } else if (getTimeDefined == Constants.Sync_interval_timer) {
-            startOrResumeTimer(1)
+
+        val getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0)
+
+        if (getTimeDefined != 0L) {
+            startOrResumeTimer(getTimeDefined)
+        }
+
+    }
+
+    private fun second_cancel_download() {
+        try {
+
+            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+            val getFolderClo = myDownloadClass.getString("getFolderClo", "")
+            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "")
+            val Zip = myDownloadClass.getString("Zip", "")
+            val fileName = myDownloadClass.getString("fileName", "")
+
+
+            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+
+            val directoryPath =
+                Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
+
+            val myFile = File(directoryPath, fileName.toString())
+            delete(myFile)
+
+
+            val query = DownloadManager.Query()
+            query.setFilterById(download_ref)
+            val c =
+                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                    query
+                )
+            if (c.moveToFirst()) {
+                manager!!.remove(download_ref)
+                val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                editor.remove(Constants.downloadKey)
+                editor.apply()
+
+            }
+        } catch (ignored: java.lang.Exception) {
         }
     }
 

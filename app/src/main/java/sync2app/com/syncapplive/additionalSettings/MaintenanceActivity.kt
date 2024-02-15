@@ -1,6 +1,7 @@
 package sync2app.com.syncapplive.additionalSettings
 
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -26,7 +27,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import sync2app.com.syncapplive.MyApplication
+import sync2app.com.syncapplive.SettingsActivity
 import sync2app.com.syncapplive.WebActivity
+import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityMaintenanceBinding
 import sync2app.com.syncapplive.databinding.CustomCrashReportBinding
@@ -72,10 +75,7 @@ class MaintenanceActivity : AppCompatActivity() {
         }, 700)
 
 
-        binding.actionBarRoot.setOnClickListener {
 
-            showToastMessage("Yes")
-        }
 
 
         binding.apply {
@@ -87,26 +87,26 @@ class MaintenanceActivity : AppCompatActivity() {
             /// enable the Auto Boot
             imagEnableDownloadStatus.setOnCheckedChangeListener { compoundButton, isValued -> // we are putting the values into SHARED PREFERENCE
                 if (compoundButton.isChecked) {
-                    editor.putString(Constants.imagEnableDownloadStatus, "imagEnableDownloadStatus")
+
+                    editor.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
                     editor.apply()
                     binding.textCheckDownloadStatus2.text = "Show Download Status"
 
                 } else {
-                    editor.remove(Constants.imagEnableDownloadStatus)
+                    editor.remove(Constants.showDownloadSyncStatus)
                     editor.apply()
                     binding.textCheckDownloadStatus2.text = "Hide Download Status"
                 }
             }
 
 
-            val get_imagEnableDownloadStatus =
-                sharedBiometric.getString(Constants.imagEnableDownloadStatus, "")
+            val get_imagEnableDownloadStatus = sharedBiometric.getString(Constants.showDownloadSyncStatus, "")
 
 
             imagEnableDownloadStatus.isChecked =
-                get_imagEnableDownloadStatus.equals(Constants.imagEnableDownloadStatus)
+                get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)
 
-            if (get_imagEnableDownloadStatus.equals(Constants.imagEnableDownloadStatus)) {
+            if (get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)) {
 
                 binding.textCheckDownloadStatus2.text = "Show Download Status"
 
@@ -123,7 +123,21 @@ class MaintenanceActivity : AppCompatActivity() {
 
 
             closeBs.setOnClickListener {
-                onBackPressed()
+
+                val get_navigationS2222 = sharedBiometric.getString(Constants.SAVE_NAVIGATION, "")
+
+                if (get_navigationS2222.equals(Constants.SettingsPage)) {
+                    val intent = Intent(applicationContext, SettingsActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                } else if (get_navigationS2222.equals(Constants.AdditionNalPage)) {
+                    val intent =
+                        Intent(applicationContext, AdditionalSettingsActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+
+
             }
 
             textView42.setOnClickListener {
@@ -411,10 +425,22 @@ class MaintenanceActivity : AppCompatActivity() {
     }
 
 
-    override fun onStart() {
-        super.onStart()
+    override fun onBackPressed() {
+        val get_navigationS2222 = sharedBiometric.getString(Constants.SAVE_NAVIGATION, "")
 
+        if (get_navigationS2222.equals(Constants.SettingsPage)) {
+            val intent = Intent(applicationContext, SettingsActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else if (get_navigationS2222.equals(Constants.AdditionNalPage)) {
+            val intent =
+                Intent(applicationContext, AdditionalSettingsActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
+
+
 
 
 }

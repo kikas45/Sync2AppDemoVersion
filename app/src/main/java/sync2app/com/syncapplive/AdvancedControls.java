@@ -42,6 +42,7 @@ public class AdvancedControls {
                 || !con_manager.getActiveNetworkInfo().isConnected());
     }
 
+/*
     public static void CompletionReciever(Context context) {
 
         constants.currentFileUri = FileProvider.getUriForFile(context, constants.AUTHORITY, new File(path
@@ -57,6 +58,7 @@ public class AdvancedControls {
         };
         context.registerReceiver(receiver, filter);
     }
+*/
 
     public static void DownloadFinishedAction(Context context) {
         try {

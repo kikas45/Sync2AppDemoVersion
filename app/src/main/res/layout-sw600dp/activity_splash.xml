@@ -11,6 +11,23 @@
     tools:ignore="ExtraText">
 
 
+
+    <ImageView
+        android:id="@+id/imageHelper"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:padding="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/deep_blue_light"
+        app:srcCompat="@drawable/ic_help_outline_24" />
+
+
+
     <ImageView
         android:id="@+id/splash_image"
         android:layout_width="80dp"

@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import sync2app.com.syncapplive.additionalSettings.CrashReportDB.CrashHandler;
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
+import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 
 
@@ -89,6 +90,7 @@ public class MyApplication extends MultiDexApplication {
         if (numberOfRunningActivities == 0) {
             // Stop the service
             instance.stopService(new Intent(instance.getApplicationContext(), NotificationService.class));
+            instance.stopService(new Intent(instance.getApplicationContext(), OnChnageService.class));
         }
     }
 

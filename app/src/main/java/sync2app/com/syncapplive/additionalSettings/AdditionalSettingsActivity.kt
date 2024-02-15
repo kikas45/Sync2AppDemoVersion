@@ -193,6 +193,12 @@ class AdditionalSettingsActivity : AppCompatActivity() {
             textMaintencePage.setOnClickListener {
                 val intent = Intent(applicationContext, MaintenanceActivity::class.java)
                 startActivity(intent)
+                finish()
+
+                val editor = sharedBiometric.edit()
+                editor.putString(Constants.SAVE_NAVIGATION, Constants.AdditionNalPage)
+                editor.apply()
+
             }
 
 

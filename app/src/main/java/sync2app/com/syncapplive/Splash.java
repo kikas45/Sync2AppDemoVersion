@@ -1,5 +1,6 @@
 package sync2app.com.syncapplive;
 
+import static sync2app.com.syncapplive.AdvancedControls.showToast;
 import static sync2app.com.syncapplive.WebActivity.hasPermissions;
 import static sync2app.com.syncapplive.constants.AllowOnlyHostUrlInApp;
 import static sync2app.com.syncapplive.constants.ChangeBottombarBgColor;
@@ -98,15 +99,21 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -121,6 +128,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.android.volley.Request;
@@ -140,6 +148,8 @@ import java.net.URISyntaxException;
 
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
+import sync2app.com.syncapplive.databinding.CustomHelperLayoutBinding;
+import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
 
 
 public class Splash extends AppCompatActivity {
@@ -158,8 +168,14 @@ public class Splash extends AppCompatActivity {
     ImageView imageView35;
     ImageView imagwifi2;
 
+    ImageView splash_image;
+    ImageView imageHelper;
 
     int clickcount = 0;
+
+    Handler handler;
+    private ConnectivityReceiver connectivityReceiver;
+
 
     @SuppressLint({"NewApi", "MissingInflatedId"})
     @Override
@@ -230,13 +246,25 @@ public class Splash extends AppCompatActivity {
         imagwifi = findViewById(R.id.imagwifi);
         imageView35 = findViewById(R.id.imageView35);
         imagwifi2 = findViewById(R.id.imagwifi2);
+        splash_image = findViewById(R.id.splash_image);
+        imageHelper = findViewById(R.id.imageHelper);
+
+        handler = new Handler(Looper.getMainLooper());
+        imageHelper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showToolHelpPiopUp();
+
+                //   Toast.makeText(Splash.this, "Please wait", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 
+        //   retryBtn.setTooltipText("Clicking on this three times will redirect you to the settings page or reconnect if the app Internet comes back.");
+        //  go_settings_Btn.setTooltipText("This will direct you to the settings page.");
+        //  gotWifisettings.setTooltipText("Check your WiFi connection by clicking on this button.");
+        //   goConnection.setTooltipText("This means that there is no network. You don't have an internet connection");
 
-        retryBtn.setTooltipText("Clicking on this three times will redirect you to the settings page or reconnect if the app Internet comes back.");
-        go_settings_Btn.setTooltipText("This will direct you to the settings page.");
-        gotWifisettings.setTooltipText("Check your WiFi connection by clicking on this button.");
-        goConnection.setTooltipText("This means that there is no network. You don't have an internet connection");
 
         int deepBlue = getResources().getColor(R.color.white);
         int deepRed = getResources().getColor(R.color.red);
@@ -253,7 +281,6 @@ public class Splash extends AppCompatActivity {
         colorAnimator.start();
 
 
-
         // Create ObjectAnimator for color change
         ObjectAnimator colorAnimator22 = ObjectAnimator.ofInt(imagwifi2, "colorFilter", deepBlue, deepRed);
 
@@ -263,7 +290,6 @@ public class Splash extends AppCompatActivity {
         colorAnimator22.setRepeatMode(ValueAnimator.REVERSE);
         colorAnimator22.setDuration(900); // Adjust the duration as needed
         colorAnimator22.start();
-
 
 
         go_settings_Btn.setOnClickListener(new View.OnClickListener() {
@@ -284,8 +310,6 @@ public class Splash extends AppCompatActivity {
                 Toast.makeText(Splash.this, "Please wait", Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
 
         String splashLoadStatus = preferences.getString("splashStarted", null);
@@ -321,7 +345,7 @@ public class Splash extends AppCompatActivity {
 //
 //
 //        view.startAnimation(animation);
-        int SPLASH_TIME_OUT = 1300;
+/*        int SPLASH_TIME_OUT = 1300;
 
 
         new Handler().postDelayed(new Runnable() {
@@ -332,16 +356,19 @@ public class Splash extends AppCompatActivity {
 
             }
         }, SPLASH_TIME_OUT);
+        */
+
+
     }
-
-
 
 
     public static void deleteCache(Context context) {
         try {
             File dir = context.getCacheDir();
             deleteDir(dir);
-        } catch (Exception e) { e.printStackTrace();}
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean deleteDir(File dir) {
@@ -354,13 +381,12 @@ public class Splash extends AppCompatActivity {
                 }
             }
             return dir.delete();
-        } else if(dir!= null && dir.isFile()) {
+        } else if (dir != null && dir.isFile()) {
             return dir.delete();
         } else {
             return false;
         }
     }
-
 
 
     private static int clearCacheFolder(final File dir) {
@@ -377,7 +403,7 @@ public class Splash extends AppCompatActivity {
                         deletedFiles++;
                     }
                 }
-            } catch (Exception e) {
+            } catch ( Exception e ) {
                 // Log the exception
                 e.printStackTrace();
             }
@@ -386,14 +412,12 @@ public class Splash extends AppCompatActivity {
     }
 
 
-
-
-
-
     public void ApiCall(Context context, String url) {
 
         infotext.setText(R.string.connecting);
         progressBar.setVisibility(View.VISIBLE);
+
+
         RequestQueue queue = Volley.newRequestQueue(context);
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -551,7 +575,7 @@ public class Splash extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
 
-                                if (EnableWelcomeSlider ) {
+                                if (EnableWelcomeSlider) {
                                     Intent myactivity = new Intent(Splash.this, WelcomeSlider.class);
                                     startActivity(myactivity);
                                     finish();
@@ -560,12 +584,12 @@ public class Splash extends AppCompatActivity {
 
                                     String getTvMode = sharedBiometric.getString(Constants.CALL_RE_SYNC_MANGER, "");
 
-                                    if (getTvMode.equals(Constants.CALL_RE_SYNC_MANGER)){
+                                    if (getTvMode.equals(Constants.CALL_RE_SYNC_MANGER)) {
                                         Intent myactivity = new Intent(Splash.this, ReSyncActivity.class);
                                         myactivity.putExtra("url", jsonUrl);
                                         startActivity(myactivity);
                                         finish();
-                                    }else{
+                                    } else {
                                         Intent myactivity = new Intent(Splash.this, WebActivity.class);
                                         myactivity.putExtra("url", jsonUrl);
                                         startActivity(myactivity);
@@ -603,86 +627,88 @@ public class Splash extends AppCompatActivity {
                                     imagwifi.setVisibility(View.VISIBLE);
                                 }
 
-                            if (imageView35.getVisibility() == View.GONE) {
-                                imageView35.setVisibility(View.VISIBLE);
-                            }
-                            if (imagwifi2.getVisibility() == View.GONE) {
-                                imagwifi2.setVisibility(View.VISIBLE);
+                                if (imageView35.getVisibility() == View.GONE) {
+                                    imageView35.setVisibility(View.VISIBLE);
+                                }
+                                if (imagwifi2.getVisibility() == View.GONE) {
+                                    imagwifi2.setVisibility(View.VISIBLE);
+                                }
+                                if (imageHelper.getVisibility() == View.GONE) {
+                                    imageHelper.setVisibility(View.VISIBLE);
+                                }
+
+
                             }
 
 
+                        } catch (
+                                JSONException e ) {
+                            e.printStackTrace();
+                            infotext.setText(e.getMessage());
                         }
 
-
-                    } catch(
-                    JSONException e )
-
-                    {
-                        e.printStackTrace();
-                        infotext.setText(e.getMessage());
                     }
 
+
+                }, new Response.ErrorListener() {
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                infotext.setText("Error occurred! =" + error.toString());
+                progressBar.setVisibility(View.GONE);
+
+                if (retryBtn.getVisibility() == View.GONE) {
+                    retryBtn.setVisibility(View.VISIBLE);
+                }
+
+                if (go_settings_Btn.getVisibility() == View.GONE) {
+                    go_settings_Btn.setVisibility(View.VISIBLE);
+                }
+
+                if (goConnection.getVisibility() == View.GONE) {
+                    goConnection.setVisibility(View.VISIBLE);
+                }
+
+                if (gotWifisettings.getVisibility() == View.GONE) {
+                    gotWifisettings.setVisibility(View.VISIBLE);
                 }
 
 
-    },new Response.ErrorListener()
+                if (imageView34.getVisibility() == View.GONE) {
+                    imageView34.setVisibility(View.VISIBLE);
+                }
+                if (imagwifi.getVisibility() == View.GONE) {
+                    imagwifi.setVisibility(View.VISIBLE);
+                }
 
-    {
-        @SuppressLint("SetTextI18n")
-        @Override
-        public void onErrorResponse (VolleyError error){
-        infotext.setText("Error occurred! =" + error.toString());
-        progressBar.setVisibility(View.GONE);
+                if (imageView35.getVisibility() == View.GONE) {
+                    imageView35.setVisibility(View.VISIBLE);
+                }
 
-        if (retryBtn.getVisibility() == View.GONE) {
-            retryBtn.setVisibility(View.VISIBLE);
-        }
-
-        if (go_settings_Btn.getVisibility() == View.GONE) {
-            go_settings_Btn.setVisibility(View.VISIBLE);
-        }
-
-        if (goConnection.getVisibility() == View.GONE) {
-            goConnection.setVisibility(View.VISIBLE);
-        }
-
-        if (gotWifisettings.getVisibility() == View.GONE) {
-            gotWifisettings.setVisibility(View.VISIBLE);
-        }
+                if (imagwifi2.getVisibility() == View.GONE) {
+                    imagwifi2.setVisibility(View.VISIBLE);
+                }
 
 
-        if (imageView34.getVisibility() == View.GONE) {
-            imageView34.setVisibility(View.VISIBLE);
-        }
-        if (imagwifi.getVisibility() == View.GONE) {
-            imagwifi.setVisibility(View.VISIBLE);
-        }
-
-        if (imageView35.getVisibility() == View.GONE) {
-            imageView35.setVisibility(View.VISIBLE);
-        }
-
-        if (imagwifi2.getVisibility() == View.GONE) {
-            imagwifi2.setVisibility(View.VISIBLE);
-        }
+                if (imageHelper.getVisibility() == View.GONE) {
+                    imageHelper.setVisibility(View.VISIBLE);
+                }
 
 
-    }
-    });
+            }
+        });
 
 
 // Add the request to the RequestQueue.
         queue.add(stringRequest);
 
-        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>()
-
-    {
-        @Override
-        public void onRequestFinished (Request < Object > request) {
-        queue.getCache().clear();
+        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
+            @Override
+            public void onRequestFinished(Request<Object> request) {
+                queue.getCache().clear();
+            }
+        });
     }
-    });
-}
 
     public void retryCall(View view) {
         clickcount++;
@@ -722,10 +748,150 @@ public class Splash extends AppCompatActivity {
                 imageView35.setVisibility(View.GONE);
 
 
-            }  if (imagwifi2.getVisibility() == View.VISIBLE) {
+            }
+            if (imagwifi2.getVisibility() == View.VISIBLE) {
                 imagwifi2.setVisibility(View.GONE);
+            }
+
+
+            if (imageHelper.getVisibility() == View.VISIBLE) {
+                imageHelper.setVisibility(View.GONE);
             }
         }
     }
+
+    @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
+    private void showToolHelpPiopUp() {
+
+        CustomHelperLayoutBinding binding = CustomHelperLayoutBinding.inflate(getLayoutInflater());
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(binding.getRoot());
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setCanceledOnTouchOutside(true);
+        alertDialog.setCancelable(true);
+
+
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+
+        // TextView textDescription = binding.textDescription;
+
+        //  textDescription.setText(message);
+
+
+        alertDialog.show();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        connectivityReceiver = new ConnectivityReceiver();
+
+        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(connectivityReceiver, intentFilter);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(connectivityReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //  unregisterReceiver(connectivityReceiver);
+
+
+    }
+
+    public class ConnectivityReceiver extends BroadcastReceiver {
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            try {
+                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+
+                    try {
+
+                        int SPLASH_TIME_OUT = 1300;
+
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                              try {
+
+                                  ApiCall(Splash.this, Jsonurl);
+                                  progressBar.setVisibility(View.VISIBLE);
+
+
+                                  retryBtn.setVisibility(View.GONE);
+                                  go_settings_Btn.setVisibility(View.GONE);
+                                  gotWifisettings.setVisibility(View.GONE);
+                                  goConnection.setVisibility(View.GONE);
+                                  imageView34.setVisibility(View.GONE);
+                                  imagwifi.setVisibility(View.GONE);
+                                  imageView35.setVisibility(View.GONE);
+                                  imagwifi2.setVisibility(View.GONE);
+
+                                  splash_image.setVisibility(View.VISIBLE);
+                                  imageHelper.setVisibility(View.GONE);
+
+
+                              }catch ( Exception e ){}
+
+                            }
+                        }, SPLASH_TIME_OUT);
+
+
+                    } catch ( Exception ignored ) {
+                    }
+
+
+                } else {
+
+                    // No internet Connection
+                    try {
+                        infotext.setText("No Internet Connection");
+                        progressBar.setVisibility(View.GONE);
+
+
+                        retryBtn.setVisibility(View.VISIBLE);
+                        go_settings_Btn.setVisibility(View.VISIBLE);
+                        gotWifisettings.setVisibility(View.VISIBLE);
+                        goConnection.setVisibility(View.VISIBLE);
+                        imageView34.setVisibility(View.VISIBLE);
+                        imagwifi.setVisibility(View.VISIBLE);
+                        imageView35.setVisibility(View.VISIBLE);
+                        imagwifi2.setVisibility(View.VISIBLE);
+
+                        splash_image.setVisibility(View.VISIBLE);
+                        imageHelper.setVisibility(View.VISIBLE);
+
+
+                    } catch ( Exception e ) {
+                    }
+
+                }
+
+                // No internet Connection
+
+
+            } catch ( Exception ignored ) {
+            }
+        }
+
+    }
+
+
 }
 

@@ -2,11 +2,14 @@ package sync2app.com.syncapplive.additionalSettings
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -159,8 +162,8 @@ class SystemInfoActivity : AppCompatActivity() {
 
                                     binding.textBtnhardWareAprroved.setBackgroundResource(R.drawable.round_edit_text_solid_green_design)
                                     binding.textBtnhardWareAprroved.text = "HARDWARE APPROVED"
-                                    binding.imageNotApproved!!.visibility = View.INVISIBLE
-                                    binding.imageApproved!!.visibility = View.VISIBLE
+                                    binding.imageNotApproved.visibility = View.INVISIBLE
+                                    binding.imageApproved.visibility = View.VISIBLE
 
                                     editor.putString("deviceName", device.deviceName)
                                     editor.putString("manufacturer", device.manufacturer)
@@ -256,16 +259,24 @@ class SystemInfoActivity : AppCompatActivity() {
             textBuildNumber2.text =   Build.DISPLAY
 
 
-//            imageCheckDevice.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageModel.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageManufactuer.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageBrand.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageOsVersion.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageSDK.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-//            imageBuildNumber.setBackgroundResource(R.drawable.ic_failed_hardware_circle)
-
-
             textContinuPassword2.setOnClickListener {
+                alertDialog.dismiss()
+            }
+
+            textShareApp.setOnClickListener {
+
+                val deviceInfoBuilder = StringBuilder()
+                deviceInfoBuilder.append("Device name: ").append(Build.DEVICE).append("\n")
+                deviceInfoBuilder.append("Model: ").append(Build.MODEL).append("\n")
+                deviceInfoBuilder.append("Manufacturer: ").append(Build.MANUFACTURER).append("\n")
+                deviceInfoBuilder.append("Brand: ").append(Build.BRAND).append("\n")
+                deviceInfoBuilder.append("OS Version: ").append(Build.VERSION.RELEASE).append("\n")
+                deviceInfoBuilder.append("SDK Version: ").append(Build.VERSION.SDK_INT).append("\n")
+                deviceInfoBuilder.append("Build Number: ").append(Build.DISPLAY).append("\n")
+
+                val deviceInformation = deviceInfoBuilder.toString()
+
+                sendShareData(deviceInformation)
                 alertDialog.dismiss()
             }
 
@@ -307,28 +318,6 @@ class SystemInfoActivity : AppCompatActivity() {
 
         binding.apply {
 
-//            val deviceInfoBuilder = StringBuilder()
-//            deviceInfoBuilder.append("Device name: ").append(Build.DEVICE).append("\n")
-//            deviceInfoBuilder.append("Model: ").append(Build.MODEL).append("\n")
-//            deviceInfoBuilder.append("Manufacturer: ").append(Build.MANUFACTURER).append("\n")
-//            deviceInfoBuilder.append("Brand: ").append(Build.BRAND).append("\n")
-//            deviceInfoBuilder.append("OS Version: ").append(Build.VERSION.RELEASE).append("\n")
-//            deviceInfoBuilder.append("SDK Version: ").append(Build.VERSION.SDK_INT).append("\n")
-//            deviceInfoBuilder.append("Build Number: ").append(Build.DISPLAY).append("\n")
-//
-//            val deviceInformation = deviceInfoBuilder.toString()
-
-
-            /// textDeviceName.text = "Device name: $deviceName"
-            //  textModel.text = "Model: $brand"
-//            textManufacturer.text =  "Manufacturer: $brand"
-//            textBrand.text = "Brand: $brand"
-//            textOsVersion.text = "OS Version: $osVersion"
-//            textSdkVersion.text = "SDK Version: $sdkVersion"
-//            textBuildNumber.text = "Build Number: $buildNumber"
-
-
-            //  textDeviceName3.text = Build.DEVICE + ""
 
             if ( deviceName.equals(Build.DEVICE + "") ) {
                 textDeviceName3.text = deviceName
@@ -465,22 +454,6 @@ class SystemInfoActivity : AppCompatActivity() {
 
         binding.apply {
 
-
-//            val deviceInfoBuilder = StringBuilder()
-//            deviceInfoBuilder.append("Device name: ").append(deviceName).append("\n")
-//            deviceInfoBuilder.append("Model: ").append(model).append("\n")
-//            deviceInfoBuilder.append("Manufacturer: ").append(manufacturer).append("\n")
-//            deviceInfoBuilder.append("Brand: ").append(brand).append("\n")
-//            deviceInfoBuilder.append("OS Version: ").append(osVersion).append("\n")
-//            deviceInfoBuilder.append("SDK Version: ").append(sdkVersion).append("\n")
-//            deviceInfoBuilder.append("Build Number: ").append(buildNumber).append("\n")
-//
-//            val deviceInformation = deviceInfoBuilder.toString()
-//
-//            Log.d("DeviceInfo", deviceInformation)
-
-            //           textDisplayResult.text = deviceInformation
-
             textDeviceName3.text = deviceName
             textModel3.text = model
             textManufacturer2.text = manufacturer
@@ -493,6 +466,27 @@ class SystemInfoActivity : AppCompatActivity() {
             textContinuPassword2.setOnClickListener {
                 alertDialog.dismiss()
             }
+
+
+
+
+            textShareApp.setOnClickListener {
+
+                val deviceInfoBuilder = StringBuilder()
+                deviceInfoBuilder.append("Device name: ").append(deviceName).append("\n")
+                deviceInfoBuilder.append("Model: ").append(model).append("\n")
+                deviceInfoBuilder.append("Manufacturer: ").append(manufacturer).append("\n")
+                deviceInfoBuilder.append("Brand: ").append(brand).append("\n")
+                deviceInfoBuilder.append("OS Version: ").append(osVersion).append("\n")
+                deviceInfoBuilder.append("SDK Version: ").append(sdkVersion).append("\n")
+                deviceInfoBuilder.append("Build Number: ").append(buildNumber).append("\n")
+
+                val deviceInformation = deviceInfoBuilder.toString()
+
+                sendShareData(deviceInformation)
+                alertDialog.dismiss()
+            }
+
 
         }
 
@@ -527,10 +521,39 @@ class SystemInfoActivity : AppCompatActivity() {
 
     }
 
-    override fun onStart() {
-        super.onStart()
+    fun sendShareData(crashMessage: String?) {
+        //  val email = "kola@moreadvice.co.uk"
+        val email = "support@syn2app.com"
+        val subject = "Crash Report"
 
+        val uriText = "mailto:" + Uri.encode(email) +
+                "?subject=" + Uri.encode(subject) +
+                "&body=" + Uri.encode(crashMessage)
+
+        val uri = Uri.parse(uriText)
+
+        // Intent for sending text
+        val sendIntent = Intent()
+        sendIntent.action = Intent.ACTION_SEND
+        sendIntent.putExtra(Intent.EXTRA_TEXT, crashMessage)
+        sendIntent.type = "text/plain"
+
+        // Intent for sending email
+        val emailIntent = Intent(Intent.ACTION_SENDTO)
+        emailIntent.data = uri
+
+        // Create a chooser with both intents
+        val chooserIntent = Intent.createChooser(sendIntent, "Send message via:")
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(emailIntent))
+
+        try {
+            startActivity(chooserIntent)
+        } catch (e: ActivityNotFoundException) {
+            // Handle case where no email app is available
+            Toast.makeText(this, "No email app found", Toast.LENGTH_SHORT).show()
+        }
     }
+
 
 
 

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.Dialog
 import android.app.DownloadManager
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -19,10 +18,11 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.MediaStore
+import android.os.PowerManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -34,13 +34,16 @@ import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
+import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
+import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityDownlodPaggerBinding
 import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding
 import java.io.File
 import java.io.FileInputStream
 import java.util.Objects
 import java.util.zip.ZipInputStream
+
 
 class DownlodPagger : AppCompatActivity() {
     private lateinit var binding: ActivityDownlodPaggerBinding
@@ -67,8 +70,8 @@ class DownlodPagger : AppCompatActivity() {
     }
 
 
-
-
+    private var powerManager: PowerManager? = null
+    private var wakeLock: PowerManager.WakeLock? = null
 
 
     private val sharedP: SharedPreferences by lazy {
@@ -81,11 +84,19 @@ class DownlodPagger : AppCompatActivity() {
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "WakelockTimeout")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDownlodPaggerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        powerManager = getSystemService(POWER_SERVICE) as PowerManager
+        wakeLock = powerManager!!.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourApp::MyWakelockTag")
+        wakeLock!!.acquire()
+
+
+
 
         manager = getApplicationContext()
             .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
@@ -120,7 +131,7 @@ class DownlodPagger : AppCompatActivity() {
 
             imageResumeDownload.setOnClickListener {
                 resumeDownload()
-                showToastMessage("Resuming..")
+                showToastMessage("Please wait")
 
             }
 
@@ -236,7 +247,8 @@ class DownlodPagger : AppCompatActivity() {
             }
 
             DownloadManager.STATUS_PAUSED -> {
-                msg = "Resume"
+               // msg = "Resume"
+                msg = "Paused"
                 binding.imagePauseDownload.visibility = View.INVISIBLE
                 binding.imageResumeDownload.visibility = View.VISIBLE
                 isValid = true
@@ -321,12 +333,19 @@ class DownlodPagger : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     override fun onResume() {
         super.onResume()
-        getDownloadStatus()
 
         try {
             if (myHandler != null) {
                 myHandler!!.removeCallbacks(runnable)
             }
+
+            getDownloadStatus()
+
+
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+
+
         } catch (ignored: java.lang.Exception) {
         }
         if (myHandler != null) {
@@ -360,6 +379,13 @@ class DownlodPagger : AppCompatActivity() {
                 myHandler!!.removeCallbacks(runnable)
             }
 
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+
+            if (wakeLock != null && wakeLock!!.isHeld) {
+                wakeLock!!.release()
+            }
+
         } catch (ignored: java.lang.Exception) {
         }
     }
@@ -372,9 +398,40 @@ class DownlodPagger : AppCompatActivity() {
             }
 
             MyApplication.decrementRunningActivities()
+
+
+           second_cancel_download2222()
+
+
+            if (wakeLock != null && wakeLock!!.isHeld) {
+                wakeLock!!.release()
+            }
+
+
         } catch (ignored: java.lang.Exception) {
         }
     }
+
+    private fun second_cancel_download2222() {
+
+            try {
+
+                val download_ref: Long = sharedP.getLong(Constants.downloadKey, -15)
+
+                val query = DownloadManager.Query()
+                query.setFilterById(download_ref)
+                val c =
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+                if (c.moveToFirst()) {
+                    manager!!.remove(download_ref)
+                    val editor: SharedPreferences.Editor = sharedP.edit()
+                    editor.remove(Constants.downloadKey)
+                    editor.apply()
+                }
+            } catch (ignored: java.lang.Exception) {
+            }
+        }
+
 
 
 
@@ -421,7 +478,7 @@ class DownlodPagger : AppCompatActivity() {
     suspend fun extractZip(zipFilePath: String, destinationPath: String) {
         try {
             withContext(Dispatchers.Main) {
-                showToastMessage("Zip extraction started")
+                showToastMessage(Constants.Extracting)
             }
 
             val buffer = ByteArray(1024)
@@ -469,13 +526,13 @@ class DownlodPagger : AppCompatActivity() {
 
             withContext(Dispatchers.Main) {
                 stratMyACtivity()
-                showToastMessage("Zip completed")
+                showToastMessage(Constants.media_ready)
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
             withContext(Dispatchers.Main) {
-                showToastMessage("Error during zip extraction")
+                showToastMessage(Constants.Error_during_zip_extraction)
                 stratMyACtivity()
             }
         }
@@ -491,13 +548,29 @@ class DownlodPagger : AppCompatActivity() {
         try {
        handler.postDelayed(Runnable {
 
-           val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+  /*         val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
 
            if (get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)){
                if (!foregroundServiceRunning()) {
                    applicationContext.startService(Intent(applicationContext, NotificationService::class.java))
                } else {
                    applicationContext.stopService(Intent(applicationContext, NotificationService::class.java))
+               }
+           }
+*/
+
+
+           val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+
+           if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+               stopService(Intent(applicationContext, OnChnageService::class.java))
+               if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                   startService(Intent(applicationContext, NotificationService::class.java))
+               }
+           } else {
+               stopService(Intent(applicationContext, NotificationService::class.java))
+               if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                   startService(Intent(applicationContext, OnChnageService::class.java))
                }
            }
 
@@ -684,26 +757,6 @@ private fun showToastMessage(messages: String) {
         }
         return false
     }
-
-
-
-
-
-    private fun foregroundServiceRunning(): Boolean {
-        val activityManager = (getSystemService(ACTIVITY_SERVICE) as ActivityManager)!!
-        val runningServices = activityManager!!.getRunningServices(Int.MAX_VALUE)
-        for (service in runningServices) {
-            if (NotificationService::class.java.name == service.service.className) {
-                return true
-            }
-        }
-        return false
-    }
-
-
-
-
-
 
 
 

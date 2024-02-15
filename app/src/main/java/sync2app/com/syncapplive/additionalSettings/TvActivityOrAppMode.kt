@@ -120,6 +120,8 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 if (checkMultiplePermission()) {
                     doOperation()
                 }
+
+
             }
 
             textTvMode.setOnClickListener {
@@ -127,6 +129,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 if (checkMultiplePermission()) {
                     doOperation()
                 }
+
             }
 
         }
@@ -284,9 +287,10 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
-                editor.putString(Constants.FIRST_CONFIG, Constants.FIRST_CONFIG)
                 editor.apply()
                 finish()
+
+                showToastMessage("Please wait")
 
 
             }
@@ -303,9 +307,10 @@ class TvActivityOrAppMode : AppCompatActivity() {
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.TV_Mode)
                 editor.putString(Constants.CALL_RE_SYNC_MANGER, Constants.CALL_RE_SYNC_MANGER)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
-                editor.putString(Constants.FIRST_CONFIG, Constants.FIRST_CONFIG)
                 editor.apply()
                 finish()
+
+                showToastMessage("Please wait")
 
             }
 

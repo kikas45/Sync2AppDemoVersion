@@ -47,7 +47,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             editor.putString(Constants.crashInfo, "" + crashInfo);
             editor.putString(Constants.crashCalled, Constants.crashCalled);
             editor.apply();
-            showToast("We are sorry System Crashed, Please close App");
+            showToast("We are sorry Please Go to Maintenance Page to Send Crash");
             // showAlertDialog();
         }
     }

@@ -15,7 +15,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import sync2app.com.syncapplive.BuildConfig
 import sync2app.com.syncapplive.additionalSettings.utils.Constants.Companion.MANAGE_EXTERNAL_STORAGE_PERMISSION
-import sync2app.com.syncapplive.additionalSettings.utils.Constants.Companion.MANAGE_EXTERNAL_STORAGE_PERMISSION_REQUEST
 import sync2app.com.syncapplive.additionalSettings.utils.Constants.Companion.NOT_APPLICABLE
 import sync2app.com.syncapplive.additionalSettings.utils.Constants.Companion.READ_EXTERNAL_STORAGE_PERMISSION_REQUEST
 

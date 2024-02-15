@@ -50,8 +50,8 @@
 
 
     <string name="go_parent_label">"⬆️ Parent folder"</string>
-    <string name="folder_item">⬆️ %1$s</string>
-    <string name="file_item">⬆️ %1$s</string>
+    <string name="folder_item">🗂️ %1$s</string>
+    <string name="file_item">📄 %1$s</string>
     <string name="permission_rationale_message">Syn2App need your permission to access your files\n for app to function properly</string>
     <string name="permission_request_label">Give permission</string>
     <string name="legacy_external_storage_warning_message">You need to enable the <b>requestLegacyExternalStorage</b>\n flag in the AndroidManifest.xml file</string>

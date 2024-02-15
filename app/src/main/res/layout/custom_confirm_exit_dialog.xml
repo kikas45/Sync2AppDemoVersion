@@ -54,15 +54,15 @@
             android:id="@+id/textView4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="8dp"
             android:elegantTextHeight="true"
             android:fontFamily="sans-serif-medium"
             android:gravity="center|start"
             android:text="Enter Password"
             android:textColor="@color/black"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/imgWifi"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/imgMaintainace"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -77,7 +77,7 @@
             android:background="@android:color/transparent"
             android:hint="Enter password"
             android:inputType="textPassword"
-            android:paddingStart="24dp"
+            android:paddingStart="7dp"
             android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -97,12 +97,12 @@
 
         <ImageView
             android:id="@+id/imgToggle"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?selectableItemBackground"
-            android:padding="11dp"
+            android:padding="7dp"
             android:src="@drawable/ic_icon_visibile"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/editTextText2"
@@ -113,12 +113,12 @@
 
         <ImageView
             android:id="@+id/imgToggleNzotVisible"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?selectableItemBackground"
-            android:padding="11dp"
+            android:padding="7dp"
             android:src="@drawable/ic_visibility_24"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@+id/imgToggle"
@@ -347,8 +347,8 @@
 
         <ImageView
             android:id="@+id/imagePassowrdSettings"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
             android:layout_marginEnd="10dp"
             android:clickable="true"
             android:focusable="true"
@@ -362,8 +362,8 @@
 
         <ImageView
             android:id="@+id/imgClearCatch"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:selectableItemBackground"
@@ -376,8 +376,8 @@
 
         <ImageView
             android:id="@+id/imgWifi"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:selectableItemBackground"
@@ -386,6 +386,20 @@
             app:layout_constraintEnd_toStartOf="@+id/imgClearCatch"
             app:layout_constraintTop_toTopOf="@+id/textView4"
             app:srcCompat="@drawable/error_wifi"
+            app:tint="#504C4C" />
+
+        <ImageView
+            android:id="@+id/imgMaintainace"
+            android:layout_width="33dp"
+            android:layout_height="33dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:selectableItemBackground"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/textView4"
+            app:layout_constraintEnd_toStartOf="@+id/imgWifi"
+            app:layout_constraintTop_toTopOf="@+id/textView4"
+            app:srcCompat="@drawable/ic_maintence_24"
             app:tint="#504C4C" />
 
 

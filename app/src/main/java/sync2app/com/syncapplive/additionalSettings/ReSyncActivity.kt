@@ -7,10 +7,8 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.app.DownloadManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
@@ -20,7 +18,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -31,23 +28,24 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import sync2app.com.syncapplive.AdvancedControls
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.SettingsActivity
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.DownloadsArray.list.DownlodPagger
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
+import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.SavedHistoryListAdapter
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.UserViewModel
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.urlchecks.isUrlValid
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
+import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivitySyncPowellBinding
 import sync2app.com.syncapplive.databinding.CustomContinueDownloadLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomDefinedTimeIntervalsBinding
@@ -72,27 +70,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private lateinit var customSavedDownloadDialog: Dialog
 
 
-    //  private var randNumber = "" + System.currentTimeMillis()
-
-
     private val baseUrl222 =
         "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
-
-
-    private val multiplePermissionId = 14
-    private val multiplePermissionNameList = if (Build.VERSION.SDK_INT >= 33) {
-        arrayListOf(
-            android.Manifest.permission.READ_MEDIA_AUDIO,
-            android.Manifest.permission.READ_MEDIA_VIDEO,
-            android.Manifest.permission.READ_MEDIA_IMAGES
-
-        )
-    } else {
-        arrayListOf(
-            android.Manifest.permission.READ_EXTERNAL_STORAGE,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        )
-    }
 
 
     private var urlIndex =
@@ -117,18 +96,20 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
     private var rootfolder = "Downloads"
 
+    private var Minutes = " Minutes"
+
 
     private var getTimeDefined_Prime = ""
     private var timeMinuetesDefined = "Sync interval timer"
-    private var timeMinuetes22 = "2 Minutes"
-    private var timeMinuetes55 = "5 Minutes"
-    private var timeMinuetes10 = "10 Minutes"
-    private var timeMinuetes15 = "15 Minutes"
-    private var timeMinuetes30 = "30 Minutes"
-    private var timeMinuetes60 = "60 Minutes"
-    private var timeMinuetes120 = "120 Minutes"
-    private var timeMinuetes180 = "180 Minutes"
-    private var timeMinuetes240 = "240 Minutes"
+    private var timeMinuetes22 = 2L
+    private var timeMinuetes55 = 5L
+    private var timeMinuetes10 = 10L
+    private var timeMinuetes15 = 15L
+    private var timeMinuetes30 = 30L
+    private var timeMinuetes60 = 60L
+    private var timeMinuetes120 = 120L
+    private var timeMinuetes180 = 180L
+    private var timeMinuetes240 = 240L
 
 
     private val sharedBiometric: SharedPreferences by lazy {
@@ -153,13 +134,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         Handler(Looper.getMainLooper())
     }
 
-    private val myInterVals: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
 
-    private val myHandler: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
 
     var preferences: SharedPreferences? = null
 
@@ -207,12 +182,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             binding.textTitle.setOnClickListener {
-                applicationContext.stopService(
-                    Intent(
-                        applicationContext,
-                        NotificationService::class.java
-                    )
-                )
+                applicationContext.stopService(Intent(applicationContext, OnChnageService::class.java))
             }
 
 
@@ -228,9 +198,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             textDownloadZipSyncOrApiSyncNow.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
-                if (checkMultiplePermission()) {
-                    doOperation()
-                }
+                testAndDownLoadZipConnection()
 
             }
 
@@ -240,7 +208,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             closeBs.setOnClickListener {
 
-                val getStateNaviagtion = sharedBiometric.getString(Constants.CALL_RE_SYNC_MANGER, "")
+                val getStateNaviagtion =
+                    sharedBiometric.getString(Constants.CALL_RE_SYNC_MANGER, "")
 
                 val get_navigationS2222 = sharedBiometric.getString(Constants.SAVE_NAVIGATION, "")
 
@@ -342,6 +311,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             binding.textLoading.text = message
 
+            binding.imgCloseDialog.setOnClickListener {
+                customProgressDialog.cancel()
+            }
+
             customProgressDialog.show()
         } catch (_: Exception) {
         }
@@ -366,15 +339,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                     getFolderSubpath
                                 )
                                 editor.apply()
-
-                                // save also to room data base
-                                val user =
-                                    User(
-                                        CLO = getFolderClo,
-                                        DEMO = getFolderSubpath,
-                                        EditUrl = ""
-                                    )
-                                mUserViewModel.addUser(user)
 
                             } else {
                                 editTextCLOpath.error = "Input a valid path e.g CLO"
@@ -411,8 +375,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                     editInputUrl
                                 )
                                 editor.apply()
-                                val user = User(CLO = "", DEMO = "", EditUrl = editInputUrl)
-                                mUserViewModel.addUser(user)
                             } else {
                                 showToastMessage("Invalid url format")
                                 binding.editTextInputSynUrlZip.error = "Invalid url format"
@@ -453,6 +415,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 getFolderSubpath,
                                 "Successful"
                             )
+
+                            // save also to room data base
+                            val user =
+                                User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                            mUserViewModel.addUser(user)
+
                         } else {
                             showPopsForMyConnectionTest(
                                 getFolderClo,
@@ -481,6 +453,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 getFolderSubpath,
                                 "Successful"
                             )
+
+                            val user =
+                                User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                            mUserViewModel.addUser(user)
+
+
                         } else {
                             showPopsForMyConnectionTest(
                                 getFolderClo,
@@ -518,6 +500,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             fileNameWithoutExtension,
                             "Successful"
                         )
+
+                        val user = User(CLO = "", DEMO = "", EditUrl = baseUrl33)
+                        mUserViewModel.addUser(user)
+
+
                     } else {
 
                         showPopsForMyConnectionTest("CLO", fileNameWithoutExtension, "Failed!")
@@ -711,11 +698,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 textSyncOnFileChangeIntervals.setText("Download on Intervals")
             } else {
                 textSyncOnFileChangeIntervals.setText("Download on change")
-                applicationContext.stopService(
-                    Intent(
-                        applicationContext,
-                        NotificationService::class.java
-                    )
+                applicationContext.stopService(Intent(applicationContext, NotificationService::class.java)
+
                 )
 
             }
@@ -723,28 +707,72 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             imagSwtichEnableSyncOnFilecahnge.setOnCheckedChangeListener { compoundButton, isValued ->
                 val editor = sharedBiometric.edit()
+
                 if (compoundButton.isChecked) {
-                    editor.putString(Constants.imagSwtichEnableSyncOnFilecahnge, "imagSwtichEnableSyncOnFilecahnge")
-                    editor.putString(Constants.imagEnableDownloadStatus, "imagEnableDownloadStatus")
+                    editor.putString(
+                        Constants.imagSwtichEnableSyncOnFilecahnge,
+                        "imagSwtichEnableSyncOnFilecahnge"
+                    )
+                    editor.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
 
                     editor.apply()
                     textSyncOnFileChangeIntervals.setText("Download on Intervals")
 
 
+                    val fil_CLO: String = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+                    val fil_DEMO: String = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+
+                    if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+
+                        if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                            stopService(Intent(applicationContext, OnChnageService::class.java))
+                            startService(Intent(applicationContext, NotificationService::class.java))
+
+                            val editorM = myDownloadClass.edit()
+                            editorM.remove(Constants.SynC_Status)
+                            editorM.remove(Constants.SAVED_CN_TIME)
+                            editorM.apply()
+
+                        }
+
+                    }else{
+                       // showToastMessage("Invalid Saved Paths")
+                    }
+
+
                 } else {
 
                     editor.remove("imagSwtichEnableSyncOnFilecahnge")
-                    editor.remove(Constants.imagEnableDownloadStatus)
                     editor.apply()
 
-                    applicationContext.stopService(
-                        Intent(
-                            applicationContext,
-                            NotificationService::class.java
-                        )
-                    )
-
                     textSyncOnFileChangeIntervals.setText("Download on change")
+
+
+                    val fil_CLO: String = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+                    val fil_DEMO: String = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+                    if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+
+                        if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                            stopService(Intent(applicationContext, NotificationService::class.java))
+                            startService(Intent(applicationContext, OnChnageService::class.java))
+
+                            val editorM = myDownloadClass.edit()
+                            editorM.remove(Constants.SynC_Status)
+                            editorM.remove(Constants.SAVED_CN_TIME)
+                            editorM.apply()
+
+                        }
+
+                    }else{
+                      //  showToastMessage("Invalid Saved Paths")
+                    }
+
+
+
+
+
                 }
             }
 
@@ -870,33 +898,36 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
     }
 
+
+
+
+
+
+
     private fun initSyncTimmer() {
 
-        val get_savedIntervals = myDownloadClass.getString(Constants.getTimeDefined, "")
+        val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
-        if (get_savedIntervals!!.isNotEmpty()) {
+        if (get_savedIntervals != 0L) {
 
-            if (get_savedIntervals.equals(Constants.Sync_interval_timer)){
-                binding.textIntervalsSelect.text = "Sync interval timer"
-                binding.textDisplaytime.text = "Selected time : 00:55"
-
-            }else{
-                binding.textIntervalsSelect.text = get_savedIntervals + "ute"
-                binding.textDisplaytime.text = get_savedIntervals  + "ute"
-
-            }
+            binding.textIntervalsSelect.text = get_savedIntervals.toString() + Minutes
+            binding.textDisplaytime.text = get_savedIntervals.toString() + Minutes
 
         } else {
-            getTimeDefined_Prime = timeMinuetesDefined
 
-            val editor = myDownloadClass.edit()
-            editor.putString(Constants.getTimeDefined, Constants.Sync_interval_timer)
-            editor.apply()
-
+            binding.textIntervalsSelect.text = "Sync interval timer"
+            binding.textDisplaytime.text = "Selected time : 00:55"
 
         }
 
     }
+
+
+
+
+
+
+
 
     private fun showSaveduserHistory() {
 
@@ -993,15 +1024,15 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             textTwoMinutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes22
+                binding.textIntervalsSelect.text = timeMinuetes22.toString() + " $Minutes"
                 binding.textDisplaytime.text = "2 Minutes"
-                getTimeDefined_Prime = timeMinuetes22
+                getTimeDefined_Prime = timeMinuetes22.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_2min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_2min)
                 editor.apply()
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1010,26 +1041,25 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                   // showToastMessage("Service not running")
+                } else {
+                    // showToastMessage("Service not running")
                 }
-
 
 
             }
 
 
             text55minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes55
+                binding.textIntervalsSelect.text = timeMinuetes55.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "5 Minutes"
-                getTimeDefined_Prime = timeMinuetes55
+                getTimeDefined_Prime = timeMinuetes55.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_5min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_5min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1038,26 +1068,24 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                   // showToastMessage("Service not running")
+                } else {
+                    // showToastMessage("Service not running")
                 }
-
-
 
 
             }
 
             text100minutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes10
+                binding.textIntervalsSelect.text = timeMinuetes10.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "10 Minutes"
-                getTimeDefined_Prime = timeMinuetes10
+                getTimeDefined_Prime = timeMinuetes10.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_10min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_10min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1066,8 +1094,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                   // showToastMessage("Service not running")
+                } else {
+                    // showToastMessage("Service not running")
                 }
 
 
@@ -1075,16 +1103,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             text1500minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes15
+                binding.textIntervalsSelect.text = timeMinuetes15.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "15 Minutes"
-                getTimeDefined_Prime = timeMinuetes15
+                getTimeDefined_Prime = timeMinuetes15.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_15min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_15min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1092,24 +1120,24 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.remove(Constants.SAVED_CN_TIME)
                     editor.apply()
 
-                }else{
-                 //   showToastMessage("Service not running")
+                } else {
+                    //   showToastMessage("Service not running")
                 }
 
 
             }
 
             text3000minutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes30
+                binding.textIntervalsSelect.text = timeMinuetes30.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "30 Minutes"
-                getTimeDefined_Prime = timeMinuetes30
+                getTimeDefined_Prime = timeMinuetes30.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_30min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_30min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1118,27 +1146,25 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                  //  showToastMessage("Service not running")
+                } else {
+                    //  showToastMessage("Service not running")
                 }
-
-
 
 
             }
 
             text6000minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes60
+                binding.textIntervalsSelect.text = timeMinuetes60.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "60 Minutes"
-                getTimeDefined_Prime = timeMinuetes60
+                getTimeDefined_Prime = timeMinuetes60.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_60min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_60min)
                 editor.apply()
 
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1147,27 +1173,25 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                   // showToastMessage("Service not running")
+                } else {
+                    // showToastMessage("Service not running")
                 }
-
-
 
 
             }
 
 
             textOneTwentyMinutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes120
+                binding.textIntervalsSelect.text = timeMinuetes120.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "2 Hours"
-                getTimeDefined_Prime = timeMinuetes120
+                getTimeDefined_Prime = timeMinuetes120.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_120min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_120min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1176,27 +1200,26 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                 //   showToastMessage("Service not running")
+                } else {
+                    //   showToastMessage("Service not running")
                 }
-
-
-
 
 
             }
 
+
+
             textOneEightThyMinutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes180
+                binding.textIntervalsSelect.text = timeMinuetes180.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "3 hours"
-                getTimeDefined_Prime = timeMinuetes180
+                getTimeDefined_Prime = timeMinuetes180.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_180min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_180min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1205,28 +1228,25 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                  //  showToastMessage("Service not running")
+                } else {
+                    //  showToastMessage("Service not running")
                 }
-
-
-
 
 
             }
 
 
             tex24000ThyMinutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes240
+                binding.textIntervalsSelect.text = timeMinuetes240.toString()  + " $Minutes"
                 binding.textDisplaytime.text = "4 hours"
-                getTimeDefined_Prime = timeMinuetes240
+                getTimeDefined_Prime = timeMinuetes240.toString()
                 alertDialog.dismiss()
 
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getTimeDefined, Constants.t_240min)
+                editor.putLong(Constants.getTimeDefined, Constants.t_240min)
                 editor.apply()
 
-                if (foregroundServiceRunning()) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1235,11 +1255,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                }else{
-                 //   showToastMessage("Service not running")
+                } else {
+                    //   showToastMessage("Service not running")
                 }
-
-
 
 
             }
@@ -1304,12 +1322,48 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
 
+
             textOkayAccept.setOnClickListener {
-                val getHourVlaue = editTexthour.text.toString()
+                val getHourValue = editTexthour.text.toString()
                 val getHourMinutes = editTextMinutes.text.toString()
 
-                val selectedTime = "$getHourVlaue:$getHourMinutes"
-                binding.textDisplaytime.text = selectedTime
+                val hours = getHourValue.toIntOrNull() ?: 0
+                val minutes = getHourMinutes.toIntOrNull() ?: 0
+
+                val totalMinutes = hours * 60 + minutes
+
+                if (totalMinutes < 1) {
+                    showToastMessage("Time cannot be less than 1 minute")
+                    alertDialog.dismiss()
+                    return@setOnClickListener // Abort further execution
+                }
+
+                if (getHourMinutes.isNotEmpty() || getHourMinutes.isNotEmpty()) {
+
+                    binding.textDisplaytime.text = "$totalMinutes $Minutes"
+                    binding.textIntervalsSelect.text = "$totalMinutes $Minutes"
+
+                    val editor = myDownloadClass.edit()
+                    editor.putLong(Constants.getTimeDefined, totalMinutes.toLong())
+                    editor.apply()
+
+
+                    if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                        val intent = Intent(Constants.UpdateTimmer_Reciver)
+                        sendBroadcast(intent)
+
+                        val editor = myDownloadClass.edit()
+                        editor.remove(Constants.SAVED_CN_TIME)
+                        editor.apply()
+                    } else {
+                        // showToastMessage("Service not running")
+                    }
+                } else {
+                    showToastMessage("Invalid Input Filed")
+                    binding.textDisplaytime.text = "Sync interval timer"
+                    binding.textIntervalsSelect.text = "Sync interval timer"
+                }
+
                 alertDialog.dismiss()
             }
 
@@ -1422,16 +1476,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 )
                                 editor.apply()
 
-                                // save also to room data base
-                                val user =
-                                    User(
-                                        CLO = getFolderClo,
-                                        DEMO = getFolderSubpath,
-                                        EditUrl = ""
-                                    )
-                                mUserViewModel.addUser(user)
-
-
                             } else {
                                 editTextCLOpath.error = "Input a valid path e.g CLO"
                                 editTextSubPathFolder.error =
@@ -1467,9 +1511,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                     editInputUrl
                                 )
                                 editor.apply()
-
-                                val user = User(CLO = "", DEMO = "", EditUrl = editInputUrl)
-                                mUserViewModel.addUser(user)
 
                             } else {
                                 showToastMessage("Invalid url format")
@@ -1524,6 +1565,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 "App.zip",
                                 syncUrl
                             )
+
+                            // save also to room data base
+                            val user =
+                                User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                            mUserViewModel.addUser(user)
+
+
                         } else {
                             showPopsForMyConnectionTest(
                                 getFolderClo,
@@ -1558,6 +1610,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 "update.csv",
                                 ""
                             )
+
+                            val user =
+                                User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                            mUserViewModel.addUser(user)
+
+
                         } else {
                             showPopsForMyConnectionTest(
                                 getFolderClo,
@@ -1594,6 +1656,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
                             startDownloadSingles(baseUrl, "Zip", "App.zip")
+
+                            val user = User(CLO = "", DEMO = "", EditUrl = baseUrl)
+                            mUserViewModel.addUser(user)
+
                         } else {
                             showPopsForMyConnectionTest(
                                 "CLO",
@@ -1615,6 +1681,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         val result = checkUrlExistence(baseUrl)
                         if (result) {
                             startDownloadSingles(baseUrl, "Api", "App.zip")
+                            val user = User(CLO = "", DEMO = "", EditUrl = baseUrl)
+                            mUserViewModel.addUser(user)
                         } else {
 
                             showPopsForMyConnectionTest(
@@ -1666,20 +1734,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             textContinuPassword2.setOnClickListener {
                 alertDialog.dismiss()
+            }
 
-                binding.apply {
-
-                    if (imagSwtichEnableSyncOnFilecahnge.isChecked) {
-
-
-                        if (getTimeDefined_Prime == "15 Minutes") {
-                            showToastMessage("Preparing Interval Download in $getTimeDefined_Prime")
-                        }
-
-
-                    }
-                }
-
+            imgCloseDialog.setOnClickListener {
+                alertDialog.dismiss()
             }
 
         }
@@ -1787,104 +1845,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-    private fun checkMultiplePermission(): Boolean {
-        val listPermissionNeeded = arrayListOf<String>()
-        for (permission in multiplePermissionNameList) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                listPermissionNeeded.add(permission)
-            }
-        }
-        if (listPermissionNeeded.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                listPermissionNeeded.toTypedArray(),
-                multiplePermissionId
-            )
-            return false
-        }
-        return true
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray,
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == multiplePermissionId) {
-            if (grantResults.isNotEmpty()) {
-                var isGrant = true
-                for (element in grantResults) {
-                    if (element == PackageManager.PERMISSION_DENIED) {
-                        isGrant = false
-                    }
-                }
-                if (isGrant) {
-                    // here all permission granted successfully
-                    doOperation()
-                } else {
-                    var someDenied = false
-                    for (permission in permissions) {
-                        if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                                this,
-                                permission
-                            )
-                        ) {
-                            if (ActivityCompat.checkSelfPermission(
-                                    this,
-                                    permission
-                                ) == PackageManager.PERMISSION_DENIED
-                            ) {
-                                someDenied = true
-                            }
-                        }
-                    }
-
-                    if (someDenied) {
-                        showPermissionDeniedDialog()
-
-                    } else {
-                        showPermissionDeniedDialog()
-                    }
-
-
-                }
-            }
-        }
-    }
-
-
-    private fun showPermissionDeniedDialog() {
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setCancelable(false)
-        builder.setTitle("Permission Required")
-        builder.setMessage("Please grant the required permissions in the app settings to proceed.")
-        builder.setPositiveButton("Go to Settings") { dialog: DialogInterface?, which: Int ->
-            openAppSettings()
-            dialog?.dismiss()
-        }
-        builder.setNegativeButton("Cancel") { dialog: DialogInterface?, which: Int ->
-            showToastMessage("Permission Denied!")
-            //  activity.finish()
-        }
-        builder.show()
-    }
-
-    private fun openAppSettings() {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        val uri = Uri.fromParts("package", this.packageName, null)
-        intent.data = uri
-        startActivity(intent)
-    }
-
-
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun download(
         url: String,
@@ -1920,18 +1880,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             editior.putString("fileNamy", fileNamy)
             editior.putString("Extracted", Extracted)
 
-            val get_savedIntervals = myDownloadClass.getString(Constants.getTimeDefined, "")
+            val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
-            if (get_savedIntervals!!.isNotEmpty()) {
-                editior.putString("getTimeDefined", get_savedIntervals)
+            if (get_savedIntervals !=0L) {
+                editior.putLong(Constants.getTimeDefined, get_savedIntervals)
 
             } else {
-                editior.putString("getTimeDefined", getTimeDefined_Prime)
+                editior.putLong(Constants.getTimeDefined, Constants.t_5min)
 
             }
 
             editior.apply()
-
 
 
             val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
@@ -1956,7 +1915,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val editor = myDownloadClass.edit()
             editor.putLong(Constants.downloadKey, downloadReferenceMain)
+           // editor.remove(Constants.SAVED_CN_TIME)  -- may be to be removed later
             editor.apply()
+
+
 
 
             val intent = Intent(applicationContext, DownlodPagger::class.java)
@@ -1971,6 +1933,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             intent.putExtra("baseUrl", url)
             startActivity(intent)
             finish()
+
+
+            val editor222 = sharedBiometric.edit()
+            editor222.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
+            editor222.apply()
+
+
+            stopService(Intent(this@ReSyncActivity, NotificationService::class.java))
+            stopService(Intent(this@ReSyncActivity, OnChnageService::class.java))
+
 
 
         }, 1000)
@@ -2090,8 +2062,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
 
-
-
                 alertDialog.dismiss()
             }
 
@@ -2149,18 +2119,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         close_bs.setOnClickListener { alertDialog.dismiss() }
 
         alertDialog.show()
-    }
-
-
-
-    fun foregroundServiceRunning(): Boolean {
-        val activityManager = getSystemService(AppCompatActivity.ACTIVITY_SERVICE) as ActivityManager
-        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
-            if (NotificationService::class.java.name == service.service.className) {
-                return true
-            }
-        }
-        return false
     }
 
 

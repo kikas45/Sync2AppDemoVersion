@@ -169,33 +169,16 @@
     </LinearLayout>
 
 
-    <LinearLayout
-        android:id="@+id/webx"
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-
-        android:layout_gravity="center"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="30dp"
-        android:paddingBottom="30dp"
+    <ImageView
+        android:id="@+id/web_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="70dp"
+        android:background="@drawable/round_bg"
         ads:layout_constraintBottom_toTopOf="@+id/bottom_server_layout"
-        ads:layout_constraintEnd_toEndOf="parent">
+        ads:layout_constraintEnd_toEndOf="parent" />
 
-        <ImageView
-            android:id="@+id/web_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/round_bg"
-            android:contentDescription="TODO"
-
-            android:onClick="handleWebBtn"
-            android:padding="3dp" />
-
-    </LinearLayout>
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -252,7 +235,7 @@
             android:layout_height="wrap_content"
             android:elegantTextHeight="true"
             android:gravity="center"
-            android:text="PR: Running"
+            android:text="PR: --"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -292,6 +275,25 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/textSyncMode"
             app:layout_constraintTop_toTopOf="@+id/textSyncMode" />
+
+<!--
+
+        <TextView
+            android:id="@+id/textSystemState"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="Running"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            ads:layout_constraintBottom_toBottomOf="parent"
+            ads:layout_constraintEnd_toEndOf="parent"
+            ads:layout_constraintStart_toStartOf="parent"
+            ads:layout_constraintTop_toTopOf="parent" />
+
+-->
 
 
 

@@ -30,12 +30,11 @@ fun getMimeType(url: String): String {
 //}
 
 
-
-
 fun getFilesList(selectedItem: File): List<File> {
     val rawFilesList = selectedItem.listFiles()?.filter { !it.isHidden }
 
-    val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
+    val directoryPath =
+        Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
     val file = File(directoryPath)
 
     return if (selectedItem == file) {
@@ -44,7 +43,6 @@ fun getFilesList(selectedItem: File): List<File> {
         listOf(selectedItem.parentFile) + (rawFilesList?.toList() ?: listOf())
     }
 }
-
 
 
 fun renderParentLink(activity: AppCompatActivity): String {
@@ -62,7 +60,7 @@ fun renderItem(activity: AppCompatActivity, file: File): String {
 
 fun openFile(activity: AppCompatActivity, selectedItem: File) {
     // Get URI and MIME type of file
-    val uri = FileProvider.getUriForFile(activity, AUTHORITY, selectedItem)
+    val uri = FileProvider.getUriForFile(activity.applicationContext, AUTHORITY, selectedItem)
     val mime: String = getMimeType(uri.toString())
 
     // Open file with user selected app

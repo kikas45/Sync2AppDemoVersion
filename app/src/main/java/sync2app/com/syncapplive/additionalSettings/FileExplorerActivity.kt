@@ -144,6 +144,8 @@ class FileExplorerActivity : AppCompatActivity() {
 
         adapter.notifyDataSetChanged()
 
+        binding.textNoFolder.visibility = if (filesList.isEmpty()) View.VISIBLE else View.GONE
+
         val editor = sharedPreferences.edit()
         editor.putString("LAST_OPENED_FOLDER_KEY", selectedItem.absolutePath);
         editor.apply()
@@ -232,11 +234,6 @@ class FileExplorerActivity : AppCompatActivity() {
         MyApplication.decrementRunningActivities()
     }
 
-
-    override fun onStart() {
-        super.onStart()
-
-    }
 
 
 }
