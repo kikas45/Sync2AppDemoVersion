@@ -15,6 +15,8 @@
     android:orientation="vertical">
 
 
+
+
     <LinearLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
@@ -276,27 +278,84 @@
             app:layout_constraintStart_toEndOf="@+id/textSyncMode"
             app:layout_constraintTop_toTopOf="@+id/textSyncMode" />
 
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
 <!--
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_crash"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="70dp"
+        android:layout_marginEnd="32dp"
+        android:alpha="0.7"
+        android:background="@color/deep_blue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <ImageView
+            android:id="@+id/imageCrossClose"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?selectableItemBackground"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_close_24"
+            app:tint="@color/white" />
+
 
         <TextView
-            android:id="@+id/textSystemState"
+            android:id="@+id/textView14"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:elegantTextHeight="true"
-            android:gravity="center"
-            android:text="Running"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="We apologize for the inconvenience. Please close the app."
             android:textColor="@color/white"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            ads:layout_constraintBottom_toBottomOf="parent"
-            ads:layout_constraintEnd_toEndOf="parent"
-            ads:layout_constraintStart_toStartOf="parent"
-            ads:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/imageCrossClose"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textSend"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="SEND"
+            android:textColor="@color/white"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView14" />
+
+        <TextView
+            android:id="@+id/textCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="24dp"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="CANCEL"
+
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/textSend"
+            app:layout_constraintEnd_toStartOf="@+id/textSend"
+            app:layout_constraintTop_toTopOf="@+id/textSend" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 -->
 
 
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

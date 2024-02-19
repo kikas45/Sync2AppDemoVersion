@@ -7,34 +7,33 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 
 class RestarterBootReceiver : BroadcastReceiver() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onReceive(context: Context, intent: Intent?) {
 
         if (intent!!.action.equals("RestarterBootReceiver")) {
-            if (!foregroundServiceRunning(context)) {
+            if (!ServiceUtils.foregroundServiceRunning(context)) {
                 context.applicationContext.startService(
                     Intent(
                         context.applicationContext, NotificationService::class.java
                     )
                 )
-            } // else do nothing
-
-        }
-
-    }
-
-
-    fun foregroundServiceRunning(context: Context): Boolean {
-        val activityManager =
-            context.applicationContext.getSystemService(AppCompatActivity.ACTIVITY_SERVICE) as ActivityManager
-        for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
-            if (NotificationService::class.java.name == service.service.className) {
-                return true
             }
+
+            if (!ServiceUtils.foregroundServiceRunningOnChange(context)) {
+                context.applicationContext.startService(
+                    Intent(
+                        context.applicationContext, OnChnageService::class.java
+                    )
+                )
+            }
+
+
+
         }
-        return false
+
     }
 
 }

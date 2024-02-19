@@ -13,6 +13,11 @@ class Constants {
 
         const val BASE_URL = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
 
+
+        const val BASE_URL_API = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
+
+
+
         const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
 
       //  const val LAUNCH_ONLINE_URL =  "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/App/index.html"
@@ -55,6 +60,11 @@ class Constants {
         const val SeverTimeSaved = "SeverTimeSaved"
         const val CurrentServerTime = "CurrentServerTime"
         const val media_ready = "Media ready"
+
+
+        const val Saved_Domains_Name = "Saved_Domains_Name"
+        const val Saved_Domains_Urls = "Saved_Domains_Urls"
+        const val Saved_Parthner_Name = "Saved_Parthner_Name"
 
 
         const val Tapped_OnlineORoffline = "Tapped_OnlineORoffline"

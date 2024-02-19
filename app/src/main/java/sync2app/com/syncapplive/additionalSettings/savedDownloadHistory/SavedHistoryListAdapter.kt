@@ -12,7 +12,7 @@ import sync2app.com.syncapplive.databinding.ItemSavedHistoryRowsBinding
 
 class SavedHistoryListAdapter(
     private val listener: OnItemClickListener,
-   private val context: Context
+  /// private val context: Context
 ): RecyclerView.Adapter<SavedHistoryListAdapter.MyViewHolder>() {
 
     private var userList = emptyList<User>()

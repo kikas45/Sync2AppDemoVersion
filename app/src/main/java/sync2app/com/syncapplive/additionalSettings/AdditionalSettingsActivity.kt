@@ -49,7 +49,7 @@ import com.google.android.material.snackbar.Snackbar
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.SettingsActivity
-import sync2app.com.syncapplive.additionalSettings.DownloadsArray.devicelock.MyDeviceAdminReceiver
+import sync2app.com.syncapplive.additionalSettings.devicelock.MyDeviceAdminReceiver
 import sync2app.com.syncapplive.additionalSettings.scanutil.CustomShortcuts
 import sync2app.com.syncapplive.additionalSettings.scanutil.DefaultCustomShortCut
 import sync2app.com.syncapplive.additionalSettings.utils.Constants

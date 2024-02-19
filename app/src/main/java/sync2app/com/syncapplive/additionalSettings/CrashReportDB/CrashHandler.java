@@ -41,13 +41,13 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
                     "\n\nCrash in Method: " + getCrashMethodName(throwable) +
                     "\n\nCrash in Activity: " + getCurrentActivityName() +
                     "\n\nStack Trace: " + Log.getStackTraceString(throwable);
-
+            showToast("Crash Occurred !, Please go to Maintenance Page to Send Crash");
             SharedPreferences sharedBiometric = mContext.getSharedPreferences(Constants.SHARED_SAVED_CRASH_REPORT, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedBiometric.edit();
             editor.putString(Constants.crashInfo, "" + crashInfo);
             editor.putString(Constants.crashCalled, Constants.crashCalled);
             editor.apply();
-            showToast("We are sorry Please Go to Maintenance Page to Send Crash");
+
             // showAlertDialog();
         }
     }

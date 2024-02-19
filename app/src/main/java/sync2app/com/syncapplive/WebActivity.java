@@ -869,7 +869,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                         if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
                             String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+
                             load_Launch_Online_Mode(vurl);
+
                         } else {
                             showPopForTVConfiguration(Constants.UnableToFindIndex);
                         }
@@ -1562,7 +1564,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
-
                 }
 
             }
@@ -1602,7 +1603,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 restoreTimerState();
 
             }
-
 
 
             String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
@@ -1649,7 +1649,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 }
 
 
-                if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()){
+                if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
                     textStatusProcess.setText("PR: Running");
                     textSynIntervals.setText("ST: 5 Mins");
                 }
@@ -2996,94 +2996,88 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
     private void showPopForTVConfiguration(String message) {
 
-        Handler handler1 = new Handler(Looper.getMainLooper());
 
-        handler1.postDelayed(new Runnable() {
+        CustomOfflinePopLayoutBinding binding = CustomOfflinePopLayoutBinding.inflate(getLayoutInflater());
+        AlertDialog.Builder builder = new AlertDialog.Builder(WebActivity.this);
+        builder.setView(binding.getRoot());
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setCancelable(false);
+
+
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+        String get_AppMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
+
+
+        TextView textContinuPasswordDai3 = binding.textContinuPasswordDai3;
+        TextView textContinue = binding.textContinue;
+        TextView textDescription = binding.textDescription;
+        ImageView imgCloseDialog = binding.imgCloseDialog;
+        ImageView imageView24 = binding.imageView24;
+
+
+        if (!message.isEmpty()) {
+            textDescription.setText(message);
+        }
+
+        if (message.equals(Constants.UnableToFindIndex)) {
+            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_folder_24));
+
+        } else if (message.equals(Constants.badRequest)) {
+            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_wifi_no_internet));
+        } else {
+            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_sync_cm));
+        }
+
+
+        SharedPreferences.Editor editor222 = sharedBiometric.edit();
+        textContinuPasswordDai3.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void run() {
+            public void onClick(View view) {
+                startActivity(new Intent(WebActivity.this, SettingsActivity.class));
+                finish();
+                editor222.putString(Constants.SAVE_NAVIGATION, Constants.WebViewPage);
+                editor222.apply();
 
-                CustomOfflinePopLayoutBinding binding = CustomOfflinePopLayoutBinding.inflate(getLayoutInflater());
-                AlertDialog.Builder builder = new AlertDialog.Builder(WebActivity.this);
-                builder.setView(binding.getRoot());
-                final AlertDialog alertDialog = builder.create();
-
-                alertDialog.setCanceledOnTouchOutside(false);
-                alertDialog.setCancelable(false);
-
-
-                if (alertDialog.getWindow() != null) {
-                    alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                }
-
-                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-                String get_AppMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
-
-
-                TextView textContinuPasswordDai3 = binding.textContinuPasswordDai3;
-                TextView textContinue = binding.textContinue;
-                TextView textDescription = binding.textDescription;
-                ImageView imgCloseDialog = binding.imgCloseDialog;
-                ImageView imageView24 = binding.imageView24;
-
-
-                if (!message.isEmpty()) {
-                    textDescription.setText(message);
-                }
-
-                if (message.equals(Constants.UnableToFindIndex)) {
-                    imageView24.setBackground(getResources().getDrawable(R.drawable.ic_folder_24));
-
-                } else if (message.equals(Constants.badRequest)) {
-                    imageView24.setBackground(getResources().getDrawable(R.drawable.ic_wifi_no_internet));
-                } else {
-                    imageView24.setBackground(getResources().getDrawable(R.drawable.ic_sync_cm));
-                }
-
-
-                SharedPreferences.Editor editor222 = sharedBiometric.edit();
-                textContinuPasswordDai3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(new Intent(WebActivity.this, SettingsActivity.class));
-                        finish();
-                        editor222.putString(Constants.SAVE_NAVIGATION, Constants.WebViewPage);
-                        editor222.apply();
-
-                        showToast(mContext, "Please wait");
-                    }
-                });
-
-
-                textContinue.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
-                            //   showPopForTVConfiguration();
-                            showToast(mContext, "Tap The Back Button to Go Settings Page");
-                        }
-
-                        alertDialog.dismiss();
-                    }
-                });
-
-
-                imgCloseDialog.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-
-                        if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
-                            showToast(mContext, "Tap The Back Button to Go Settings Page");
-                        }
-
-                        alertDialog.dismiss();
-                    }
-                });
-
-
-                alertDialog.show();
+                showToast(mContext, "Please wait");
             }
-        }, 700);
+        });
+
+
+        textContinue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
+                    //   showPopForTVConfiguration();
+                    showToast(mContext, "Tap The Back Button to Go Settings Page");
+                }
+
+                alertDialog.dismiss();
+            }
+        });
+
+
+        imgCloseDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
+                    showToast(mContext, "Tap The Back Button to Go Settings Page");
+                }
+
+                alertDialog.dismiss();
+            }
+        });
+
+
+        alertDialog.show();
+
 
 
     }

@@ -2,7 +2,6 @@ package sync2app.com.syncapplive.additionalSettings
 
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.AlertDialog
 import android.app.Dialog
 import android.app.DownloadManager
@@ -13,11 +12,13 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -32,11 +33,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
-import sync2app.com.syncapplive.AdvancedControls
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.SettingsActivity
 import sync2app.com.syncapplive.WebActivity
-import sync2app.com.syncapplive.additionalSettings.DownloadsArray.list.DownlodPagger
+import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
+import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
+import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.SavedHistoryListAdapter
@@ -47,6 +49,8 @@ import sync2app.com.syncapplive.additionalSettings.urlchecks.isUrlValid
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivitySyncPowellBinding
+import sync2app.com.syncapplive.databinding.CustomApiHardCodedLayoutBinding
+import sync2app.com.syncapplive.databinding.CustomApiUrlLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomContinueDownloadLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomDefinedTimeIntervalsBinding
 import sync2app.com.syncapplive.databinding.CustomSavedHistoryLayoutBinding
@@ -57,17 +61,28 @@ import java.io.File
 import java.util.Objects
 
 
-class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickListener {
+class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickListener,
+    SavedApiAdapter.OnItemClickListener {
     private lateinit var binding: ActivitySyncPowellBinding
 
     private val mUserViewModel by viewModels<UserViewModel>()
 
+    private val mApiViewModel by viewModels<ApiUrlViewModel>()
+
+
     private val adapter by lazy {
-        SavedHistoryListAdapter(this, this)
+        SavedHistoryListAdapter(this)
     }
+
+
+    private val adapterApi by lazy {
+        SavedApiAdapter(this)
+    }
+
 
     private lateinit var customProgressDialog: Dialog
     private lateinit var customSavedDownloadDialog: Dialog
+    private lateinit var custom_ApI_Dialog: Dialog
 
 
     private val baseUrl222 =
@@ -135,7 +150,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-
     var preferences: SharedPreferences? = null
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -181,24 +195,31 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             initViewTooggle()
 
 
-            binding.textTitle.setOnClickListener {
-                applicationContext.stopService(Intent(applicationContext, OnChnageService::class.java))
-            }
-
 
 
             textTestConnectionAPPer.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 try {
+
                     testConnectionSetup()
+
                 } catch (_: Exception) {
                 }
+
+
             }
+
 
 
             textDownloadZipSyncOrApiSyncNow.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
-                testAndDownLoadZipConnection()
+
+                try {
+                    testAndDownLoadZipConnection()
+
+                } catch (_: Exception) {
+                }
+
 
             }
 
@@ -252,6 +273,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
     }
 
+
     override fun onBackPressed() {
 
 
@@ -295,10 +317,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         MyApplication.decrementRunningActivities()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-    }
 
     private fun showCustomProgressDialog(message: String) {
         try {
@@ -328,69 +346,104 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val editor = myDownloadClass.edit()
             if (isNetworkAvailable()) {
-                if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
-                    when (getUrlBasedOnSpinnerText) {
-                        CP_server -> {
-                            if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
-                                httpNetworkTester(getFolderClo, getFolderSubpath)
-                                editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo)
-                                editor.putString(
-                                    Constants.getSaveSubFolderInPutFiled,
-                                    getFolderSubpath
-                                )
-                                editor.apply()
+                if (!imagSwtichEnableManualOrNot.isChecked) {
 
-                            } else {
-                                editTextCLOpath.error = "Input a valid path e.g CLO"
-                                editTextSubPathFolder.error =
-                                    "Input a valid path e.g DE_MO_2021000"
-                                showToastMessage("Fields can not be empty")
+                    if (imagSwtichPartnerUrl.isChecked) {
+
+                        if (getUrlBasedOnSpinnerText.isNotEmpty()) {
+
+
+                            when (getUrlBasedOnSpinnerText) {
+                                CP_server -> {
+                                    if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
+                                        httpNetworkTester(getFolderClo, getFolderSubpath)
+                                        editor.putString(
+                                            Constants.getSavedCLOImPutFiled,
+                                            getFolderClo
+                                        )
+                                        editor.putString(
+                                            Constants.getSaveSubFolderInPutFiled,
+                                            getFolderSubpath
+                                        )
+                                        editor.apply()
+
+                                    } else {
+                                        editTextCLOpath.error = "Input a valid path e.g CLO"
+                                        editTextSubPathFolder.error =
+                                            "Input a valid path e.g DE_MO_2021000"
+                                        showToastMessage("Fields can not be empty")
+                                    }
+                                }
+
+                                API_Server -> {
+                                    showToastMessage("No Logic For API Server Yet")
+                                }
+
                             }
+
+                        } else {
+                            showToastMessage("Select Partner Url")
                         }
 
-                        API_Server -> {
-                            showToastMessage("No Logic For API Server Yet")
+                    } else {
+
+                        // let consider Custom Domain was selected
+
+                        val getFolderClo222 = binding.editTextCLOpath.text.toString().trim()
+                        val getFolderSubpath22 = binding.editTextSubPathFolder.text.toString().trim()
+
+
+                        var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+
+
+                        if (Saved_Domains_Urls.isNotEmpty()){
+
+                        if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
+                            testConnectionSetup_API_Test(getFolderClo222, getFolderSubpath22)
+                            editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
+                            editor.putString(
+                                Constants.getSaveSubFolderInPutFiled,
+                                getFolderSubpath22
+                            )
+                            editor.apply()
+
+                        } else {
+                            editTextCLOpath.error = "Input a valid path e.g CLO"
+                            editTextSubPathFolder.error =
+                                "Input a valid path e.g DE_MO_2021000"
+                            showToastMessage("Fields can not be empty")
                         }
+
+
+                    }  else {
+                        showToastMessage("Select Custom Domain")
+                    }
 
                     }
 
+                } else {
+
+                    /// when the button is checked
+
+                    val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
+                    if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
+                        httpNetSingleUrlTest(editInputUrl)
+                        editor.putString(
+                            Constants.getSavedEditTextInputSynUrlZip,
+                            editInputUrl
+                        )
+                        editor.apply()
+                    } else {
+                        showToastMessage("Invalid url format")
+                        binding.editTextInputSynUrlZip.error = "Invalid url format"
+                    }
+
                 }
-                //// enf of the main if
+
             } else {
                 showToastMessage("No Internet Connection")
             }
 
-
-            /// when the button is checked
-            if (isNetworkAvailable()) {
-                if (imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
-                    when (getUrlBasedOnSpinnerText) {
-                        CP_server -> {
-
-                            val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
-                            if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
-                                httpNetSingleUrlTest(editInputUrl)
-                                editor.putString(
-                                    Constants.getSavedEditTextInputSynUrlZip,
-                                    editInputUrl
-                                )
-                                editor.apply()
-                            } else {
-                                showToastMessage("Invalid url format")
-                                binding.editTextInputSynUrlZip.error = "Invalid url format"
-                            }
-
-                        }
-
-                        API_Server -> {
-                            showToastMessage("No Logic For API Server Yet")
-                        }
-
-                    }
-                }
-            } else {
-                showToastMessage("No Internet Connection")
-            }
 
         }
     }
@@ -533,11 +586,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             // for server
-            getUrlBasedOnSpinnerText = CP_server
+            //  getUrlBasedOnSpinnerText = CP_server   // it was hard coded before, but now saved
             constraintLayout4.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
 
-                serVerOptionDialog()
+                if (imagSwtichPartnerUrl.isChecked) {
+                    serVerOptionDialog()
+
+                } else {
+
+                    show_API_Urls()
+                }
 
             }
 
@@ -698,7 +757,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 textSyncOnFileChangeIntervals.setText("Download on Intervals")
             } else {
                 textSyncOnFileChangeIntervals.setText("Download on change")
-                applicationContext.stopService(Intent(applicationContext, NotificationService::class.java)
+                applicationContext.stopService(
+                    Intent(applicationContext, NotificationService::class.java)
 
                 )
 
@@ -719,15 +779,22 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     textSyncOnFileChangeIntervals.setText("Download on Intervals")
 
 
-                    val fil_CLO: String = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-                    val fil_DEMO: String = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+                    val fil_CLO: String =
+                        myDownloadClass.getString(Constants.getFolderClo, "").toString()
+                    val fil_DEMO: String =
+                        myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
 
 
                     if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
 
                         if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
                             stopService(Intent(applicationContext, OnChnageService::class.java))
-                            startService(Intent(applicationContext, NotificationService::class.java))
+                            startService(
+                                Intent(
+                                    applicationContext,
+                                    NotificationService::class.java
+                                )
+                            )
 
                             val editorM = myDownloadClass.edit()
                             editorM.remove(Constants.SynC_Status)
@@ -736,8 +803,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                         }
 
-                    }else{
-                       // showToastMessage("Invalid Saved Paths")
+                    } else {
+                        // showToastMessage("Invalid Saved Paths")
                     }
 
 
@@ -749,8 +816,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     textSyncOnFileChangeIntervals.setText("Download on change")
 
 
-                    val fil_CLO: String = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-                    val fil_DEMO: String = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+                    val fil_CLO: String =
+                        myDownloadClass.getString(Constants.getFolderClo, "").toString()
+                    val fil_DEMO: String =
+                        myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
 
                     if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
 
@@ -765,12 +834,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                         }
 
-                    }else{
-                      //  showToastMessage("Invalid Saved Paths")
+                    } else {
+                        //  showToastMessage("Invalid Saved Paths")
                     }
-
-
-
 
 
                 }
@@ -821,12 +887,38 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             imagSwtichPartnerUrl.isChecked =
                 imagPartnerurl.equals(Constants.imagSwtichPartnerUrl)
 
+            val get_Saved_Domains_Name = myDownloadClass.getString(Constants.Saved_Domains_Name, "")
+            val Saved_Parthner_Name = myDownloadClass.getString(Constants.Saved_Parthner_Name, "")
 
             if (imagPartnerurl.equals(Constants.imagSwtichPartnerUrl)) {
                 textPartnerUrlLunch.setText("Select Partner Url")
+
+
+                if (Saved_Parthner_Name!!.isNotEmpty()) {
+                    texturlsViews.setText(Saved_Parthner_Name)
+                    getUrlBasedOnSpinnerText = Saved_Parthner_Name
+
+                } else {
+                    texturlsViews.setText("Select Partner Url")
+                }
+
+
             } else {
-                textPartnerUrlLunch.setText("Custom Domain")
+                textPartnerUrlLunch.setText("Select Custom Domain")
+
+
+
+                if (get_Saved_Domains_Name!!.isNotEmpty()) {
+                    texturlsViews.setText(get_Saved_Domains_Name)
+
+                } else {
+                    texturlsViews.setText("Select Custom Domain")
+                }
+
+
             }
+
+
 
             imagSwtichPartnerUrl.setOnCheckedChangeListener { compoundButton, isValued ->
                 hideKeyBoard(binding.editTextInputSynUrlZip)
@@ -836,28 +928,41 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
                     textPartnerUrlLunch.setText("Select Partner Url")
 
+
+                    val Saved_Parthner_Name111 =
+                        myDownloadClass.getString(Constants.Saved_Parthner_Name, "")
+
+
+                    if (Saved_Parthner_Name111!!.isNotEmpty()) {
+                        texturlsViews.setText(Saved_Parthner_Name111)
+                        getUrlBasedOnSpinnerText = Saved_Parthner_Name111
+
+                    } else {
+                        texturlsViews.setText("Select Partner Url")
+                    }
+
+
                 } else {
 
-                    editor.remove("imagSwtichPartnerUrl")
+                    editor.remove(Constants.imagSwtichPartnerUrl)
                     editor.apply()
-                    textPartnerUrlLunch.setText("Custom Domain")
+                    textPartnerUrlLunch.setText("Select Custom Domain")
+
+
+                    val get_Saved_Domains_Name111 =
+                        myDownloadClass.getString(Constants.Saved_Domains_Name, "")
+
+                    if (get_Saved_Domains_Name111!!.isNotEmpty()) {
+                        texturlsViews.setText(get_Saved_Domains_Name111)
+
+                    } else {
+                        texturlsViews.setText("Select Custom Domain")
+                    }
 
                 }
             }
 
 
-            // enable satrt file for first synct
-            /*    val textSynfromApiZip222 =
-                    sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
-
-                if (textSynfromApiZip222.equals(Constants.imagSwtichEnableSyncFromAPI)) {
-                    textSynfromApiZip.setText("Use ZIP Sync")
-                    textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-                } else {
-                    textSynfromApiZip.setText("Use API Sync")
-                    textDownloadZipSyncOrApiSyncNow.setText("Connect ZIP Sync")
-                }
-    */
 
             imagSwtichEnableSyncFromAPI.isChecked = true
 
@@ -899,11 +1004,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-
-
-
-
-
     private fun initSyncTimmer() {
 
         val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
@@ -921,12 +1021,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }
 
     }
-
-
-
-
-
-
 
 
     private fun showSaveduserHistory() {
@@ -976,6 +1070,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         textErrorText.visibility = View.VISIBLE
                     }
                 })
+
+
             }, 100)
         }
 
@@ -1006,12 +1102,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         bindingCm.apply {
 
-
-//            textTwoMinutes.setOnClickListener {
-//                binding.textIntervalsSelect.text = timeMinuetesDefined
-//                binding.textDisplaytime.text = "00:55 Seconds"
-//                getTimeDefined = timeMinuetesDefined
-//            }
 
             imageCrossClose.setOnClickListener {
                 alertDialog.dismiss()
@@ -1050,7 +1140,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             text55minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes55.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes55.toString() + " $Minutes"
                 binding.textDisplaytime.text = "5 Minutes"
                 getTimeDefined_Prime = timeMinuetes55.toString()
                 alertDialog.dismiss()
@@ -1076,7 +1166,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
             text100minutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes10.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes10.toString() + " $Minutes"
                 binding.textDisplaytime.text = "10 Minutes"
                 getTimeDefined_Prime = timeMinuetes10.toString()
                 alertDialog.dismiss()
@@ -1103,7 +1193,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             text1500minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes15.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes15.toString() + " $Minutes"
                 binding.textDisplaytime.text = "15 Minutes"
                 getTimeDefined_Prime = timeMinuetes15.toString()
                 alertDialog.dismiss()
@@ -1128,7 +1218,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
             text3000minutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes30.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes30.toString() + " $Minutes"
                 binding.textDisplaytime.text = "30 Minutes"
                 getTimeDefined_Prime = timeMinuetes30.toString()
                 alertDialog.dismiss()
@@ -1154,7 +1244,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
             text6000minutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes60.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes60.toString() + " $Minutes"
                 binding.textDisplaytime.text = "60 Minutes"
                 getTimeDefined_Prime = timeMinuetes60.toString()
                 alertDialog.dismiss()
@@ -1182,7 +1272,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             textOneTwentyMinutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes120.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes120.toString() + " $Minutes"
                 binding.textDisplaytime.text = "2 Hours"
                 getTimeDefined_Prime = timeMinuetes120.toString()
                 alertDialog.dismiss()
@@ -1210,7 +1300,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             textOneEightThyMinutes2.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes180.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes180.toString() + " $Minutes"
                 binding.textDisplaytime.text = "3 hours"
                 getTimeDefined_Prime = timeMinuetes180.toString()
                 alertDialog.dismiss()
@@ -1237,7 +1327,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             tex24000ThyMinutes.setOnClickListener {
-                binding.textIntervalsSelect.text = timeMinuetes240.toString()  + " $Minutes"
+                binding.textIntervalsSelect.text = timeMinuetes240.toString() + " $Minutes"
                 binding.textDisplaytime.text = "4 hours"
                 getTimeDefined_Prime = timeMinuetes240.toString()
                 alertDialog.dismiss()
@@ -1270,30 +1360,63 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
+
+    @SuppressLint("InflateParams", "SuspiciousIndentation")
     private fun serVerOptionDialog() {
-        val serverOptions = arrayOf(CP_server, API_Server)
+        val bindingCm: CustomApiHardCodedLayoutBinding =
+            CustomApiHardCodedLayoutBinding.inflate(
+                layoutInflater
+            )
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setView(bindingCm.getRoot())
+        val alertDialog = builder.create()
+        alertDialog.setCanceledOnTouchOutside(true)
+        alertDialog.setCancelable(true)
 
-        val builder = AlertDialog.Builder(this@ReSyncActivity)
-        // builder.setTitle("Choose Server")
-        builder.setItems(serverOptions) { dialog, which ->
-            when (which) {
-                0 -> {
-                    // Handle CP-Cloud App Server selection
-                    binding.texturlsViews.text = CP_server
-                    getUrlBasedOnSpinnerText = CP_server
-                }
-
-                1 -> {
-                    binding.texturlsViews.text = API_Server
-                    getUrlBasedOnSpinnerText = API_Server
-                }
-            }
-            dialog.dismiss()
+        // Set the background of the AlertDialog to be transparent
+        if (alertDialog.window != null) {
+            alertDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
 
-        val dialog = builder.create()
-        dialog.show()
+        bindingCm.apply {
 
+            textApiServer.setOnClickListener {
+                binding.texturlsViews.text = CP_server
+                getUrlBasedOnSpinnerText = CP_server
+
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.Saved_Parthner_Name, CP_server)
+                editor.apply()
+
+                alertDialog.dismiss()
+            }
+
+
+            textCloudServer.setOnClickListener {
+                binding.texturlsViews.text = API_Server
+                getUrlBasedOnSpinnerText = API_Server
+
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.Saved_Parthner_Name, API_Server)
+                editor.apply()
+
+                alertDialog.dismiss()
+            }
+
+
+            imageCrossClose.setOnClickListener {
+                alertDialog.dismiss()
+            }
+
+            closeBs.setOnClickListener {
+                alertDialog.dismiss()
+            }
+
+
+        }
+
+
+        alertDialog.show()
     }
 
 
@@ -1461,19 +1584,63 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             val editor = myDownloadClass.edit()
 
             if (isNetworkAvailable()) {
-                if (!imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
-                    when (getUrlBasedOnSpinnerText) {
-                        CP_server -> {
-                            if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
-                                httpNetworkDownloadsMultiplePaths(
-                                    getFolderClo,
-                                    getFolderSubpath
-                                )
-                                editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo)
-                                editor.putString(
-                                    Constants.getSaveSubFolderInPutFiled,
-                                    getFolderSubpath
-                                )
+                if (!imagSwtichEnableManualOrNot.isChecked) {
+
+
+                    if (imagSwtichPartnerUrl.isChecked) {
+
+                        if (getUrlBasedOnSpinnerText.isNotEmpty()) {
+
+                            when (getUrlBasedOnSpinnerText) {
+                                CP_server -> {
+                                    if (getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty()) {
+                                        httpNetworkDownloadsMultiplePaths(
+                                            getFolderClo,
+                                            getFolderSubpath
+                                        )
+                                        editor.putString(
+                                            Constants.getSavedCLOImPutFiled,
+                                            getFolderClo
+                                        )
+                                        editor.putString(
+                                            Constants.getSaveSubFolderInPutFiled,
+                                            getFolderSubpath
+                                        )
+                                        editor.apply()
+
+                                    } else {
+                                        editTextCLOpath.error = "Input a valid path e.g CLO"
+                                        editTextSubPathFolder.error =
+                                            "Input a valid path e.g DE_MO_2021000"
+                                        showToastMessage("Fields can not be empty")
+                                    }
+                                }
+
+                                API_Server -> {
+                                    showToastMessage("No Logic For API Server Yet")
+
+                                }
+
+                            }
+
+                        } else {
+                            showToastMessage("Select Partner Url")
+                        }
+
+                    } else {
+
+                        val getFolderClo222 = binding.editTextCLOpath.text.toString().trim()
+                        val getFolderSubpath22 = binding.editTextSubPathFolder.text.toString().trim()
+
+                        var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+
+                        if (Saved_Domains_Urls.isNotEmpty()) {
+
+
+                            if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
+                                testAndDownLoad_My_API(getFolderClo222, getFolderSubpath22)
+                                editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
+                                editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath22)
                                 editor.apply()
 
                             } else {
@@ -1482,48 +1649,29 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                     "Input a valid path e.g DE_MO_2021000"
                                 showToastMessage("Fields can not be empty")
                             }
-                        }
-
-                        API_Server -> {
-                            showToastMessage("No Logic For API Server Yet")
-                        }
-
-                    }
-
-                }
-                //// enf of the main if
-            } else {
-                showToastMessage("No Internet Connection")
-            }
 
 
-            /// when the button is checked
-            if (isNetworkAvailable()) {
-                if (imagSwtichEnableManualOrNot.isChecked && isNetworkAvailable()) {
-                    when (getUrlBasedOnSpinnerText) {
-                        CP_server -> {
-
-                            val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
-                            if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
-                                httpNetSingleDwonload(editInputUrl)
-                                editor.putString(
-                                    Constants.getSavedEditTextInputSynUrlZip,
-                                    editInputUrl
-                                )
-                                editor.apply()
-
-                            } else {
-                                showToastMessage("Invalid url format")
-                                binding.editTextInputSynUrlZip.error = "Invalid url format"
-                            }
-
-                        }
-
-                        API_Server -> {
-                            showToastMessage("No Logic For API Server Yet")
+                        } else {
+                            showToastMessage("Select Custom Domain")
                         }
 
                     }
+                } else {
+
+                    val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
+                    if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
+                        httpNetSingleDwonload(editInputUrl)
+                        editor.putString(
+                            Constants.getSavedEditTextInputSynUrlZip,
+                            editInputUrl
+                        )
+                        editor.apply()
+
+                    } else {
+                        showToastMessage("Invalid url format")
+                        binding.editTextInputSynUrlZip.error = "Invalid url format"
+                    }
+
                 }
             } else {
                 showToastMessage("No Internet Connection")
@@ -1563,7 +1711,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 getFolderSubpath,
                                 "Zip",
                                 "App.zip",
-                                syncUrl
                             )
 
                             // save also to room data base
@@ -1608,7 +1755,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 getFolderSubpath,
                                 "Api",
                                 "update.csv",
-                                ""
                             )
 
                             val user =
@@ -1704,6 +1850,185 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
+    private fun testConnectionSetup_API_Test(getFolderClo: String, getFolderSubpath: String) {
+
+        showCustomProgressDialog("Testing connection")
+
+        binding.apply {
+
+            val Saved_Domains_Name = myDownloadClass.getString(Constants.Saved_Domains_Name, "").toString()
+            var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+
+
+            if (isNetworkAvailable()) {
+                // Find the index of "public/" in the URL
+                val publicIndex = Saved_Domains_Urls.indexOf("public/")
+                if (Saved_Domains_Urls.isNotEmpty() && publicIndex != -1) {
+                    // Find the index of the next "/" after "public/"
+                    val nextSlashIndex = Saved_Domains_Urls.indexOf("/", publicIndex + 7)
+                    if (nextSlashIndex != -1) {
+                        // Find the index of the following "/" after the nextSlashIndex
+                        val endSubpathIndex = Saved_Domains_Urls.indexOf("/", nextSlashIndex + 1)
+                        if (endSubpathIndex != -1) {
+                            // Construct the new URL by replacing everything between the nextSlashIndex and endSubpathIndex with the values from EditText fields
+                            Saved_Domains_Urls = Saved_Domains_Urls.substring(0, publicIndex + 7) + "$getFolderClo/" + getFolderSubpath
+
+                           // + Saved_Domains_Urls.substring(endSubpathIndex)
+
+                            Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
+                            showToastMessageLong(Saved_Domains_Urls)
+
+
+                            lifecycleScope.launch {
+                                try {
+                                    val result = checkUrlExistence(Saved_Domains_Urls)
+                                    if (result) {
+                                        showPopsForMyConnectionTest(getFolderClo, getFolderSubpath,
+                                            "Successful"
+                                        )
+
+                                        val user = User(
+                                            CLO = getFolderClo,
+                                            DEMO = getFolderSubpath,
+                                            EditUrl = ""
+                                        )
+                                        mUserViewModel.addUser(user)
+
+                                    } else {
+                                        showPopsForMyConnectionTest(
+                                            getFolderClo,
+                                            getFolderSubpath,
+                                            "Failed!"
+                                        )
+                                    }
+                                } finally {
+                                    customProgressDialog.dismiss()
+                                }
+                            }
+
+
+                        } else {
+                            //  showToastMessage("URL does not contain a valid subpath after 'public/'")
+                        }
+                    } else {
+                        // showToastMessage("URL does not contain a valid subpath after 'public/'")
+                    }
+                } else {
+                    showToastMessage("URL does not contain 'public/'")
+
+                    handler.postDelayed(Runnable {
+                        customProgressDialog.cancel()
+                    }, 1200)
+                }
+
+                //   Log.d("testConnectionSetup_API_Test", "result : $Saved_Domains_Urls")
+
+
+            } else {
+                showToastMessage("No Internet Connection")
+            }
+        }
+
+
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun testAndDownLoad_My_API(getFolderClo: String, getFolderSubpath: String) {
+
+        showCustomProgressDialog("Testing connection")
+
+        binding.apply {
+
+            val Saved_Domains_Name =
+                myDownloadClass.getString(Constants.Saved_Domains_Name, "").toString()
+            var Saved_Domains_Urls =
+                myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+
+            if (isNetworkAvailable()) {
+                // Find the index of "public/" in the URL
+                val publicIndex = Saved_Domains_Urls.indexOf("public/")
+                if (Saved_Domains_Urls.isNotEmpty() && publicIndex != -1) {
+                    // Find the index of the next "/" after "public/"
+                    val nextSlashIndex = Saved_Domains_Urls.indexOf("/", publicIndex + 7)
+                    if (nextSlashIndex != -1) {
+                        // Find the index of the following "/" after the nextSlashIndex
+                        val endSubpathIndex = Saved_Domains_Urls.indexOf("/", nextSlashIndex + 1)
+                        if (endSubpathIndex != -1) {
+                            // Construct the new URL by replacing everything between the nextSlashIndex and endSubpathIndex with the values from EditText fields
+                            Saved_Domains_Urls = Saved_Domains_Urls.substring(0, publicIndex + 7) + "$getFolderClo/" + getFolderSubpath
+
+                            // + Saved_Domains_Urls.substring(endSubpathIndex)
+
+                            Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
+                            showToastMessageLong(Saved_Domains_Urls)
+
+
+                            lifecycleScope.launch {
+                                try {
+                                    val result = checkUrlExistence(Saved_Domains_Urls)
+                                    if (result) {
+                                        startMyDownlaodsMutiplesPath(
+                                            Saved_Domains_Urls,
+                                            getFolderClo,
+                                            getFolderSubpath,
+                                            "Zip",
+                                            "App.zip",
+                                        )
+
+                                        // save also to room data base
+                                        val user =
+                                            User(
+                                                CLO = getFolderClo,
+                                                DEMO = getFolderSubpath,
+                                                EditUrl = ""
+                                            )
+                                        mUserViewModel.addUser(user)
+
+
+                                    } else {
+                                        showPopsForMyConnectionTest(
+                                            getFolderClo,
+                                            getFolderSubpath,
+                                            "Failed!"
+                                        )
+                                    }
+                                } finally {
+                                    handler.postDelayed(Runnable {
+                                        customProgressDialog.dismiss()
+                                    }, 900)
+                                }
+                            }
+
+
+                        } else {
+                            //  showToastMessage("URL does not contain a valid subpath after 'public/'")
+                        }
+                    } else {
+                        // showToastMessage("URL does not contain a valid subpath after 'public/'")
+                    }
+                } else {
+                    showToastMessage("URL does not contain 'public/'")
+
+                    handler.postDelayed(Runnable {
+                        customProgressDialog.cancel()
+                    }, 1200)
+                }
+
+                //   Log.d("testConnectionSetup_API_Test", "result : $Saved_Domains_Urls")
+
+
+            } else {
+                showToastMessage("No Internet Connection")
+            }
+        }
+
+
+
+    }
+
+
+
     @SuppressLint("MissingInflatedId", "SetTextI18n")
     private fun showPopsForMyConnectionTest(
         getFolderClo: String,
@@ -1756,7 +2081,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         getFolderSubpath: String,
         Zip: String,
         fileName: String,
-        syncUrl: String,
     ) {
 
         val threeFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
@@ -1827,21 +2151,20 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }
     }
 
+    private fun showToastMessageLong(messages: String) {
+
+        try {
+            Toast.makeText(applicationContext, messages, Toast.LENGTH_LONG).show()
+        } catch (_: Exception) {
+        }
+    }
+
 
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager =
             getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun doOperation() {
-
-        testAndDownLoadZipConnection()
-
-
     }
 
 
@@ -1882,7 +2205,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
-            if (get_savedIntervals !=0L) {
+            if (get_savedIntervals != 0L) {
                 editior.putLong(Constants.getTimeDefined, get_savedIntervals)
 
             } else {
@@ -1915,10 +2238,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val editor = myDownloadClass.edit()
             editor.putLong(Constants.downloadKey, downloadReferenceMain)
-           // editor.remove(Constants.SAVED_CN_TIME)  -- may be to be removed later
+            // editor.remove(Constants.SAVED_CN_TIME)  -- may be to be removed later
             editor.apply()
-
-
 
 
             val intent = Intent(applicationContext, DownlodPagger::class.java)
@@ -1942,7 +2263,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             stopService(Intent(this@ReSyncActivity, NotificationService::class.java))
             stopService(Intent(this@ReSyncActivity, OnChnageService::class.java))
-
 
 
         }, 1000)
@@ -2088,7 +2408,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     editor.putString(Constants.getFolderClo, fil_CLO)
                     editor.putString(Constants.getFolderSubpath, fil_DEMO)
-                    // editor.putString(Constants.PASS_URL, url)
                     editor.putString(Constants.syncUrl, url)
                     editor.putString(
                         Constants.Tapped_OnlineORoffline,
@@ -2121,6 +2440,109 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         alertDialog.show()
     }
 
+
+    @SuppressLint("SetTextI18n")
+    private fun show_API_Urls() {
+        custom_ApI_Dialog = Dialog(this)
+        val bindingCm = CustomApiUrlLayoutBinding.inflate(LayoutInflater.from(this))
+        custom_ApI_Dialog.setContentView(bindingCm.root)
+        custom_ApI_Dialog.setCancelable(true)
+        custom_ApI_Dialog.setCanceledOnTouchOutside(true)
+        custom_ApI_Dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        if (isNetworkAvailable()) {
+            bindingCm.progressBar2.visibility = View.VISIBLE
+            bindingCm.textTryAgin.visibility = View.GONE
+            bindingCm.textErrorText.visibility = View.GONE
+            mApiViewModel.fetchApiUrls()
+        } else {
+            bindingCm.apply {
+                progressBar2.visibility = View.GONE
+                textErrorText.visibility = View.VISIBLE
+                textTryAgin.visibility = View.VISIBLE
+                textErrorText.text = "No Internet Connection"
+            }
+
+        }
+
+        bindingCm.apply {
+
+
+            recyclerApi.adapter = adapterApi
+            recyclerApi.layoutManager = LinearLayoutManager(applicationContext)
+
+            mApiViewModel.apiUrls.observe(this@ReSyncActivity, Observer { apiUrls ->
+                apiUrls?.let {
+                    adapterApi.setData(it.DomainUrls)
+
+                    if (it.DomainUrls.isNotEmpty()) {
+                        textErrorText.visibility = View.GONE
+                        progressBar2.visibility = View.GONE
+                        textTryAgin.visibility = View.GONE
+
+                    } else {
+                        textErrorText.visibility = View.VISIBLE
+                        textTryAgin.visibility = View.VISIBLE
+                        textErrorText.text = "Opps! No Data Found"
+                    }
+
+                }
+            })
+
+
+            imageCrossClose.setOnClickListener {
+                custom_ApI_Dialog.dismiss()
+            }
+
+            closeBs.setOnClickListener {
+                custom_ApI_Dialog.dismiss()
+            }
+
+
+            textTryAgin.setOnClickListener {
+                if (isNetworkAvailable()) {
+                    bindingCm.progressBar2.visibility = View.VISIBLE
+                    bindingCm.textTryAgin.visibility = View.GONE
+                    bindingCm.textErrorText.visibility = View.GONE
+                    mApiViewModel.fetchApiUrls()
+                } else {
+                    bindingCm.apply {
+                        progressBar2.visibility = View.GONE
+                        textErrorText.visibility = View.VISIBLE
+                        textTryAgin.visibility = View.VISIBLE
+                        textErrorText.text = "No Internet Connection"
+                        showToastMessage("No Internet Connection")
+                    }
+
+                }
+            }
+
+        }
+
+
+        custom_ApI_Dialog.show()
+
+    }
+
+    override fun onItemClicked(domainUrl: DomainUrl) {
+
+        val name = domainUrl.name + ""
+        val urls = domainUrl.url + ""
+        if (name.isNotEmpty()) {
+            binding.texturlsViews.text = name
+        }
+
+        // Note - later you can use the url as well , the  name is displayed on textview
+        if (name.isNotEmpty() && urls.isNotEmpty()) {
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.Saved_Domains_Name, name)
+            editor.putString(Constants.Saved_Domains_Urls, urls)
+            editor.apply()
+        }
+
+
+        custom_ApI_Dialog.dismiss()
+    }
 
 
 }
