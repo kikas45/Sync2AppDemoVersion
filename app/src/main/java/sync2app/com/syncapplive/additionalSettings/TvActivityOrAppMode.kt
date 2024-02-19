@@ -139,10 +139,61 @@ class TvActivityOrAppMode : AppCompatActivity() {
 
 
     private fun doOperation() {
-        if (hasPermission == false){
-            showPop_For_Grant_Permsiion()
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (hasPermission == false){
+                showPop_For_Grant_Permsiion()
+            }
+        }else{
+            isReadToMoveForKower()
         }
     }
+
+    private fun isReadToMoveForKower() {
+        binding.apply {
+            val sharedBiometric: SharedPreferences =
+                applicationContext.getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE)
+            val editor = sharedBiometric.edit()
+
+            if (navigateAppMolde == true ) {
+
+                val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
+                val file = File(directoryPath)
+                delete(file)
+
+                startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
+                editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
+                editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
+                editor.apply()
+                finish()
+
+                showToastMessage("Please wait")
+
+
+            }
+
+
+            if (navigateTVMode == true ) {
+
+                val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
+                val file = File(directoryPath)
+                delete(file)
+
+                //  startActivity(Intent(applicationContext, ReSyncActivity::class.java))
+                startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
+                editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.TV_Mode)
+                editor.putString(Constants.CALL_RE_SYNC_MANGER, Constants.CALL_RE_SYNC_MANGER)
+                editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
+                editor.apply()
+                finish()
+
+                showToastMessage("Please wait")
+
+            }
+
+        }
+    }
+
+
 
 
     private fun checkMultiplePermission(): Boolean {
