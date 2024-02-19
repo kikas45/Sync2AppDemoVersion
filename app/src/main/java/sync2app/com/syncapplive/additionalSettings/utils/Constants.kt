@@ -147,5 +147,17 @@ class Constants {
         const val t_180min = 180L
         const val t_240min = 240L
 
+
+
+        // For Gmail
+
+
+
+        const val Sender_email_Address = "synapp4@gmail.com"
+        const val Sender_email_Password = "tnpudfyfdrlrdgxe"
+        const val mailhost = "smtp.gmail.com"
+        const val Sender_name = "synapp4@gmail.com"
+        const val Subject = "Reset Password"
+
     }
 }

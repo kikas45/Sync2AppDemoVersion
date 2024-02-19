@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,13 +15,12 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.method.PasswordTransformationMethod;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,16 +28,18 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 import sync2app.com.syncapplive.additionalSettings.AdditionalSettingsActivity;
+import sync2app.com.syncapplive.additionalSettings.MainHelpers.GMailSender;
 import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
@@ -55,6 +58,8 @@ public class SettingsActivity extends AppCompatActivity {
     String Admin_Password = "1234";
     Handler handler = new Handler();
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +71,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         MyApplication.incrementRunningActivities();
+
+
 
         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
         String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
@@ -93,7 +100,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -107,6 +113,31 @@ public class SettingsActivity extends AppCompatActivity {
         finish();
 
 
+    }
+    private boolean isConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+
+        if (connectivityManager != null) {
+            networkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+
+    private void sendMessage(String reciverEmail, String myMessage) {
+        Thread sender = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    GMailSender sender = new GMailSender(Constants.Sender_email_Address, Constants.Sender_email_Password);
+                    sender.sendMail(Constants.Subject, "Your Password is\n" + myMessage, Constants.Sender_name, reciverEmail);
+                } catch ( Exception e ) {
+                    Log.e("mylog", "Error: " + e.getMessage());
+                }
+            }
+        });
+        sender.start();
     }
 
     @SuppressLint("InflateParams")
@@ -646,16 +677,32 @@ public class SettingsActivity extends AppCompatActivity {
             textForGetPassword.setText("Input registered email");
         }
 
+        String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
         textContinuPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String editTextText = editTextInputUrl.getText().toString().trim();
                 if (isValidEmail(editTextText)) {
-                    //    showToastMessage("An email is sent to " + editTextText);
+
                     hideKeyBoard(editTextInputUrl);
-                    alertDialog.dismiss();
-                    showPopEmailForget();
+                    String get_email = editTextInputUrl.getText().toString();
+
+                    if (isConnected()) {
+                        if (!isSavedEmail.isEmpty()) {
+                            sendMessage(isSavedEmail, simpleAdminPassword);
+                        } else {
+                            sendMessage(get_email, simpleAdminPassword);
+                        }
+                        showPopEmailForget();
+                        alertDialog.dismiss();
+
+                    }else {
+
+                        showToastMessage("No internet Connection");
+                     //   showExitConfirmationDialog();
+                    }
+
                 } else {
                     hideKeyBoard(editTextInputUrl);
                     editTextInputUrl.setError("Wrong email format");
@@ -676,6 +723,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         alertDialog.show();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -720,6 +768,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         // Apply actions to views in the binding
         binding.textEmailSendOkayBtn.setOnClickListener(view -> {
+
             alertDialog.dismiss();
             showExitConfirmationDialog();
         });
@@ -1018,10 +1067,6 @@ public class SettingsActivity extends AppCompatActivity {
                 });
 
             }
-
-
-
-
 
 
             if (useOfflineFolderOrNot != null) {

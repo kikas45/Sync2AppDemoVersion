@@ -134,6 +134,14 @@ dependencies {
       implementation 'androidx.navigation:navigation-ui-ktx:2.2.2'
 
 
+
+    // for gmail sending
+
+    implementation files('libs/activation.jar')
+    implementation files('libs/additional.jar')
+    implementation files('libs/mail.jar')
+
+
 }
 
 
