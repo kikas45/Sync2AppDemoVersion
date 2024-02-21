@@ -134,6 +134,7 @@ public class SettingsActivity extends AppCompatActivity {
                     sender.sendMail(Constants.Subject, "Your Password is\n" + myMessage, Constants.Sender_name, reciverEmail);
                 } catch ( Exception e ) {
                     Log.e("mylog", "Error: " + e.getMessage());
+                    showToastMessage("Email Sent Successfully");
                 }
             }
         });
@@ -142,7 +143,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     @SuppressLint("InflateParams")
     private void showExitConfirmationDialog() {
-
 
         CustomConfirmExitDialogBinding binding = CustomConfirmExitDialogBinding.inflate(getLayoutInflater());
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -654,10 +654,11 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
 
-        final EditText editTextInputUrl = binding.eitTextEnterPassword;
+        final TextView editTextInputUrl = binding.eitTextEnterPassword;
         final TextView textContinuPassword = binding.textContinuPassword;
         final ImageView imgCloseDialog2 = binding.imgCloseDialogForegetPassword;
         final TextView textForGetPassword = binding.textForGetPassword;
+        final View divider2 = binding.divider2;
 
         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
         String imgIsemailVisbile = sharedBiometric.getString(Constants.imagEnableEmailVisisbility, "");
@@ -669,44 +670,35 @@ public class SettingsActivity extends AppCompatActivity {
         if (imgIsemailVisbile.equals(Constants.imagEnableEmailVisisbility)) {
             if (!isSavedEmail.isEmpty()) {
                 editTextInputUrl.setText(isSavedEmail + "");
-                editTextInputUrl.setEnabled(false);
-                textForGetPassword.setText("Continue with  registered email");
+               // textForGetPassword.setText("Default Email");
+                divider2.setVisibility(View.VISIBLE);
+                editTextInputUrl.setVisibility(View.VISIBLE);
             }
         } else {
             editTextInputUrl.setEnabled(true);
-            textForGetPassword.setText("Input registered email");
+         //   textForGetPassword.setText("Default Email");
+            divider2.setVisibility(View.GONE);
+            editTextInputUrl.setVisibility(View.GONE);
         }
+
 
         String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
 
         textContinuPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String editTextText = editTextInputUrl.getText().toString().trim();
-                if (isValidEmail(editTextText)) {
-
-                    hideKeyBoard(editTextInputUrl);
-                    String get_email = editTextInputUrl.getText().toString();
-
+                if (!isSavedEmail.isEmpty() && isValidEmail(isSavedEmail)) {
                     if (isConnected()) {
-                        if (!isSavedEmail.isEmpty()) {
-                            sendMessage(isSavedEmail, simpleAdminPassword);
-                        } else {
-                            sendMessage(get_email, simpleAdminPassword);
-                        }
+                        sendMessage(isSavedEmail, simpleAdminPassword);
                         showPopEmailForget();
                         alertDialog.dismiss();
 
                     }else {
-
                         showToastMessage("No internet Connection");
-                     //   showExitConfirmationDialog();
                     }
 
                 } else {
-                    hideKeyBoard(editTextInputUrl);
-                    editTextInputUrl.setError("Wrong email format");
-                    showToastMessage("Wrong email format");
+                    showToastMessage("Default Email Reminder not found");
                 }
             }
         });
@@ -717,7 +709,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View v) {
                 alertDialog.dismiss();
                 showExitConfirmationDialog();
-                hideKeyBoard(editTextInputUrl);
+               // hideKeyBoard(editTextInputUrl);
             }
         });
 

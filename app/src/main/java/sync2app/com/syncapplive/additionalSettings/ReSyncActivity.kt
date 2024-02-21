@@ -166,6 +166,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         setContentView(binding.root)
 
 
+
         manager = applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager?
 
         MyApplication.incrementRunningActivities()
@@ -401,10 +402,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
                             testConnectionSetup_API_Test(getFolderClo222, getFolderSubpath22)
                             editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
-                            editor.putString(
-                                Constants.getSaveSubFolderInPutFiled,
-                                getFolderSubpath22
-                            )
+                            editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath22)
                             editor.apply()
 
                         } else {
@@ -767,6 +765,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             imagSwtichEnableSyncOnFilecahnge.setOnCheckedChangeListener { compoundButton, isValued ->
                 val editor = sharedBiometric.edit()
+                second_cancel_download()
+               // showToastMessage("Download cancel")
 
                 if (compoundButton.isChecked) {
                     editor.putString(
@@ -1122,7 +1122,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 val editor = myDownloadClass.edit()
                 editor.putLong(Constants.getTimeDefined, Constants.t_2min)
                 editor.apply()
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1149,7 +1150,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_5min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1175,7 +1177,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_10min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1202,7 +1205,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_15min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1227,7 +1231,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_30min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1254,7 +1259,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1281,7 +1287,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_120min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1309,7 +1316,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_180min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1336,7 +1344,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_240min)
                 editor.apply()
 
-                if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1471,7 +1480,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     editor.apply()
 
 
-                    if (ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                    if (ServiceUtils.foregroundServiceRunning(applicationContext)
+                        || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
                         val intent = Intent(Constants.UpdateTimmer_Reciver)
                         sendBroadcast(intent)
 
@@ -1875,6 +1885,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                            // + Saved_Domains_Urls.substring(endSubpathIndex)
 
+                            val get_ModifiedUrl = Saved_Domains_Urls
+                            val editor = myDownloadClass.edit()
+                            editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
+                            editor.apply()
+
                             Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
                             showToastMessageLong(Saved_Domains_Urls)
 
@@ -1959,6 +1974,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             Saved_Domains_Urls = Saved_Domains_Urls.substring(0, publicIndex + 7) + "$getFolderClo/" + getFolderSubpath
 
                             // + Saved_Domains_Urls.substring(endSubpathIndex)
+
+                            val get_ModifiedUrl = Saved_Domains_Urls
+                            val editor = myDownloadClass.edit()
+                            editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
+                            editor.apply()
 
                             Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
                             showToastMessageLong(Saved_Domains_Urls)
@@ -2543,6 +2563,46 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         custom_ApI_Dialog.dismiss()
     }
+
+    private fun second_cancel_download() {
+        try {
+
+            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+            val getFolderClo = myDownloadClass.getString("getFolderClo", "")
+            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "")
+            val Zip = myDownloadClass.getString("Zip", "")
+            val fileName = myDownloadClass.getString("fileName", "")
+
+
+            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+
+            val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
+
+            val myFile = File(directoryPath, fileName.toString())
+            delete(myFile)
+
+
+            if (download_ref !=- 15L){
+                val query = DownloadManager.Query()
+                query.setFilterById(download_ref)
+                val c =
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+                if (c.moveToFirst()) {
+                    manager!!.remove(download_ref)
+                    val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                    editor.remove(Constants.downloadKey)
+                    editor.apply()
+                }
+
+            }
+
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
+
+
+
 
 
 }

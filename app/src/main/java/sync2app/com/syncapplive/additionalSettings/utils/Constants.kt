@@ -10,20 +10,20 @@ class Constants {
         const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST = 2
 
 
-
-        const val BASE_URL = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
-
-
-        const val BASE_URL_API = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
+        const val BASE_URL =
+            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
 
 
+        const val BASE_URL_API =
+            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
 
-        const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
 
-      //  const val LAUNCH_ONLINE_URL =  "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/App/index.html"
+        const val BASE_URL_ON_CHANGE =
+            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
+
+        //  const val LAUNCH_ONLINE_URL =  "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/App/index.html"
 
         const val BASE_URL_UR = "http://jsonplaceholder.typicode.com"
-
 
 
         const val SHARED_BIOMETRIC = "SHARED_BIOMETRIC"
@@ -94,12 +94,14 @@ class Constants {
         const val getSavedEditTextInputSynUrlZip = "getSavedEditTextInputSynUrlZip"
         const val showDownloadSyncStatus = "showDownloadSyncStatus"
 
-        const val  MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
-        const val  SAVE_NAVIGATION = "SAVE_NAVIGATION"
-        const val  CALL_RE_SYNC_MANGER = "CALL_RE_SYNC_MANGER"
+        const val MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
+        const val SAVE_NAVIGATION = "SAVE_NAVIGATION"
+        const val CALL_RE_SYNC_MANGER = "CALL_RE_SYNC_MANGER"
 
         const val shortcut_website_id = "id_website"
         const val shortcut_messages_id = "id_messages"
+
+        const val get_ModifiedUrl = "get_ModifiedUrl"
 
         const val imgAllowFingerPrint = "imgAllowFingerPrint"
         const val imgEnablePassword = "imgEnablePassword"
@@ -135,6 +137,8 @@ class Constants {
         const val PR_NO_CHange = "PR: No Change"
 
 
+        const val Launching_Content = "Launching Content"
+
 
         const val t_1min = 1L
         const val t_2min = 2L
@@ -148,15 +152,19 @@ class Constants {
         const val t_240min = 240L
 
 
-
         // For Gmail
 
 
+        //  const val Sender_email_Address = "synapp4@gmail.com"
+        //  const val Sender_email_Password = "tnpudfyfdrlrdgxe"
 
-        const val Sender_email_Address = "synapp4@gmail.com"
-        const val Sender_email_Password = "tnpudfyfdrlrdgxe"
+        const val Sender_email_Address = "SmtpSync2app@gmail.com"
+      //  const val Sender_email_Password = "lgelaxjlwbuazzcm"
+        const val Sender_email_Password = "uhsxlgyoqhwsaihs"
+
+
         const val mailhost = "smtp.gmail.com"
-        const val Sender_name = "synapp4@gmail.com"
+        const val Sender_name = "sync2App"
         const val Subject = "Reset Password"
 
     }

@@ -721,7 +721,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         //// Iniliazing the webview
 
         try {
-            showToast(mContext, "Display Launching");
+            showToast(mContext, Constants.Launching_Content);
 
             SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
 
@@ -818,9 +818,19 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         // showToast(mContext, "launched online checked to launch single url appended");
 
                         if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
-                            String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
-                            load_Launch_Online_Mode(vurl);
-                            //  showToast(mContext, "single url appended 11");
+
+
+                            String url = my_DownloadClass.getString(Constants.get_ModifiedUrl, "");
+                            String imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "");
+
+                            if (imagSwtichPartnerUrl.equals(Constants.imagSwtichPartnerUrl)) {
+                                String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                load_Launch_Online_Mode(vurl);
+                            } else {
+                                String appended_url =     url + "/App/index.html";
+                                load_Launch_Online_Mode(appended_url);
+                            }
+
                         } else {
                             showPopForTVConfiguration(Constants.badRequest);
                             //  showToast(mContext, "single url appended 22");
@@ -1621,9 +1631,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-            String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
+            //  String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
 
-            if (get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
+            if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
 
                 long getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0);
 
@@ -1633,25 +1643,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     textSynIntervals.setText("ST: --");
                 }
 
-
                 if (!get_progress.isEmpty()) {
                     textStatusProcess.setText(get_progress + "");
                 } else {
-                    textStatusProcess.setText("PR:--");
-                }
-
-
-            } else {
-
-
-                if (!get_progress.isEmpty()) {
-                    textStatusProcess.setText(get_progress + "");
-                }
-
-
-                if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
                     textStatusProcess.setText("PR: Running");
-                    textSynIntervals.setText("ST: 5 Mins");
                 }
 
 
@@ -3077,7 +3072,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
         alertDialog.show();
-
 
 
     }

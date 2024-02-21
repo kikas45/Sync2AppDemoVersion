@@ -116,10 +116,8 @@ class PasswordActivity : AppCompatActivity() {
 
             /// is email visibility allowed
 
-            val imgEmailVisibility =
-                sharedBiometric.getString(Constants.imagEnableEmailVisisbility, "")
-            imagEnableEmailVisisbility.isChecked =
-                imgEmailVisibility.equals(Constants.imagEnableEmailVisisbility)
+            val imgEmailVisibility = sharedBiometric.getString(Constants.imagEnableEmailVisisbility, "")
+            imagEnableEmailVisisbility.isChecked = imgEmailVisibility.equals(Constants.imagEnableEmailVisisbility)
 
 
             if (imgEmailVisibility.equals(Constants.imagEnableEmailVisisbility)) {
@@ -128,6 +126,25 @@ class PasswordActivity : AppCompatActivity() {
 
                 textEmailVisbility.setText("Disable email visibility")
             }
+
+
+            imagEnableEmailVisisbility.setOnCheckedChangeListener { compoundButton, isValued ->
+                val editor = sharedBiometric.edit()
+                if (compoundButton.isChecked) {
+                    editor.putString(Constants.imagEnableEmailVisisbility, "imagEnableEmailVisisbility")
+                    editor.apply()
+                    textEmailVisbility.setText("Enable email visibility")
+
+                } else {
+                    editor.remove("imagEnableEmailVisisbility")
+                    editor.apply()
+                    textEmailVisbility.setText("Disable email visibility")
+
+                }
+            }
+
+
+
 
 
             old_and_new_PasswordTextChanger()

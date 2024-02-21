@@ -112,13 +112,15 @@ class DownlodPagger : AppCompatActivity() {
 
 
 
+
             binding.textContinuPassword222222.setOnClickListener {
                 if (isValid == true) {
-                    showToastMessage(" Please Wait! for Download & Zip Extraction to be completed")
+                    showToastMessage("Please wait for download of media")
                 }else{
-                    showToastMessage("If Zip does not Extract in Few Minutes, Try Re-Download ..")
+                    showToastMessage("Please wait for download of media")
                 }
             }
+
 
 
             imagePauseDownload.setOnClickListener {
@@ -659,17 +661,21 @@ private fun showToastMessage(messages: String) {
             delete(myFile)
 
 
-            val query = DownloadManager.Query()
-            query.setFilterById(download_ref)
-            val c =
-                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
-            if (c.moveToFirst()) {
-                manager!!.remove(download_ref)
-                val editor: SharedPreferences.Editor = sharedP.edit()
-                editor.remove(Constants.downloadKey)
-                editor.apply()
-                onBackPressed()
+            if (download_ref !=- 15L){
+                val query = DownloadManager.Query()
+                query.setFilterById(download_ref)
+                val c =
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+                if (c.moveToFirst()) {
+                    manager!!.remove(download_ref)
+                    val editor: SharedPreferences.Editor = sharedP.edit()
+                    editor.remove(Constants.downloadKey)
+                    editor.apply()
+                    onBackPressed()
+                }
+
             }
+
         } catch (ignored: java.lang.Exception) {
         }
     }

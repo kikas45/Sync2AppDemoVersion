@@ -139,7 +139,7 @@ class TvActivityOrAppMode : AppCompatActivity() {
 
 
     private fun doOperation() {
-        if (Build.VERSION.SDK_INT >= 33) {
+        if (Build.VERSION.SDK_INT >= 30) {
             if (hasPermission == false){
                 showPop_For_Grant_Permsiion()
             }

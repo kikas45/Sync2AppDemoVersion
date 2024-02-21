@@ -75,13 +75,9 @@ class NotificationService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        manager = getApplicationContext()
-            .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        manager = getApplicationContext().getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
-        registerReceiver(
-            downloadCompleteReceiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        )
+        registerReceiver(downloadCompleteReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         val filter222 = IntentFilter(Constants.UpdateTimmer_Reciver)
         registerReceiver(UpdateTimmerBroad_Reciver, filter222)
@@ -583,7 +579,7 @@ class NotificationService : Service() {
                 countdownTimer?.cancel()
 
                 SyncIntervalDownload();
-                showToastMessage("Update Sync Time")
+                showToastMessage("Sync Time Updated")
                 synReapeatTime()
 
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {

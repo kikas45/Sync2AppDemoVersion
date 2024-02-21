@@ -78,10 +78,12 @@ class OnChnageService : Service() {
 
         manager = getApplicationContext().getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
-        registerReceiver(
-            downloadCompleteReceiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-        )
+        registerReceiver(downloadCompleteReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+
+
+        val filter222 = IntentFilter(Constants.UpdateTimmer_Reciver)
+        registerReceiver(UpdateTimmerBroad_Reciver, filter222)
+
 
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
@@ -103,13 +105,26 @@ class OnChnageService : Service() {
 
         val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
         val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
-
         val editor = myDownloadClass.edit()
 
 
+        lauchWebView = true
+
         countdownTimerServerUpdater?.cancel()
-        attemptRequestAgain(5)
-        startOrResumeTimer(5)
+      //  attemptRequestAgain(5)
+      //  startOrResumeTimer(5)
+
+
+
+        val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
+        val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
+        val fileName = myDownloadClass.getString("fileName", "").toString()
+        val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
+
+
+        if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty() ) {
+            SyncIntervalDownload()
+            synReapeatTime();
 
         if (networkInfo != null && networkInfo!!.isConnected) {
 
@@ -120,17 +135,19 @@ class OnChnageService : Service() {
                 editor.putString(Constants.SynC_Status, Constants.PR_running)
                 editor.apply()
 
-
                 val intent22 = Intent(Constants.RECIVER_PROGRESS)
                 sendBroadcast(intent22)
-
-
-
             }
 
         } else {
             showToastMessage("No internet Connection")
         }
+
+        } else {
+            showToastMessage("Invalid Path Format")
+        }
+
+
 
         return START_STICKY
     }
@@ -152,6 +169,7 @@ class OnChnageService : Service() {
 
         countdownTimerServerUpdater?.cancel()
         unregisterReceiver(downloadCompleteReceiver)
+        unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
 
     }
@@ -641,18 +659,24 @@ class OnChnageService : Service() {
 
                     if (networkInfo != null && networkInfo!!.isConnected) {
 
-                        editor.putString(Constants.SynC_Status, Constants.PR_running)
-                        editor.apply()
-
-                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        sendBroadcast(intent22)
-
-
                         // start the time again
                         val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent11)
 
-                        fetchData()
+
+                        if (lauchWebView == true) {
+
+                            editor.putString(Constants.SynC_Status, Constants.PR_running)
+                            editor.apply()
+
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22)
+
+                            fetchData()
+                            lauchWebView = false
+                        }else{
+                            showToastMessage("Sync Already in Progress")
+                        }
 
 
                     } else {
@@ -708,6 +732,62 @@ class OnChnageService : Service() {
         }
     }
 
+
+
+
+    private val UpdateTimmerBroad_Reciver: BroadcastReceiver = object : BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != null && intent.action == Constants.UpdateTimmer_Reciver) {
+                countdownTimerServerUpdater?.cancel()
+
+                SyncIntervalDownload();
+                showToastMessage("Sync Time Updated")
+                synReapeatTime()
+
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                    startMyOwnForeground()
+
+                } else {
+                    startForeground(1, Notification())
+
+                }
+
+
+            }
+        }
+    }
+
+
+    private fun SyncIntervalDownload() {
+        val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
+
+        if (getTimeDefined != 0L) {
+
+            attemptRequestAgain(getTimeDefined)
+
+            if (networkInfo != null && networkInfo!!.isConnected) {
+                // showToastMessage("System will Sync in $getTimeDefined minute")
+            } else {
+                showToastMessage("No internet Connection")
+            }
+
+        }
+
+
+    }
+
+
+    private fun synReapeatTime() {
+        val my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE)
+
+        val getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0)
+
+        if (getTimeDefined != 0L) {
+            startOrResumeTimer(getTimeDefined)
+        }
+
+    }
 
 
 
