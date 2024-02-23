@@ -1,6 +1,8 @@
 package sync2app.com.syncapplive;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -50,6 +53,7 @@ import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
 import sync2app.com.syncapplive.databinding.CustomEmailSucessLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomForgetPasswordEmailLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomSettingsPageBinding;
+import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -57,6 +61,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     String Admin_Password = "1234";
     Handler handler = new Handler();
+
+    private Dialog customProgressDialog;
 
 
 
@@ -125,21 +131,70 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    private void sendMessage(String reciverEmail, String myMessage) {
+    private void sendMessage(final String reciverEmail, final String myMessage) {
+
+
+        showCustomProgressDialog("Sending Email");
+
         Thread sender = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     GMailSender sender = new GMailSender(Constants.Sender_email_Address, Constants.Sender_email_Password);
                     sender.sendMail(Constants.Subject, "Your Password is\n" + myMessage, Constants.Sender_name, reciverEmail);
-                } catch ( Exception e ) {
+                    Log.d("mylog", "Email Sent Successfully");
+
+                    // Show toast message on UI thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            show_Pop_Up_Email_Sent_Sucessful("Email sent", "Kindly check email to view password");
+                            customProgressDialog.dismiss();
+                        }
+                    });
+
+
+                } catch (Exception e) {
                     Log.e("mylog", "Error: " + e.getMessage());
-                    showToastMessage("Email Sent Successfully");
+
+                    // Show toast message on UI thread
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            show_Pop_Up_Email_Sent_Sucessful("Failed!", "Unable to send email");
+                            customProgressDialog.dismiss();
+                        }
+                    });
                 }
             }
         });
         sender.start();
     }
+
+
+
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private void showCustomProgressDialog(String message) {
+        try {
+            customProgressDialog = new Dialog(this);
+            ProgressDialogLayoutBinding binding = ProgressDialogLayoutBinding.inflate(LayoutInflater.from(this));
+            customProgressDialog.setContentView(binding.getRoot());
+            customProgressDialog.setCancelable(false);
+            customProgressDialog.setCanceledOnTouchOutside(false);
+            customProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+            binding.textLoading.setText(message);
+
+            binding.imgCloseDialog.setVisibility(View.GONE);
+            binding.imagSucessful.setBackground(getApplicationContext().getDrawable(R.drawable.ic_email_read_24));
+
+            customProgressDialog.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @SuppressLint("InflateParams")
     private void showExitConfirmationDialog() {
@@ -690,7 +745,6 @@ public class SettingsActivity extends AppCompatActivity {
                 if (!isSavedEmail.isEmpty() && isValidEmail(isSavedEmail)) {
                     if (isConnected()) {
                         sendMessage(isSavedEmail, simpleAdminPassword);
-                        showPopEmailForget();
                         alertDialog.dismiss();
 
                     }else {
@@ -741,7 +795,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     @SuppressLint("MissingInflatedId")
-    private void showPopEmailForget() {
+    private void show_Pop_Up_Email_Sent_Sucessful(String title, String body) {
         // Inflate the custom layout
         CustomEmailSucessLayoutBinding binding = CustomEmailSucessLayoutBinding.inflate(getLayoutInflater());
 
@@ -765,9 +819,15 @@ public class SettingsActivity extends AppCompatActivity {
             showExitConfirmationDialog();
         });
 
+        binding.textSucessful.setText(title);
+        binding.textBodyMessage.setText(body);
+
         // Show the AlertDialog
         alertDialog.show();
     }
+
+
+
 
 
     private void showToastMessage(String messages) {

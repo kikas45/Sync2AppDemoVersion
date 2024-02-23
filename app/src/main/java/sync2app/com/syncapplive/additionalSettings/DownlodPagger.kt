@@ -180,7 +180,7 @@ class DownlodPagger : AppCompatActivity() {
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun run() {
             getDownloadStatus()
-            myHandler!!.postDelayed(this, 500)
+            myHandler.postDelayed(this, 500)
         }
     }
 
@@ -349,8 +349,10 @@ class DownlodPagger : AppCompatActivity() {
         } catch (ignored: java.lang.Exception) {
         }
         if (myHandler != null) {
-            myHandler!!.postDelayed(runnable, 500)
+            myHandler.postDelayed(runnable, 500)
         }
+
+
     }
 
 
@@ -358,7 +360,7 @@ class DownlodPagger : AppCompatActivity() {
         super.onPause()
         try {
             if (myHandler != null) {
-                myHandler!!.removeCallbacks(runnable)
+                myHandler.removeCallbacks(runnable)
             }
         } catch (ignored: java.lang.Exception) {
         }

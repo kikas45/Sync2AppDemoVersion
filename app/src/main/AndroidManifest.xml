@@ -47,7 +47,9 @@
         android:theme="@style/Theme.RemoteWebViewLight"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
-
+        <activity
+            android:name=".additionalSettings.ResultActivity"
+            android:exported="false" />
         <activity
             android:name=".additionalSettings.FileExplorerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
@@ -84,24 +86,20 @@
             android:name=".additionalSettings.ReSyncActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
-
         <activity
             android:name=".additionalSettings.PasswordActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
             android:name=".additionalSettings.scanutil.CaptureAct"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:screenOrientation="fullSensor"
             android:stateNotNeeded="true"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@style/zxing_CaptureTheme" />
-
         <activity
             android:name=".additionalSettings.QRSanActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
-
-
         <activity
             android:name=".Splash"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
@@ -120,54 +118,47 @@
         <activity android:name=".WelcomeSlider" />
         <activity
             android:name=".additionalSettings.TvActivityOrAppMode"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-<!--        android:alwaysRetainTaskState="true"-->
-
-     <!--   android:hardwareAccelerated="false"-->
-
+        </activity> <!-- android:alwaysRetainTaskState="true" -->
+        <!-- android:hardwareAccelerated="false" -->
         <activity
             android:name=".WebActivity"
-            android:hardwareAccelerated="true"
             android:alwaysRetainTaskState="true"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false"
+            android:hardwareAccelerated="true"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustResize"
             tools:ignore="AppLinkUrlError">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-<!--                <data
+                <!--
+                    <data
                     android:host="@string/deeplink_url"
                     android:scheme="https"
                     tools:ignore="AppLinkUrlError" />
                 <data
                     android:host="@string/deeplink_url"
                     android:scheme="http"
-                    tools:ignore="AppLinkUrlError" />-->
+                    tools:ignore="AppLinkUrlError" />
+                -->
 
-
-                <data android:scheme="https"/>
-                <data android:host="@string/deeplink_url"/>
-
-                <data android:scheme="http"/>
-                <data android:host="@string/deeplink_url"/>
-
-
-
+                <data android:scheme="https" />
+                <data android:host="@string/deeplink_url" />
+                <data android:scheme="http" />
+                <data android:host="@string/deeplink_url" />
             </intent-filter>
-
         </activity>
-
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -210,7 +201,6 @@
             android:name=".additionalSettings.myService.NotificationService"
             android:directBootAware="true"
             android:exported="false" />
-
         <service
             android:name=".additionalSettings.myService.OnChnageService"
             android:directBootAware="true"

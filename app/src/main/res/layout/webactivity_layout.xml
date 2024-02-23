@@ -200,6 +200,9 @@
         ads:layout_constraintEnd_toEndOf="parent"
         ads:layout_constraintStart_toStartOf="parent">
 
+
+
+
         <TextView
             android:id="@+id/textSyncMode"
             android:layout_width="wrap_content"
@@ -226,9 +229,8 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textDownladByes"
+            app:layout_constraintStart_toEndOf="@+id/imageWiFiOFF"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -275,6 +277,49 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/textSyncMode"
             app:layout_constraintTop_toTopOf="@+id/textSyncMode" />
+
+        <TextView
+            android:id="@+id/textDownladByes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:elegantTextHeight="true"
+            android:gravity="center"
+            android:text="0%"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageWiFiOFF"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="16dp"
+            android:padding="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_wifi_no_internet"
+            app:tint="@android:color/holo_green_light" />
+
+
+        <ImageView
+            android:id="@+id/imageWiFiOn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="16dp"
+            android:padding="5dp"
+            android:visibility="invisible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_bad_wifi"
+            app:tint="@android:color/holo_red_light" />
+
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

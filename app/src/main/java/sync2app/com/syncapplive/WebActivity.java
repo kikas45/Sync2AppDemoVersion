@@ -78,6 +78,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
@@ -140,6 +141,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -190,6 +192,7 @@ import java.util.Objects;
 
 import sync2app.com.syncapplive.additionalSettings.QRSanActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -221,6 +224,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     //  private CountDownTimer countdownTimer222;
     private long remainingTime = 0;
 
+
+    private ConnectivityReceiver connectivityReceiver;
+
+    private Handler myHandler;
 
     protected ObservableWebView webView;
     RelativeLayout drawer_menu;
@@ -370,6 +377,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     ImageView bottomToolbar_img_5;
     ImageView bottomToolbar_img_6;
     ImageView bottomtoolbar_btn_7;
+    ImageView imageWiFiOn;
+    ImageView imageWiFiOFF;
     RelativeLayout x_toolbar;
     ConstraintLayout bottom_server_layout;
     ImageView drawer_menu_btn;
@@ -403,7 +412,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     TextView textSynIntervals;
     TextView countDownTime;
     TextView textLocation;
-    // TextView textStatusProcess;
+    TextView textStatusProcess;
 
     private WebView mWebviewPop;
     private AdView mAdView;
@@ -468,6 +477,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         setContentView(R.layout.webactivity_layout);
 
+        myHandler = new Handler(Looper.getMainLooper());
 
         mContext = WebActivity.this;
         //  AdvancedControls.CompletionReciever(WebActivity.this);
@@ -568,6 +578,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         textSynIntervals = findViewById(R.id.textSynIntervals);
         countDownTime = findViewById(R.id.countDownTime);
         textLocation = findViewById(R.id.textLocation);
+        textStatusProcess = findViewById(R.id.textStatusProcess);
+
+        imageWiFiOFF = findViewById(R.id.imageWiFiOFF);
+        imageWiFiOn = findViewById(R.id.imageWiFiOn);
 
 
         //   textSystemState = findViewById(R.id.textSystemState);
@@ -637,40 +651,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         });
 
 
-
-/*
-        webx_layout.setOnTouchListener(new View.OnTouchListener() {
-
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        dX = v.getX() - event.getRawX();
-                        dY = v.getY() - event.getRawY();
-
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-                        v.setY(event.getRawY() + dY);
-                        v.setX(event.getRawX() + dX);
-                        lastAction = MotionEvent.ACTION_MOVE;
-
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        if (lastAction == MotionEvent.ACTION_DOWN)
-                            break;
-
-
-                }
-                return true;
-            }
-        });
-*/
 
 
         swipeView.setEnabled(false);
@@ -827,7 +807,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                 String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
                                 load_Launch_Online_Mode(vurl);
                             } else {
-                                String appended_url =     url + "/App/index.html";
+                                String appended_url = url + "/App/index.html";
                                 load_Launch_Online_Mode(appended_url);
                             }
 
@@ -1438,13 +1418,50 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     @Override
     public void onPause() {
         isAppOpen = false;
+
+        try {
+            if (myHandler != null) {
+                myHandler.removeCallbacks(runnableDn);
+            }
+        } catch ( Exception ignored ) {
+            // Ignore the exception
+        }
+
         super.onPause();
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("SetTextI18n")
     @Override
     public void onResume() {
+
+
+        try {
+            if (myHandler != null) {
+                myHandler.removeCallbacks(runnableDn);
+            }
+
+            TextView textDownladByes = findViewById(R.id.textDownladByes);
+            MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
+
+            downloadManager.getDownloadStatus(textDownladByes, getApplicationContext());
+
+
+            if (myHandler != null) {
+                myHandler.postDelayed(runnableDn, 500);
+            }
+
+
+            connectivityReceiver = new ConnectivityReceiver();
+
+            IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(connectivityReceiver, intentFilter);
+
+
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
 
 
         try {
@@ -1589,72 +1606,87 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     @SuppressLint("SetTextI18n")
     private void updateSyncView() {
-        try {
 
-            SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
-
-            SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-
-            TextView textStatusProcess = findViewById(R.id.textStatusProcess);
-
-            String getFolderClo = my_DownloadClass.getString(Constants.getFolderClo, "");
-            String getFolderSubpath = my_DownloadClass.getString(Constants.getFolderSubpath, "");
-            String zip = my_DownloadClass.getString("Zip", "");
-            String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
-
-            myDownloadStatus();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
 
-            Long get_SavedTime = my_DownloadClass.getLong(Constants.SAVED_CN_TIME, 0);
+                try {
 
-            if (get_SavedTime == 0) {
-                //
-            } else {
-                restoreTimerState();
+                    SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
 
-            }
+                    SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
 
+                    //   TextView textStatusProcess = findViewById(R.id.textStatusProcess);
 
-            String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
+                    String getFolderClo = my_DownloadClass.getString(Constants.getFolderClo, "");
+                    String getFolderSubpath = my_DownloadClass.getString(Constants.getFolderSubpath, "");
+                    String zip = my_DownloadClass.getString("Zip", "");
+                    String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
 
-            if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
-                textLocation.setText(finalFolderPath);
-            } else {
-                textLocation.setText("LN: --");
-            }
+                    myDownloadStatus();
 
 
-            if (!zip.isEmpty()) {
-                textSyncMode.setText("SM: " + zip);
-            } else {
-                textSyncMode.setText("SM: --");
-            }
+                    Long get_SavedTime = my_DownloadClass.getLong(Constants.SAVED_CN_TIME, 0);
+
+                    if (get_SavedTime == 0) {
+                        //
+                    } else {
+                        restoreTimerState();
+
+                    }
 
 
-            //  String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
+                    String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
 
-            if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
+                        textLocation.setText(finalFolderPath);
+                    } else {
+                        textLocation.setText("LN: --");
+                    }
 
-                long getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0);
 
-                if (getTimeDefined != 0L) {
-                    textSynIntervals.setText("ST: " + getTimeDefined + " Mins");
-                } else {
-                    textSynIntervals.setText("ST: --");
+                    if (!zip.isEmpty()) {
+                        textSyncMode.setText("SM: " + zip);
+                    } else {
+                        textSyncMode.setText("SM: --");
+                    }
+
+
+                    //  String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
+
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
+
+                        long getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0);
+
+                        if (getTimeDefined != 0L) {
+                            textSynIntervals.setText("ST: " + getTimeDefined + " Mins");
+                        } else {
+                            textSynIntervals.setText("ST: --");
+                        }
+
+                        if (isConnected()) {
+                            if (!get_progress.isEmpty()) {
+                                textStatusProcess.setText(get_progress + "");
+                            } else {
+                                textStatusProcess.setText("PR: Running");
+                            }
+                        }else {
+                            textStatusProcess.setText("No Internet");
+                        }
+
+
+
+                    }
+
+
+                } catch ( Exception e ) {
                 }
 
-                if (!get_progress.isEmpty()) {
-                    textStatusProcess.setText(get_progress + "");
-                } else {
-                    textStatusProcess.setText("PR: Running");
-                }
-
-
             }
+        });
 
-
-        } catch ( Exception e ) {
-        }
 
     }
 
@@ -1693,6 +1725,16 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         } catch ( Exception e ) {
         }
 
+
+        try {
+            if (myHandler != null) {
+                myHandler.removeCallbacks(runnableDn);
+            }
+        } catch ( Exception ignored ) {
+            // Ignore the exception
+        }
+
+
         super.onDestroy();
     }
 
@@ -1721,6 +1763,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             unregisterReceiver(Send_Time_Update_Reciver);
             unregisterReceiver(Reciver_Progress);
 
+            unregisterReceiver(connectivityReceiver);
+
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
@@ -1731,6 +1775,16 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         } catch ( Exception e ) {
         }
+
+
+        try {
+            if (myHandler != null) {
+                myHandler.removeCallbacks(runnableDn);
+            }
+        } catch ( Exception ignored ) {
+            // Ignore the exception
+        }
+
 
         super.onStop();
     }
@@ -3131,19 +3185,36 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     private void myDownloadStatus() {
 
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
-
-        TextView textStatusProcess = findViewById(R.id.textStatusProcess);
-        String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
+                if (isConnected()) {
 
 
-        if (!get_progress.isEmpty()) {
-            textStatusProcess.setText(get_progress + "");
-        } else {
-            textStatusProcess.setText("PR: --");
-        }
+                try {
+                    SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
 
+                    //   TextView textStatusProcess = findViewById(R.id.textStatusProcess);
+                    String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
+
+
+                    if (!get_progress.isEmpty()) {
+                        textStatusProcess.setText(get_progress + "");
+                    } else {
+                        textStatusProcess.setText("PR: Running");
+                    }
+                } catch ( Exception e ) {
+                }
+
+
+                }else {
+                    textStatusProcess.setText("No Internet");
+                }
+
+
+            }
+        });
 
     }
 
@@ -3195,6 +3266,92 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         };
         countdownTimer.start();
     }
+
+    private Runnable runnableDn = new Runnable() {
+        @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+        @Override
+        public void run() {
+            TextView textDownladByes = findViewById(R.id.textDownladByes);
+            MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
+
+            downloadManager.getDownloadStatus(textDownladByes, getApplicationContext());
+            myHandler.postDelayed(this, 500);
+        }
+    };
+
+
+    public class ConnectivityReceiver extends BroadcastReceiver {
+
+        @SuppressLint("SetTextI18n")
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            try {
+                ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+                if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+
+                    try {
+
+                        int SPLASH_TIME_OUT = 1000;
+                        textStatusProcess.setText("Connecting..");
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    imageWiFiOn.setVisibility(View.GONE);
+                                    imageWiFiOFF.setVisibility(View.VISIBLE);
+
+                                    myDownloadStatus();
+
+
+
+                                } catch ( Exception e ) {
+                                }
+
+                            }
+                        }, SPLASH_TIME_OUT);
+
+
+                    } catch ( Exception ignored ) {
+                    }
+
+
+                } else {
+
+                    // No internet Connection
+                    try {
+                        int SPLASH_TIME_OUT = 1000;
+                        imageWiFiOn.setVisibility(View.VISIBLE);
+                        imageWiFiOFF.setVisibility(View.GONE);
+                        textStatusProcess.setText("No Internet");
+
+
+                    } catch ( Exception e ) {
+                    }
+
+                }
+
+                // No internet Connection
+
+
+            } catch ( Exception ignored ) {
+            }
+        }
+
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+
+        if (connectivityManager != null) {
+            networkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
 
 
 }

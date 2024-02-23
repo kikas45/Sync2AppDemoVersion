@@ -135,6 +135,7 @@ class Constants {
         const val PR_Zip_error = "PR: Zip error"
         const val PR_Change_Found = "PR: Change Found"
         const val PR_NO_CHange = "PR: No Change"
+        const val PR_Sync_Pro = "Sync in Progress"
 
 
         const val Launching_Content = "Launching Content"

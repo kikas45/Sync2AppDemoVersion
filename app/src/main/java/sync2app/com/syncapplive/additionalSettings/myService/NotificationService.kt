@@ -212,15 +212,24 @@ class NotificationService : Service() {
 
     private fun makeAPIRequest() {
 
+        val connectivityManager22: ConnectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
 
-        val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
-        val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
-        val Zip = myDownloadClass.getString("Zip", "").toString()
-        val fileName = myDownloadClass.getString("fileName", "").toString()
-        val Extracted = myDownloadClass.getString("Extracted", "").toString()
-        val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
+        if (networkInfo22 != null && networkInfo22.isConnected) {
 
-        download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
+
+            val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
+            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
+            val Zip = myDownloadClass.getString("Zip", "").toString()
+            val fileName = myDownloadClass.getString("fileName", "").toString()
+            val Extracted = myDownloadClass.getString("Extracted", "").toString()
+            val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
+
+            download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
+
+        }else{
+            showToastMessage("No Internet Connection")
+        }
     }
 
 
@@ -314,11 +323,16 @@ class NotificationService : Service() {
     private fun SyncIntervalDownload() {
         val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
+        val connectivityManager22: ConnectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
+
+
+
         if (getTimeDefined != 0L) {
 
             attemptRequestAgain(getTimeDefined)
 
-            if (networkInfo != null && networkInfo!!.isConnected) {
+            if (networkInfo22 != null && networkInfo22.isConnected) {
                // showToastMessage("System will Sync in $getTimeDefined minute")
             } else {
                 showToastMessage("No internet Connection")
@@ -368,6 +382,7 @@ class NotificationService : Service() {
                         intent22.putExtra(Constants.SynC_Status, Constants.PR_Zip_error)
                         sendBroadcast(intent22)
 
+                        lauchWebView = true
 
                         val editor = myDownloadClass.edit()
                         editor.putString(Constants.SynC_Status, Constants.PR_Zip_error)
@@ -451,6 +466,7 @@ class NotificationService : Service() {
             withContext(Dispatchers.Main) {
                 showToastMessage(Constants.Error_during_zip_extraction)
                 stratMyACtivity()
+                lauchWebView = true
 
             }
         }
@@ -500,6 +516,7 @@ class NotificationService : Service() {
 
     private fun attemptRequestAgain(minutes: Long) {
         val milliseconds = minutes * 60 * 1000 // Convert minutes to
+        val editor = myDownloadClass.edit()
 
         countdownTimer = object : CountDownTimer(milliseconds, 1000) {
             @SuppressLint("SetTextI18n")
@@ -507,38 +524,62 @@ class NotificationService : Service() {
                 try {
                     countdownTimer?.cancel()
 
-                    if (lauchWebView == true) {
+                    val connectivityManager22: ConnectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                    val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
 
-                        // for loading/refresh Webview after sync
-                        //  val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
-                        //  sendBroadcast(intent)
+                    if (networkInfo22 != null && networkInfo22.isConnected) {
 
-                        // for getting states
-                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        intent22.putExtra(Constants.SynC_Status, Constants.PR_Refresh)
-                        sendBroadcast(intent22)
+                        if (lauchWebView == true) {
 
-                        val editor = myDownloadClass.edit()
-                        editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
-                        editor.apply()
+                            // for loading/refresh Webview after sync
+                            //  val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
+                            //  sendBroadcast(intent)
 
-                        makeAPIRequest()
+                            // for getting states
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            intent22.putExtra(Constants.SynC_Status, Constants.PR_Refresh)
+                            sendBroadcast(intent22)
+
+                            val editor = myDownloadClass.edit()
+                            editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
+                            editor.apply()
+
+                            makeAPIRequest()
+
+                            synReapeatTime()
+                            lauchWebView = false
+
+                            val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                            sendBroadcast(intent)
+
+                        } else {
+                            showToastMessage("Sync Already in Progress")
+                            //  showToastMessage("DL error")
+                            synReapeatTime()
+
+                            val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                            sendBroadcast(intent)
+
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22)
+
+
+                        }
+
+                    }else{
+                        showToastMessage("No Internet Connection")
+
+                      //  editor.putString(Constants.SynC_Status, "Error Network")
+                      //  editor.apply()
+
+                    //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                     //   sendBroadcast(intent22)
 
                         synReapeatTime()
-                        lauchWebView = false
 
                         val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent)
 
-                    } else {
-                        showToastMessage("Sync Already in Progress")
-                        //  showToastMessage("DL error")
-                        synReapeatTime()
-
-                        val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
-                        sendBroadcast(intent)
-
-                        val get_key = myDownloadClass.getLong(Constants.downloadKey, 0L)
                     }
 
                     attemptRequestAgain(minutes)
@@ -653,6 +694,8 @@ class NotificationService : Service() {
         } catch (ignored: java.lang.Exception) {
         }
     }
+
+
 
 
 }

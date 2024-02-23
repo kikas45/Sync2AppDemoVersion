@@ -47,7 +47,8 @@ class OnChnageService : Service() {
     }
 
 
-    var lauchWebView = false
+    var isDownloading = false
+    var isRxtracting = false
 
     var manager: DownloadManager? = null
 
@@ -78,7 +79,10 @@ class OnChnageService : Service() {
 
         manager = getApplicationContext().getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
-        registerReceiver(downloadCompleteReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
+        registerReceiver(
+            downloadCompleteReceiver,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        )
 
 
         val filter222 = IntentFilter(Constants.UpdateTimmer_Reciver)
@@ -107,13 +111,9 @@ class OnChnageService : Service() {
         val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
         val editor = myDownloadClass.edit()
 
-
-        lauchWebView = true
-
         countdownTimerServerUpdater?.cancel()
-      //  attemptRequestAgain(5)
-      //  startOrResumeTimer(5)
-
+        //  attemptRequestAgain(5)
+        //  startOrResumeTimer(5)
 
 
         val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
@@ -122,26 +122,26 @@ class OnChnageService : Service() {
         val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
 
 
-        if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty() ) {
+        if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty()) {
             SyncIntervalDownload()
             synReapeatTime();
 
-        if (networkInfo != null && networkInfo!!.isConnected) {
+            if (networkInfo != null && networkInfo!!.isConnected) {
 
-            if (currentTime.isEmpty() || severTime.isEmpty()) {
-                getServerTimeFromJson()
-              //  showToastMessage("Checking")
+                if (currentTime.isEmpty() || severTime.isEmpty()) {
+                    getServerTimeFromJson()
+                    //  showToastMessage("Checking")
 
-                editor.putString(Constants.SynC_Status, Constants.PR_running)
-                editor.apply()
+                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                    editor.apply()
 
-                val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                sendBroadcast(intent22)
+                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                    sendBroadcast(intent22)
+                }
+
+            } else {
+                showToastMessage("No internet Connection")
             }
-
-        } else {
-            showToastMessage("No internet Connection")
-        }
 
         } else {
             showToastMessage("Invalid Path Format")
@@ -159,7 +159,7 @@ class OnChnageService : Service() {
 
 
     override fun onDestroy() {
-      //  Toast.makeText(this, "Sync DN Cancelled", Toast.LENGTH_SHORT).show()
+        //  Toast.makeText(this, "Sync DN Cancelled", Toast.LENGTH_SHORT).show()
 
         val editor = myDownloadClass.edit()
         editor.remove(Constants.SynC_Status)
@@ -171,6 +171,9 @@ class OnChnageService : Service() {
         unregisterReceiver(downloadCompleteReceiver)
         unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
+
+        second_cancel_download()
+
 
     }
 
@@ -194,31 +197,32 @@ class OnChnageService : Service() {
     private fun startMyOwnForeground() {
 
 
-         var   newsTitle = "Sync on Change"
+        var newsTitle = "Sync on Change"
 
-            val builder = NotificationCompat.Builder(applicationContext, "ChannelId")
-                .setSmallIcon(R.drawable.img_logo_icon)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentText(newsTitle)
-                .setAutoCancel(true)
+        val builder = NotificationCompat.Builder(applicationContext, "ChannelId")
+            .setSmallIcon(R.drawable.img_logo_icon)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentText(newsTitle)
+            .setAutoCancel(true)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val notificationManager: NotificationManager =
-                    applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager: NotificationManager =
+                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-                val importance = NotificationManager.IMPORTANCE_DEFAULT
-                val channel = NotificationChannel("ChannelId", "News", importance)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("ChannelId", "News", importance)
 
-                notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel)
 
-                startForeground(2, builder.build())
-            }
-
+            startForeground(2, builder.build())
         }
 
+    }
 
-    private fun makeAPIRequest() {
 
+    private fun makeADownload() {
+
+        isDownloading = true
 
         val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
         val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
@@ -292,7 +296,7 @@ class OnChnageService : Service() {
 
             repEatMyProcess = true
 
-         //   showToastMessage("Downloading")
+            //   showToastMessage("Downloading")
 
             editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
             editor.apply()
@@ -319,8 +323,6 @@ class OnChnageService : Service() {
         }
         return false
     }
-
-
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -357,7 +359,16 @@ class OnChnageService : Service() {
 
                     withContext(Dispatchers.Main) {
 
-                          showToastMessage("Zip file could not be found")
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        intent22.putExtra(Constants.SynC_Status, Constants.PR_Zip_error)
+                        sendBroadcast(intent22)
+
+                        isDownloading = false
+
+
+                        val editor = myDownloadClass.edit()
+                        editor.putString(Constants.SynC_Status, Constants.PR_Zip_error)
+                        editor.apply()
 
                     }
                 }
@@ -370,7 +381,9 @@ class OnChnageService : Service() {
     suspend fun extractZip(zipFilePath: String, destinationPath: String) {
         try {
             withContext(Dispatchers.Main) {
-              //  showToastMessage("Zip extraction started")
+                //  showToastMessage("Zip extraction started")
+
+                isRxtracting = true
 
                 showToastMessage(Constants.Extracting)
 
@@ -438,7 +451,6 @@ class OnChnageService : Service() {
                 editor.apply()
 
 
-
             }
 
         } catch (e: Exception) {
@@ -458,12 +470,16 @@ class OnChnageService : Service() {
 
             myHandler.postDelayed(Runnable {
 
-                lauchWebView = true
+
+                isDownloading = false
+
+                isRxtracting = false
+
                 showToastMessage("Refreshing..");
                 val intent = Intent(Constants.SEND_SERVICE_NOTIFY)
                 sendBroadcast(intent)
 
-            },500)
+            }, 500)
 
 
             myHandler.postDelayed(Runnable {
@@ -479,15 +495,9 @@ class OnChnageService : Service() {
             }, 1000)
 
 
-
-
         } catch (_: Exception) {
         }
     }
-
-
-
-
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -502,7 +512,7 @@ class OnChnageService : Service() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
 
-                    //    showToastMessage("fetch data")
+                        //    showToastMessage("fetch data")
                         val getvalue = response.body()?.last_updated.toString()
 
 
@@ -510,11 +520,12 @@ class OnChnageService : Service() {
                         editor.apply()
 
 
-                        val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+                        val currentTime =
+                            myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
                         val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
 
-                        if (currentTime == severTime){
-                        //    showToastMessage("This same ")
+                        if (currentTime == severTime) {
+                            //    showToastMessage("This same ")
 
                             editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
                             editor.apply()
@@ -524,34 +535,90 @@ class OnChnageService : Service() {
                             sendBroadcast(intent22)
 
 
-
                             // newly added
                             myHandler.postDelayed(Runnable {
 
-                                editor.putString(Constants.SynC_Status, Constants.PR_running)
-                                editor.apply()
+                                if (isDownloading == false) {
+                                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                                    editor.apply()
+                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                                    sendBroadcast(intent22)
 
+                                } else {
+                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                                    sendBroadcast(intent22)
+
+                                    showToastMessage("Sync Already in Progress")
+
+
+                                    if (isRxtracting == true) {
+                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Extracting
+                                        )
+                                        editor.apply()
+
+                                    } else {
+                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Downloading
+                                        )
+                                        editor.apply()
+
+                                    }
+
+                                }
+
+
+                            }, 1300)
+
+
+                        } else {
+                            //  showToastMessage("Different")
+
+                            if (isDownloading == false) {
+                                makeADownload()
+
+                                getServerTimeFromJson()
+
+                                editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
+                                editor.apply()
 
                                 val intent22 = Intent(Constants.RECIVER_PROGRESS)
                                 sendBroadcast(intent22)
-                            },1300)
 
 
+                            } else {
+                                showToastMessage("Sync Already in Progress")
+
+                                myHandler.postDelayed(Runnable {
+                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                                    sendBroadcast(intent22)
+
+                                    if (isRxtracting == true) {
+                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Extracting
+                                        )
+                                        editor.apply()
+
+                                    } else {
+                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Downloading
+                                        )
+                                        editor.apply()
+
+                                    }
 
 
-                        }else{
-                          //  showToastMessage("Different")
-                            getServerTimeFromJson()
+                                }, 1300)
 
-                            makeAPIRequest()
-
-                            editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
-                            editor.apply()
-
-
-                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                            sendBroadcast(intent22)
-
+                            }
 
                         }
 
@@ -568,20 +635,20 @@ class OnChnageService : Service() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                //    showToastMessage("Error: ${e.message}")
+                    //    showToastMessage("Error: ${e.message}")
 
                     showToastMessage("No internet Connection")
 
-                    editor.putString(Constants.SynC_Status,"No internet Connection")
-                    editor.apply()
+                 //   editor.putString(Constants.SynC_Status, "Error Network")
+                 //   editor.apply()
 
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
+                 //   val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                 //   sendBroadcast(intent22)
+
                 }
             }
         }
     }
-
 
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -596,7 +663,7 @@ class OnChnageService : Service() {
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
 
-                       // showToastMessage("Server time")
+                        // showToastMessage("Server time")
                         val getvalue = response.body()?.last_updated.toString()
 
 
@@ -618,15 +685,15 @@ class OnChnageService : Service() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                 //   showToastMessage("Error: ${e.message}")
+                    //   showToastMessage("Error: ${e.message}")
 
-                 //   showToastMessage("No internet Connection")
+                    //   showToastMessage("No internet Connection")
 
-                    editor.putString(Constants.SynC_Status,"No internet Connection")
-                    editor.apply()
+                    //     editor.putString(Constants.SynC_Status, "No internet Connection")
+                    //   editor.apply()
 
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
+                 //   val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                 //   sendBroadcast(intent22)
 
                 }
             }
@@ -648,6 +715,12 @@ class OnChnageService : Service() {
         val editor = myDownloadClass.edit()
 
 
+        val connectivityManager22: ConnectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
+
+
+
         countdownTimerServerUpdater = object : CountDownTimer(milliseconds, 1000) {
             @SuppressLint("SetTextI18n")
             override fun onFinish() {
@@ -657,36 +730,34 @@ class OnChnageService : Service() {
                     startOrResumeTimer(minutes)
 
 
-                    if (networkInfo != null && networkInfo!!.isConnected) {
+                    if (networkInfo22 != null && networkInfo22.isConnected) {
 
                         // start the time again
                         val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent11)
 
+                        fetchData()
 
-                        if (lauchWebView == true) {
 
-                            editor.putString(Constants.SynC_Status, Constants.PR_running)
-                            editor.apply()
-
-                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                            sendBroadcast(intent22)
-
-                            fetchData()
-                            lauchWebView = false
-                        }else{
-                            showToastMessage("Sync Already in Progress")
-                        }
+                        editor.putString(Constants.SynC_Status, Constants.PR_running)
+                        editor.apply()
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        sendBroadcast(intent22)
 
 
                     } else {
                         showToastMessage("No internet Connection")
 
-                        editor.putString(Constants.SynC_Status,"No internet Connection")
-                        editor.apply()
 
-                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        sendBroadcast(intent22)
+                      //  editor.putString(Constants.SynC_Status, "Error Network")
+                     //   editor.apply()
+
+                    //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                     //   sendBroadcast(intent22)
+
+                        val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                        sendBroadcast(intent11)
+
 
                     }
 
@@ -711,7 +782,7 @@ class OnChnageService : Service() {
                     }
                     val displayText =
                         String.format("CD: %d:%02d", minutesUntilFinished, remainingSeconds)
-                       // showToastMessage(displayText)
+                    // showToastMessage(displayText)
 
                 } catch (ignored: java.lang.Exception) {
                 }
@@ -719,7 +790,6 @@ class OnChnageService : Service() {
         }
         countdownTimerServerUpdater?.start()
     }
-
 
 
     private fun startOrResumeTimer(minutes: Long) {
@@ -731,8 +801,6 @@ class OnChnageService : Service() {
             editor.apply()
         }
     }
-
-
 
 
     private val UpdateTimmerBroad_Reciver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -789,6 +857,46 @@ class OnChnageService : Service() {
 
     }
 
+
+    private fun second_cancel_download() {
+        try {
+
+            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+            val getFolderClo = myDownloadClass.getString("getFolderClo", "")
+            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "")
+            val Zip = myDownloadClass.getString("Zip", "")
+            val fileName = myDownloadClass.getString("fileName", "")
+
+
+            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+
+            val directoryPath =
+                Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
+
+            val myFile = File(directoryPath, fileName.toString())
+            delete(myFile)
+
+
+            if (download_ref != -15L) {
+                val query = DownloadManager.Query()
+                query.setFilterById(download_ref)
+                val c =
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                        query
+                    )
+                if (c.moveToFirst()) {
+                    manager!!.remove(download_ref)
+                    val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                    editor.remove(Constants.downloadKey)
+                    editor.apply()
+                }
+
+            }
+
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
 
 
 }

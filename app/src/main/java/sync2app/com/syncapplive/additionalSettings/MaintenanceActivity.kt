@@ -43,9 +43,6 @@ class MaintenanceActivity : AppCompatActivity() {
     private lateinit var progressBarPref: ProgressBar
     private lateinit var downloadBytes: TextView
 
-    private val myHandler: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
 
 
     private val sharedBiometric: SharedPreferences by lazy {
@@ -272,153 +269,10 @@ class MaintenanceActivity : AppCompatActivity() {
         }
     }
 
-    private val runnable: Runnable = object : Runnable {
-        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-        override fun run() {
-            getDownloadStatus()
-            myHandler!!.postDelayed(this, 500)
-        }
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    @SuppressLint("SetTextI18n")
-    fun getDownloadStatus() {
-        try {
-
-            val download_ref = sharedP.getLong(Constants.downloadKey, -15)
-            val query = DownloadManager.Query()
-            query.setFilterById(download_ref)
-            val c =
-                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
-                    query
-                )
-            if (c!!.moveToFirst()) {
-                @SuppressLint("Range") val bytes_downloaded =
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
-                        .toLong()
-                @SuppressLint("Range") val bytes_total =
-                    c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)).toLong()
-                val dl_progress =
-                    (bytes_downloaded.toDouble() / bytes_total.toDouble() * 100f).toInt()
-                progressBarPref.setProgress(dl_progress)
-                downloadBytes.setText(
-                    bytesIntoHumanReadable(
-                        bytes_downloaded.toString().toLong()
-                    ) + "/" + bytesIntoHumanReadable(bytes_total.toString().toLong())
-                )
-
-            }
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
-
-    private fun bytesIntoHumanReadable(bytes: Long): String? {
-        val kilobyte: Long = 1024
-        val megabyte = kilobyte * 1024
-        val gigabyte = megabyte * 1024
-        val terabyte = gigabyte * 1024
-        return if (bytes >= 0 && bytes < kilobyte) {
-            "$bytes B"
-        } else if (bytes >= kilobyte && bytes < megabyte) {
-            (bytes / kilobyte).toString() + " KB"
-        } else if (bytes >= megabyte && bytes < gigabyte) {
-            (bytes / megabyte).toString() + " MB"
-        } else if (bytes >= gigabyte && bytes < terabyte) {
-            (bytes / gigabyte).toString() + " GB"
-        } else if (bytes >= terabyte) {
-            (bytes / terabyte).toString() + " TB"
-        } else {
-            bytes.toString() + ""
-        }
-    }
-
-
-    @SuppressLint("MissingInflatedId")
-    private fun showPoPDownloadProgress() {
-
-        val bindingCM: CustomShowDownloadProgressBinding =
-            CustomShowDownloadProgressBinding.inflate(layoutInflater)
-        val alertDialogBuilder = android.app.AlertDialog.Builder(this)
-        alertDialogBuilder.setView(bindingCM.root)
-
-        val alertDialog = alertDialogBuilder.create()
-
-        alertDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-        progressBarPref = bindingCM.progressDownloadInfo
-        downloadBytes = bindingCM.downloadBytes
-
-        bindingCM.apply {
-
-            val getFolderClo = sharedP.getString("getFolderClo", "").toString()
-            val getFolderSubpath = sharedP.getString("getFolderSubpath", "").toString()
-            val Zip = sharedP.getString("Zip", "").toString()
-            val fileName = sharedP.getString("fileName", "").toString()
-
-
-            val threePath = "$getFolderClo/$getFolderSubpath/$Zip\n In Progress"
-            textTitleDownloading.text = threePath
-            textTitleFileName.text = fileName
-
-
-            textCancel.setOnClickListener {
-                alertDialog.dismiss()
-            }
-        }
-
-        alertDialog.show()
-
-
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    @SuppressLint("SetTextI18n")
-    override fun onResume() {
-        super.onResume()
-        getDownloadStatus()
-
-        try {
-            if (myHandler != null) {
-                myHandler!!.removeCallbacks(runnable)
-            }
-        } catch (ignored: java.lang.Exception) {
-        }
-        if (myHandler != null) {
-            myHandler!!.postDelayed(runnable, 500)
-        }
-    }
-
-
-    override fun onPause() {
-        super.onPause()
-        try {
-            if (myHandler != null) {
-                myHandler!!.removeCallbacks(runnable)
-            }
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        try {
-            if (myHandler != null) {
-                myHandler!!.removeCallbacks(runnable)
-            }
-
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
-
 
     override fun onDestroy() {
         super.onDestroy()
         try {
-            if (myHandler != null) {
-                myHandler!!.removeCallbacks(runnable)
-            }
             MyApplication.decrementRunningActivities()
         } catch (ignored: java.lang.Exception) {
         }

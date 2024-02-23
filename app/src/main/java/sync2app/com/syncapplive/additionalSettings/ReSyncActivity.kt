@@ -1891,7 +1891,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             editor.apply()
 
                             Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
-                            showToastMessageLong(Saved_Domains_Urls)
+                          //  showToastMessageLong(Saved_Domains_Urls)
 
 
                             lifecycleScope.launch {
@@ -1940,7 +1940,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             } else {
-                showToastMessage("No Internet Connection")
+              //  showToastMessage("No Internet Connection")
             }
         }
 
@@ -1981,7 +1981,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             editor.apply()
 
                             Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
-                            showToastMessageLong(Saved_Domains_Urls)
+                        //    showToastMessageLong(Saved_Domains_Urls)
 
 
                             lifecycleScope.launch {
@@ -2028,7 +2028,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         // showToastMessage("URL does not contain a valid subpath after 'public/'")
                     }
                 } else {
-                    showToastMessage("URL does not contain 'public/'")
+                //    showToastMessage("URL does not contain 'public/'")
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
