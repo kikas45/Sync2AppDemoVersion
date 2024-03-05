@@ -172,7 +172,7 @@ class OnChnageService : Service() {
         unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
 
-        second_cancel_download()
+    //    second_cancel_download()
 
 
     }

@@ -76,7 +76,6 @@ import static sync2app.com.syncapplive.constants.splashUrl;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.DownloadManager;
 import android.app.ProgressDialog;
@@ -120,8 +119,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
+import android.webkit.DownloadListener;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
+import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceResponse;
@@ -172,6 +173,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -187,11 +193,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 
-import sync2app.com.syncapplive.additionalSettings.QRSanActivity;
-import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.QrPages.QRSanActivity;
 import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
@@ -232,6 +236,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     protected ObservableWebView webView;
     RelativeLayout drawer_menu;
     public View.OnClickListener imgClk = new View.OnClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.Q)
         @SuppressLint("NonConstantResourceId")
         @Override
         public void onClick(View v) {
@@ -546,6 +551,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
         drawerItem7.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void onClick(View view) {
                 ShowHideViews(drawer_menu);
@@ -584,9 +590,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         imageWiFiOn = findViewById(R.id.imageWiFiOn);
 
 
-        //   textSystemState = findViewById(R.id.textSystemState);
-
-
         webView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -604,8 +607,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourApp::MyWakelockTag");
         wakeLock.acquire();
 
-
         web_button.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.Q)
             @Override
             public void onClick(View v) {
                 // Handle click event here
@@ -649,8 +652,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 return true;
             }
         });
-
-
 
 
         swipeView.setEnabled(false);
@@ -948,6 +949,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
         webView.setWebViewClient(new AdvancedWebViewClient());
         webView.setWebChromeClient(new AdvancedWebChromeClient());
+        webView.setDownloadListener(new Downloader());
 
         WebView.setWebContentsDebuggingEnabled(true);
 
@@ -1010,6 +1012,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
         webView.setWebViewClient(new AdvancedWebViewClient());
         webView.setWebChromeClient(new AdvancedWebChromeClient());
+        webView.setDownloadListener(new Downloader());
 
         WebView.setWebContentsDebuggingEnabled(true);
 
@@ -1081,6 +1084,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
                 webView.setWebViewClient(new WebActivity.AdvancedWebViewClient());
                 webView.setWebChromeClient(new WebActivity.AdvancedWebChromeClient());
+                webView.setDownloadListener(new Downloader());
 
                 webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
@@ -1308,6 +1312,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void HandleRemoteCommand(String command) {
 
 
@@ -1542,8 +1547,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             if (getUrlFromScanner != null) {
                 if ((getUrlFromScanner.startsWith("https://") || getUrlFromScanner.startsWith("http://"))) {
                     webView.loadUrl(getUrlFromScanner);
-                } else {
-                    Toast.makeText(mContext, "Required to perform other task", Toast.LENGTH_SHORT).show();
+
                 }
 
             }
@@ -1672,10 +1676,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             } else {
                                 textStatusProcess.setText("PR: Running");
                             }
-                        }else {
+                        } else {
                             textStatusProcess.setText("No Internet");
                         }
-
 
 
                     }
@@ -3192,23 +3195,23 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 if (isConnected()) {
 
 
-                try {
-                    SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+                    try {
+                        SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
 
-                    //   TextView textStatusProcess = findViewById(R.id.textStatusProcess);
-                    String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
+                        //   TextView textStatusProcess = findViewById(R.id.textStatusProcess);
+                        String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
 
 
-                    if (!get_progress.isEmpty()) {
-                        textStatusProcess.setText(get_progress + "");
-                    } else {
-                        textStatusProcess.setText("PR: Running");
+                        if (!get_progress.isEmpty()) {
+                            textStatusProcess.setText(get_progress + "");
+                        } else {
+                            textStatusProcess.setText("PR: Running");
+                        }
+                    } catch ( Exception e ) {
                     }
-                } catch ( Exception e ) {
-                }
 
 
-                }else {
+                } else {
                     textStatusProcess.setText("No Internet");
                 }
 
@@ -3306,7 +3309,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                     myDownloadStatus();
 
 
-
                                 } catch ( Exception e ) {
                                 }
 
@@ -3350,6 +3352,127 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             networkInfo = connectivityManager.getActiveNetworkInfo();
         }
         return networkInfo != null && networkInfo.isConnected();
+    }
+
+
+
+    /// we added
+
+    private class Downloader implements DownloadListener {
+
+        @Override
+        public void onDownloadStart(final String url, final String userAgent, String contentDisposition, String mimetype, long contentLength) {
+
+            constants.currentDownloadFileName = URLUtil.guessFileName(url, contentDisposition, mimetype);
+            constants.currentDownloadFileMimeType = mimetype;
+            if (url.startsWith("blob:")) {
+                Toast.makeText(getApplicationContext(), "Downloading blob file ", Toast.LENGTH_SHORT).show();
+//                webView.loadUrl(JavaScriptInterface.getBase64StringFromBlobUrl(url));
+            } else {
+
+
+                File file = new File(Environment.
+                        getExternalStoragePublicDirectory(Environment
+                                .DIRECTORY_DOWNLOADS).getAbsolutePath() + "/" + constants.currentDownloadFileName);
+
+                if (file.exists()) {
+                    new AlertDialog.Builder(WebActivity.this)
+                            .setIcon(R.mipmap.ic_launcher)
+                            .setTitle("File already exists")
+                            .setMessage("A  file with same name already exist, continue download?")
+                            .setPositiveButton("Download", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            downloadDialog(url, userAgent, contentDisposition, mimetype);
+                                        }
+                                    }
+
+                            ).setNegativeButton("Cancel", null)
+                            .setNeutralButton("Actions", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                            AdvancedControls.DownloadFinishedAction(WebActivity.this);
+                                        }
+
+                                    }
+                            )
+                            .show();
+
+                } else {
+                    downloadDialog(url, userAgent, contentDisposition, mimetype);
+
+                }
+
+            }
+
+
+        }
+
+
+        public void downloadDialog(final String url, final String userAgent, String contentDisposition, String mimetype) {
+
+            final String filename = URLUtil.guessFileName(url, contentDisposition, mimetype);
+            currentDownloadFileName = filename;
+            currentDownloadFileMimeType = mimetype;
+            preferences = getPreferences(MODE_PRIVATE);
+            preferences.edit().putString("downloadedfilename", filename).apply();
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(WebActivity.this);
+            builder.setTitle("File Download");
+            builder.setIcon(R.mipmap.ic_launcher);
+            builder.setMessage(("You want download") + ' ' + filename + "?");
+            builder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    Toast.makeText(mContext, "Downloading " + filename, Toast.LENGTH_LONG).show();
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    //cookie
+                    String cookie = CookieManager.getInstance().getCookie(url);
+                    //Add cookie and User-Agent to request
+                    request.addRequestHeader("Cookie", cookie);
+                    request.addRequestHeader("User-Agent", userAgent);
+                    //file scanned by MediaScannar
+                    request.allowScanningByMediaScanner();
+                    //Download is visible and its progress, after completion too.
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+//
+                    //DownloadManager created
+                    DownloadManager downloadManager = (DownloadManager) WebActivity.this.getSystemService(DOWNLOAD_SERVICE);
+                    //Saving files in Download folder
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+                    //download enqued
+                    assert downloadManager != null;
+                    try {
+                        downloadManager.enqueue(request);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(mContext, e.toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+//                    errorlayout.setVisibility(View.GONE);
+
+                }
+
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //cancel the dialog if Cancel clicks
+                    dialog.cancel();
+                    Toast.makeText(mContext, "Downloading Cancelled " + filename, Toast.LENGTH_SHORT).show();
+
+                }
+
+            });
+            //alertdialog shows.
+            builder.show();
+
+
+        }
     }
 
 

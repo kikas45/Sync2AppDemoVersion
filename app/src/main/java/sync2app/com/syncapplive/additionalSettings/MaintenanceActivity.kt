@@ -171,7 +171,6 @@ class MaintenanceActivity : AppCompatActivity() {
                 val sharedCrashReport =
                     getSharedPreferences(Constants.SHARED_SAVED_CRASH_REPORT, MODE_PRIVATE)
                 val crashInfo = sharedCrashReport.getString(Constants.crashInfo, "")
-
                 if (!crashInfo.isNullOrEmpty()) {
                     showPopCrashReport(crashInfo.toString())
                 } else {

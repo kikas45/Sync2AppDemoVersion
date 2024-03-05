@@ -216,7 +216,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 hideKeyBoard(binding.editTextInputSynUrlZip)
 
                 try {
-                    testAndDownLoadZipConnection()
+                    second_cancel_download()
+
+                    handler.postDelayed(Runnable {
+                        testAndDownLoadZipConnection()
+                    },500)
+
 
                 } catch (_: Exception) {
                 }

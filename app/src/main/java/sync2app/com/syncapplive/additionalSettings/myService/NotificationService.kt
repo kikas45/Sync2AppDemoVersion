@@ -149,7 +149,7 @@ class NotificationService : Service() {
         myHandler.removeCallbacksAndMessages(null)
 
         // can cell the download
-        second_cancel_download();
+  //      second_cancel_download();
 
 
     }
