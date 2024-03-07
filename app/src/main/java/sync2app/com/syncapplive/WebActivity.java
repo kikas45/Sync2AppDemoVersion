@@ -807,8 +807,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             if (imagSwtichPartnerUrl.equals(Constants.imagSwtichPartnerUrl)) {
                                 String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
                                 load_Launch_Online_Mode(vurl);
+
                             } else {
-                                String appended_url = url + "/App/index.html";
+                                String appended_url = url     +  "/" +      fil_CLO + "/" + fil_DEMO + "/App/index.html";
                                 load_Launch_Online_Mode(appended_url);
                             }
 

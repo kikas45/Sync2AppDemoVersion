@@ -85,18 +85,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private lateinit var custom_ApI_Dialog: Dialog
 
 
-    private val baseUrl222 =
-        "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
-
-
-    private var urlIndex =
-        "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
-    private var urlIndexCPI =
-        "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Zip/App.zip"
-    private var urlIndexAPI =
-        "https://firebasestorage.googleapis.com/v0/b/vector-news-b5fcf.appspot.com/o/testAPKs%2FMyZip.zip?alt=media&token=5f890c03-d2d5-4f97-95c7-e39c8dc49c57"
-
-
     private var fil_CLO = ""
     private var fil_DEMO = ""
     private var fil_baseUrl = ""
@@ -104,12 +92,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private var getUrlBasedOnSpinnerText = ""
     private var API_Server = "API-Cloud App Server"
     private var CP_server = "CP-Cloud App Server"
-    private var Saved_Download = "Saved Dwonload"
-
-
-    private var Selected_time = "Selected time"
-
-    private var rootfolder = "Downloads"
 
     private var Minutes = " Minutes"
 
@@ -220,7 +202,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     handler.postDelayed(Runnable {
                         testAndDownLoadZipConnection()
-                    },500)
+                    }, 500)
 
 
                 } catch (_: Exception) {
@@ -396,31 +378,36 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         // let consider Custom Domain was selected
 
                         val getFolderClo222 = binding.editTextCLOpath.text.toString().trim()
-                        val getFolderSubpath22 = binding.editTextSubPathFolder.text.toString().trim()
+                        val getFolderSubpath22 =
+                            binding.editTextSubPathFolder.text.toString().trim()
 
 
-                        var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+                        var Saved_Domains_Urls =
+                            myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
 
 
-                        if (Saved_Domains_Urls.isNotEmpty()){
+                        if (Saved_Domains_Urls.isNotEmpty()) {
 
-                        if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
-                            testConnectionSetup_API_Test(getFolderClo222, getFolderSubpath22)
-                            editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
-                            editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath22)
-                            editor.apply()
+                            if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
+                                testConnectionSetup_API_Test(getFolderClo222, getFolderSubpath22)
+                                editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
+                                editor.putString(
+                                    Constants.getSaveSubFolderInPutFiled,
+                                    getFolderSubpath22
+                                )
+                                editor.apply()
+
+                            } else {
+                                editTextCLOpath.error = "Input a valid path e.g CLO"
+                                editTextSubPathFolder.error =
+                                    "Input a valid path e.g DE_MO_2021000"
+                                showToastMessage("Fields can not be empty")
+                            }
+
 
                         } else {
-                            editTextCLOpath.error = "Input a valid path e.g CLO"
-                            editTextSubPathFolder.error =
-                                "Input a valid path e.g DE_MO_2021000"
-                            showToastMessage("Fields can not be empty")
+                            showToastMessage("Select Custom Domain")
                         }
-
-
-                    }  else {
-                        showToastMessage("Select Custom Domain")
-                    }
 
                     }
 
@@ -771,7 +758,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             imagSwtichEnableSyncOnFilecahnge.setOnCheckedChangeListener { compoundButton, isValued ->
                 val editor = sharedBiometric.edit()
                 second_cancel_download()
-               // showToastMessage("Download cancel")
+                // showToastMessage("Download cancel")
 
                 if (compoundButton.isChecked) {
                     editor.putString(
@@ -1128,7 +1115,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.putLong(Constants.getTimeDefined, Constants.t_2min)
                 editor.apply()
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1156,7 +1144,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1183,7 +1172,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1211,7 +1201,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1237,7 +1228,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1265,7 +1257,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1293,7 +1286,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1322,7 +1316,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1350,7 +1345,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editor.apply()
 
                 if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                ) {
                     val intent = Intent(Constants.UpdateTimmer_Reciver)
                     sendBroadcast(intent)
 
@@ -1372,7 +1368,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         alertDialog.show()
     }
-
 
 
     @SuppressLint("InflateParams", "SuspiciousIndentation")
@@ -1486,7 +1481,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                     if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                        || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                        || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+                    ) {
                         val intent = Intent(Constants.UpdateTimmer_Reciver)
                         sendBroadcast(intent)
 
@@ -1645,9 +1641,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     } else {
 
                         val getFolderClo222 = binding.editTextCLOpath.text.toString().trim()
-                        val getFolderSubpath22 = binding.editTextSubPathFolder.text.toString().trim()
+                        val getFolderSubpath22 =
+                            binding.editTextSubPathFolder.text.toString().trim()
 
-                        var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+                        var Saved_Domains_Urls =
+                            myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
 
                         if (Saved_Domains_Urls.isNotEmpty()) {
 
@@ -1655,7 +1653,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
                                 testAndDownLoad_My_API(getFolderClo222, getFolderSubpath22)
                                 editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
-                                editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath22)
+                                editor.putString(
+                                    Constants.getSaveSubFolderInPutFiled,
+                                    getFolderSubpath22
+                                )
                                 editor.apply()
 
                             } else {
@@ -1710,9 +1711,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 val baseUrl =
                     "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
-
-                val syncUrl =
-                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/App/index.html"
 
 
 
@@ -1871,81 +1869,100 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         binding.apply {
 
-            val Saved_Domains_Name = myDownloadClass.getString(Constants.Saved_Domains_Name, "").toString()
             var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
 
 
             if (isNetworkAvailable()) {
-                // Find the index of "public/" in the URL
-                val publicIndex = Saved_Domains_Urls.indexOf("public/")
-                if (Saved_Domains_Urls.isNotEmpty() && publicIndex != -1) {
-                    // Find the index of the next "/" after "public/"
-                    val nextSlashIndex = Saved_Domains_Urls.indexOf("/", publicIndex + 7)
-                    if (nextSlashIndex != -1) {
-                        // Find the index of the following "/" after the nextSlashIndex
-                        val endSubpathIndex = Saved_Domains_Urls.indexOf("/", nextSlashIndex + 1)
-                        if (endSubpathIndex != -1) {
-                            // Construct the new URL by replacing everything between the nextSlashIndex and endSubpathIndex with the values from EditText fields
-                            Saved_Domains_Urls = Saved_Domains_Urls.substring(0, publicIndex + 7) + "$getFolderClo/" + getFolderSubpath
 
-                           // + Saved_Domains_Urls.substring(endSubpathIndex)
-
-                            val get_ModifiedUrl = Saved_Domains_Urls
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
-                            editor.apply()
-
-                            Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
-                          //  showToastMessageLong(Saved_Domains_Urls)
+                val get_ModifiedUrl = Saved_Domains_Urls
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
+                editor.apply()
 
 
-                            lifecycleScope.launch {
-                                try {
-                                    val result = checkUrlExistence(Saved_Domains_Urls)
-                                    if (result) {
-                                        showPopsForMyConnectionTest(getFolderClo, getFolderSubpath,
-                                            "Successful"
-                                        )
 
-                                        val user = User(
-                                            CLO = getFolderClo,
-                                            DEMO = getFolderSubpath,
-                                            EditUrl = ""
-                                        )
-                                        mUserViewModel.addUser(user)
+                if (binding.imagSwtichEnableSyncFromAPI.isChecked){
+                   val get_Full_url  =    Saved_Domains_Urls +"/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
-                                    } else {
-                                        showPopsForMyConnectionTest(
-                                            getFolderClo,
-                                            getFolderSubpath,
-                                            "Failed!"
-                                        )
-                                    }
-                                } finally {
-                                    customProgressDialog.dismiss()
-                                }
+                    showToastMessageLong(get_Full_url)
+
+                    lifecycleScope.launch {
+                        try {
+                            val result = checkUrlExistence(get_Full_url)
+                            if (result) {
+                                showPopsForMyConnectionTest(getFolderClo, getFolderSubpath,
+                                    "Successful"
+                                )
+
+                                val user = User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                                mUserViewModel.addUser(user)
+
+                            } else {
+                                showPopsForMyConnectionTest(
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Failed!"
+                                )
                             }
-
-
-                        } else {
-                            //  showToastMessage("URL does not contain a valid subpath after 'public/'")
+                        } finally {
+                            customProgressDialog.dismiss()
                         }
-                    } else {
-                        // showToastMessage("URL does not contain a valid subpath after 'public/'")
                     }
-                } else {
-                    showToastMessage("URL does not contain 'public/'")
+
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
                     }, 1200)
-                }
 
-                //   Log.d("testConnectionSetup_API_Test", "result : $Saved_Domains_Urls")
+
+
+                }else{
+                    val    get_Full_url=    Saved_Domains_Urls +"/$getFolderClo/$getFolderSubpath/Api/update.csv"
+
+                    showToastMessageLong(get_Full_url)
+
+                    lifecycleScope.launch {
+                        try {
+                            val result = checkUrlExistence(get_Full_url)
+                            if (result) {
+                                showPopsForMyConnectionTest(getFolderClo, getFolderSubpath,
+                                    "Successful"
+                                )
+
+                                val user = User(
+                                    CLO = getFolderClo,
+                                    DEMO = getFolderSubpath,
+                                    EditUrl = ""
+                                )
+                                mUserViewModel.addUser(user)
+
+                            } else {
+                                showPopsForMyConnectionTest(
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Failed!"
+                                )
+                            }
+                        } finally {
+                            customProgressDialog.dismiss()
+                        }
+                    }
+
+
+                    handler.postDelayed(Runnable {
+                        customProgressDialog.cancel()
+                    }, 1200)
+
+
+                }
 
 
             } else {
-              //  showToastMessage("No Internet Connection")
+                  showToastMessage("No Internet Connection")
             }
         }
 
@@ -1956,91 +1973,109 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun testAndDownLoad_My_API(getFolderClo: String, getFolderSubpath: String) {
 
+
         showCustomProgressDialog("Testing connection")
 
         binding.apply {
 
-            val Saved_Domains_Name =
-                myDownloadClass.getString(Constants.Saved_Domains_Name, "").toString()
-            var Saved_Domains_Urls =
-                myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+            var Saved_Domains_Urls = myDownloadClass.getString(Constants.Saved_Domains_Urls, "").toString()
+
 
             if (isNetworkAvailable()) {
-                // Find the index of "public/" in the URL
-                val publicIndex = Saved_Domains_Urls.indexOf("public/")
-                if (Saved_Domains_Urls.isNotEmpty() && publicIndex != -1) {
-                    // Find the index of the next "/" after "public/"
-                    val nextSlashIndex = Saved_Domains_Urls.indexOf("/", publicIndex + 7)
-                    if (nextSlashIndex != -1) {
-                        // Find the index of the following "/" after the nextSlashIndex
-                        val endSubpathIndex = Saved_Domains_Urls.indexOf("/", nextSlashIndex + 1)
-                        if (endSubpathIndex != -1) {
-                            // Construct the new URL by replacing everything between the nextSlashIndex and endSubpathIndex with the values from EditText fields
-                            Saved_Domains_Urls = Saved_Domains_Urls.substring(0, publicIndex + 7) + "$getFolderClo/" + getFolderSubpath
 
-                            // + Saved_Domains_Urls.substring(endSubpathIndex)
-
-                            val get_ModifiedUrl = Saved_Domains_Urls
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
-                            editor.apply()
-
-                            Saved_Domains_Urls += if (binding.imagSwtichEnableSyncFromAPI.isChecked) "/Zip/App.zip" else "/Api/update.csv"
-                        //    showToastMessageLong(Saved_Domains_Urls)
+                val get_ModifiedUrl = Saved_Domains_Urls
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.get_ModifiedUrl, get_ModifiedUrl)
+                editor.apply()
 
 
-                            lifecycleScope.launch {
-                                try {
-                                    val result = checkUrlExistence(Saved_Domains_Urls)
-                                    if (result) {
-                                        startMyDownlaodsMutiplesPath(
-                                            Saved_Domains_Urls,
-                                            getFolderClo,
-                                            getFolderSubpath,
-                                            "Zip",
-                                            "App.zip",
-                                        )
 
-                                        // save also to room data base
-                                        val user =
-                                            User(
-                                                CLO = getFolderClo,
-                                                DEMO = getFolderSubpath,
-                                                EditUrl = ""
-                                            )
-                                        mUserViewModel.addUser(user)
+                if (binding.imagSwtichEnableSyncFromAPI.isChecked){
+                    val    get_Full_url  =    Saved_Domains_Urls +"/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
+                    showToastMessageLong(get_Full_url)
 
-                                    } else {
-                                        showPopsForMyConnectionTest(
-                                            getFolderClo,
-                                            getFolderSubpath,
-                                            "Failed!"
-                                        )
-                                    }
-                                } finally {
-                                    handler.postDelayed(Runnable {
-                                        customProgressDialog.dismiss()
-                                    }, 900)
-                                }
+                    lifecycleScope.launch {
+                        try {
+                            val result = checkUrlExistence(get_Full_url)
+                            if (result) {
+                                startMyDownlaodsMutiplesPath(
+                                    get_Full_url,
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Zip",
+                                    "App.zip",
+                                )
+
+                                // save also to room data base
+                                val user =
+                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "")
+                                mUserViewModel.addUser(user)
+
+                            } else {
+                                showPopsForMyConnectionTest(
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Failed!"
+                                )
                             }
-
-
-                        } else {
-                            //  showToastMessage("URL does not contain a valid subpath after 'public/'")
+                        } finally {
+                            handler.postDelayed(Runnable {
+                                customProgressDialog.dismiss()
+                            }, 900)
                         }
-                    } else {
-                        // showToastMessage("URL does not contain a valid subpath after 'public/'")
                     }
-                } else {
-                //    showToastMessage("URL does not contain 'public/'")
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
                     }, 1200)
-                }
 
-                //   Log.d("testConnectionSetup_API_Test", "result : $Saved_Domains_Urls")
+
+
+                }else{
+                    val  get_Full_url=    Saved_Domains_Urls +"/$getFolderClo/$getFolderSubpath/Api/update.csv"
+
+
+                    showToastMessageLong(get_Full_url)
+
+                    lifecycleScope.launch {
+                        try {
+                            val result = checkUrlExistence(get_Full_url)
+                            if (result) {
+                                startMyDownlaodsMutiplesPath(
+                                    get_Full_url,
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Zip",
+                                    "App.zip",
+                                )
+
+                                // save also to room data base
+                                val user =
+                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "")
+                                mUserViewModel.addUser(user)
+
+                            } else {
+                                showPopsForMyConnectionTest(
+                                    getFolderClo,
+                                    getFolderSubpath,
+                                    "Failed!"
+                                )
+                            }
+                        } finally {
+                            handler.postDelayed(Runnable {
+                                customProgressDialog.dismiss()
+                            }, 900)
+                        }
+                    }
+
+                    handler.postDelayed(Runnable {
+                        customProgressDialog.cancel()
+                    }, 1200)
+
+
+
+                }
 
 
             } else {
@@ -2048,10 +2083,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
         }
 
-
-
     }
-
 
 
     @SuppressLint("MissingInflatedId", "SetTextI18n")
@@ -2582,17 +2614,20 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
 
-            val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
+            val directoryPath =
+                Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
 
             val myFile = File(directoryPath, fileName.toString())
             delete(myFile)
 
 
-            if (download_ref !=- 15L){
+            if (download_ref != -15L) {
                 val query = DownloadManager.Query()
                 query.setFilterById(download_ref)
                 val c =
-                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                        query
+                    )
                 if (c.moveToFirst()) {
                     manager!!.remove(download_ref)
                     val editor: SharedPreferences.Editor = myDownloadClass.edit()
@@ -2605,9 +2640,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         } catch (ignored: java.lang.Exception) {
         }
     }
-
-
-
 
 
 }
