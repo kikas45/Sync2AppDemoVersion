@@ -132,6 +132,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -548,6 +549,39 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         drawerItem6 = findViewById(R.id.drawer_item_6);
 
         drawerItem7 = findViewById(R.id.drawer_item_7);
+
+
+
+        ImageView scroolToEnd = findViewById(R.id.scroolToEnd);
+        ImageView scroolToStart = findViewById(R.id.scroolTostart);
+        final HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontalScrollView2);
+
+        scroolToEnd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int scrollAmount = (int) (horizontalScrollView.getChildAt(0).getWidth() * 0.2);
+                horizontalScrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        horizontalScrollView.smoothScrollBy(scrollAmount, 0);
+                    }
+                });
+            }
+        });
+
+        scroolToStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int scrollAmount = (int) (horizontalScrollView.getChildAt(0).getWidth() * 0.2);
+                horizontalScrollView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        horizontalScrollView.smoothScrollBy(-scrollAmount, 0);
+                    }
+                });
+            }
+        });
+
 
 
         drawerItem7.setOnClickListener(new View.OnClickListener() {
@@ -1449,9 +1483,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
             TextView textDownladByes = findViewById(R.id.textDownladByes);
+            ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
             MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
 
-            downloadManager.getDownloadStatus(textDownladByes, getApplicationContext());
+            downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
 
 
             if (myHandler != null) {
@@ -3276,9 +3311,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         @Override
         public void run() {
             TextView textDownladByes = findViewById(R.id.textDownladByes);
+            ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
             MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
 
-            downloadManager.getDownloadStatus(textDownladByes, getApplicationContext());
+            downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
             myHandler.postDelayed(this, 500);
         }
     };

@@ -761,11 +761,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 // showToastMessage("Download cancel")
 
                 if (compoundButton.isChecked) {
-                    editor.putString(
-                        Constants.imagSwtichEnableSyncOnFilecahnge,
-                        "imagSwtichEnableSyncOnFilecahnge"
-                    )
-                    editor.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
+                    editor.putString(Constants.imagSwtichEnableSyncOnFilecahnge, "imagSwtichEnableSyncOnFilecahnge")
+
+                   // editor.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
 
                     editor.apply()
                     textSyncOnFileChangeIntervals.setText("Download on Intervals")
@@ -1916,7 +1914,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
-                    }, 1200)
+                    }, 900)
 
 
 
@@ -1955,7 +1953,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
-                    }, 1200)
+                    }, 900)
 
 
                 }
@@ -2028,7 +2026,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
-                    }, 1200)
+                    }, 900)
 
 
 
@@ -2046,8 +2044,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                     get_Full_url,
                                     getFolderClo,
                                     getFolderSubpath,
-                                    "Zip",
-                                    "App.zip",
+                                    "Api",
+                                    "update.csv",
                                 )
 
                                 // save also to room data base
@@ -2071,7 +2069,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     handler.postDelayed(Runnable {
                         customProgressDialog.cancel()
-                    }, 1200)
+                    }, 900)
 
 
 
@@ -2211,7 +2209,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private fun showToastMessageLong(messages: String) {
 
         try {
-            Toast.makeText(applicationContext, messages, Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, messages, Toast.LENGTH_SHORT).show()
         } catch (_: Exception) {
         }
     }
@@ -2314,7 +2312,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             val editor222 = sharedBiometric.edit()
-            editor222.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
+          //  editor222.putString(Constants.showDownloadSyncStatus, "showDownloadSyncStatus")
             editor222.apply()
 
 

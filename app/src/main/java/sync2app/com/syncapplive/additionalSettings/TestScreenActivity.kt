@@ -22,8 +22,8 @@ class TestScreenActivity : AppCompatActivity(){
     private lateinit var binding: ActivityTestScreenBinding
 
 
-    var hour = 0
-    var min = 0
+   /// var hour = 0
+  //  var min = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +31,11 @@ class TestScreenActivity : AppCompatActivity(){
         setContentView(binding.root)
 
 
-        binding.textDisplayText.setOnClickListener {
-
-            showSyncDialog()
-        }
-
+//        binding.textDisplayText.setOnClickListener {
+//
+//          //  showSyncDialog()
+//        }
+//
 
 
     }
@@ -52,6 +52,7 @@ class TestScreenActivity : AppCompatActivity(){
 
 
 
+/*
     private fun showSyncDialog() {
 
         //create dialog
@@ -113,5 +114,6 @@ class TestScreenActivity : AppCompatActivity(){
         syncDialog.show()
     }
 
+*/
 
 }

@@ -19,4 +19,5 @@
     <dimen name="slide_desc">16sp</dimen>
     <dimen name="desc_padding">40dp</dimen>
     <dimen name="notif_title_size">20sp</dimen>
+    <dimen name="_12sp">12sp</dimen>
 </resources>

@@ -40,9 +40,6 @@ class MaintenanceActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMaintenanceBinding
 
-    private lateinit var progressBarPref: ProgressBar
-    private lateinit var downloadBytes: TextView
-
 
 
     private val sharedBiometric: SharedPreferences by lazy {
@@ -52,12 +49,6 @@ class MaintenanceActivity : AppCompatActivity() {
         )
     }
 
-    private val sharedP: SharedPreferences by lazy {
-        applicationContext.getSharedPreferences(
-            Constants.MY_DOWNLOADER_CLASS,
-            Context.MODE_PRIVATE
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,8 +91,7 @@ class MaintenanceActivity : AppCompatActivity() {
             val get_imagEnableDownloadStatus = sharedBiometric.getString(Constants.showDownloadSyncStatus, "")
 
 
-            imagEnableDownloadStatus.isChecked =
-                get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)
+            imagEnableDownloadStatus.isChecked = get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)
 
             if (get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)) {
 
@@ -112,9 +102,6 @@ class MaintenanceActivity : AppCompatActivity() {
                 binding.textCheckDownloadStatus2.text = "Hide Download Status"
 
             }
-
-
-
 
 
 
@@ -136,18 +123,6 @@ class MaintenanceActivity : AppCompatActivity() {
 
 
             }
-
-            textView42.setOnClickListener {
-                //  val intent = Intent(applicationContext, TestScreenActivity::class.java)
-                //  startActivity(intent)
-            }
-
-
-            /*
-                        textTestCrash.setOnClickListener {
-                            throw RuntimeException("Deliberate crash triggered")
-                        }
-            */
 
 
             textHardwarePage.setOnClickListener {
@@ -292,8 +267,6 @@ class MaintenanceActivity : AppCompatActivity() {
             finish()
         }
     }
-
-
 
 
 }

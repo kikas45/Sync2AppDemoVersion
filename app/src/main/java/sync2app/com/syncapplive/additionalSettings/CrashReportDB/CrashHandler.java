@@ -98,6 +98,6 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
-
+    ///  minifyEnabled = false
 
 }
