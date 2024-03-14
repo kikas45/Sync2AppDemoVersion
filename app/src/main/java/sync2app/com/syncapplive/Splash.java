@@ -1,6 +1,5 @@
 package sync2app.com.syncapplive;
 
-import static sync2app.com.syncapplive.AdvancedControls.showToast;
 import static sync2app.com.syncapplive.WebActivity.hasPermissions;
 import static sync2app.com.syncapplive.constants.AllowOnlyHostUrlInApp;
 import static sync2app.com.syncapplive.constants.ChangeBottombarBgColor;
@@ -13,7 +12,7 @@ import static sync2app.com.syncapplive.constants.ForceUpdate;
 import static sync2app.com.syncapplive.constants.NewVersion;
 import static sync2app.com.syncapplive.constants.Notifx_service;
 import static sync2app.com.syncapplive.constants.OnesigID;
-import static sync2app.com.syncapplive.constants.ServerUrl;
+// import static sync2app.com.syncapplive.constants.ServerUrl;
 import static sync2app.com.syncapplive.constants.ShowAdmobInterstitial;
 import static sync2app.com.syncapplive.constants.ShowBottomBar;
 import static sync2app.com.syncapplive.constants.ShowDrawer;
@@ -66,9 +65,6 @@ import static sync2app.com.syncapplive.constants.drawerMenuItem5Url;
 import static sync2app.com.syncapplive.constants.drawerMenuItem6ImgUrl;
 import static sync2app.com.syncapplive.constants.drawerMenuItem6Text;
 import static sync2app.com.syncapplive.constants.drawerMenuItem6Url;
-import static sync2app.com.syncapplive.constants.drawerMenuItem7ImgUrl;
-import static sync2app.com.syncapplive.constants.drawerMenuItem7Text;
-import static sync2app.com.syncapplive.constants.drawerMenuItem7Url;
 import static sync2app.com.syncapplive.constants.filterdomain;
 import static sync2app.com.syncapplive.constants.jsonUrl;
 import static sync2app.com.syncapplive.constants.screen1BgColor;
@@ -154,8 +150,8 @@ import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
 
 public class Splash extends AppCompatActivity {
 
-
-    String Jsonurl = ServerUrl;
+    String ServerUrl;
+ //   String Jsonurl = ServerUrl;
 
     TextView infotext;
     ProgressBar progressBar;
@@ -181,6 +177,12 @@ public class Splash extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //    ServerUrl =   "https://sync2app.com/abc/123/admin_config/appConfig.json";
+
+
+        SharedPreferences sharedLicenseKeys = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
+
+        ServerUrl = sharedLicenseKeys.getString(Constants.get_masterDomain , "");
 
 
         try {
@@ -225,6 +227,7 @@ public class Splash extends AppCompatActivity {
 //        if (preferences.getBoolean("darktheme", false)) {
 //            rootlayout.setBackgroundColor(getResources().getColor(R.color.darkthemeColor));
 //        }
+
 
 
         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
@@ -719,7 +722,7 @@ public class Splash extends AppCompatActivity {
             finish();
             ShowServerUrlSetUp = true;
         } else {
-            ApiCall(Splash.this, Jsonurl);
+            ApiCall(Splash.this, ServerUrl);
             if (retryBtn.getVisibility() == View.VISIBLE) {
                 retryBtn.setVisibility(View.GONE);
             }
@@ -828,26 +831,27 @@ public class Splash extends AppCompatActivity {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                              try {
+                                try {
 
-                                  ApiCall(Splash.this, Jsonurl);
-                                  progressBar.setVisibility(View.VISIBLE);
-
-
-                                  retryBtn.setVisibility(View.GONE);
-                                  go_settings_Btn.setVisibility(View.GONE);
-                                  gotWifisettings.setVisibility(View.GONE);
-                                  goConnection.setVisibility(View.GONE);
-                                  imageView34.setVisibility(View.GONE);
-                                  imagwifi.setVisibility(View.GONE);
-                                  imageView35.setVisibility(View.GONE);
-                                  imagwifi2.setVisibility(View.GONE);
-
-                                  splash_image.setVisibility(View.VISIBLE);
-                                  imageHelper.setVisibility(View.GONE);
+                                    ApiCall(Splash.this, ServerUrl);
+                                    progressBar.setVisibility(View.VISIBLE);
 
 
-                              }catch ( Exception e ){}
+                                    retryBtn.setVisibility(View.GONE);
+                                    go_settings_Btn.setVisibility(View.GONE);
+                                    gotWifisettings.setVisibility(View.GONE);
+                                    goConnection.setVisibility(View.GONE);
+                                    imageView34.setVisibility(View.GONE);
+                                    imagwifi.setVisibility(View.GONE);
+                                    imageView35.setVisibility(View.GONE);
+                                    imagwifi2.setVisibility(View.GONE);
+
+                                    splash_image.setVisibility(View.VISIBLE);
+                                    imageHelper.setVisibility(View.GONE);
+
+
+                                } catch ( Exception e ) {
+                                }
 
                             }
                         }, SPLASH_TIME_OUT);

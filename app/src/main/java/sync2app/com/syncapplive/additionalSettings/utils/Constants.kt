@@ -6,24 +6,36 @@ class Constants {
 
         const val MANAGE_EXTERNAL_STORAGE_PERMISSION = "android:manage_external_storage"
         const val NOT_APPLICABLE = "N/A"
-
         const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST = 2
 
 
-        const val BASE_URL =
-            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
+
+        // for modifying the Json URL
+        const val get_UserID = "get_UserID"
+        const val get_LicenseKey = "get_LicenseKey"
 
 
-        const val BASE_URL_API =
-            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
+        const val customDomainUrl = "https://cp.cloudappserver.co.uk/app_base/public/"
+        const val syn2App = "https://cp.gogle/app_base/public/"
+        const val testServer = "hello world"
+
+        const val get_masterDomain = "get_masterDomain"
 
 
-        const val BASE_URL_ON_CHANGE =
-            "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
 
-        //  const val LAUNCH_ONLINE_URL =  "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/App/index.html"
 
-        const val BASE_URL_UR = "http://jsonplaceholder.typicode.com"
+        // Hradwre Json
+        const val BASE_URL = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
+
+
+        // for getting Api Urls in the Json
+        const val BASE_URL_API = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
+
+
+        // for check time stamp change in JSon Server
+        const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
+
+
 
 
         const val SHARED_BIOMETRIC = "SHARED_BIOMETRIC"

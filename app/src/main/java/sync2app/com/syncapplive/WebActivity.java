@@ -3142,8 +3142,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             public void onClick(View view) {
 
                 if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
-                    //   showPopForTVConfiguration();
                     showToast(mContext, "Tap The Back Button to Go Settings Page");
+                    loadTheMainWebview();
                 }
 
                 alertDialog.dismiss();

@@ -247,6 +247,17 @@
         app:iconSize="45dp"/>
 
 
+    <Preference
+        android:icon="@drawable/ic_settings_additional_suggest_24"
+        android:key="powell_settings"
+        android:title="Powell Settings"
+        app:isPreferenceVisible="false"
+        app:allowDividerAbove="true"
+        app:allowDividerBelow="true"
+        app:shouldDisableView="true"
+        app:iconSize="45dp"/>
+
+
 
     <Preference
         android:icon="@drawable/ic_information_icon"

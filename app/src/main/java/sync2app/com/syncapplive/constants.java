@@ -18,7 +18,7 @@ public class constants {
 
 
 
-    public static String ServerUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
+  //  public static String ServerUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 
     public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 

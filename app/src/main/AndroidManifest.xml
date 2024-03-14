@@ -49,7 +49,9 @@
         android:theme="@style/Theme.RemoteWebViewLight"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
-
+        <activity
+            android:name=".additionalSettings.MyTestDownloadAPI"
+            android:exported="false" />
         <activity
             android:name=".QrPages.PhoneActivity"
             android:exported="false" />
@@ -85,10 +87,7 @@
             android:name=".additionalSettings.RequiredBioActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
-        <activity
-            android:name=".additionalSettings.SynCmangerPlus"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
+
         <activity
             android:name=".additionalSettings.SystemInfoActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"

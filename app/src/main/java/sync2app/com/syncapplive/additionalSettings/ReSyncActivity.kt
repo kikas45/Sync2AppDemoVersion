@@ -12,13 +12,11 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.Uri
-import android.opengl.Visibility
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -1529,7 +1527,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 textUseManual.setText("Do not use manual")
 
                 editTextInputSynUrlZip.visibility = View.GONE
-                editTextInputIndexManual?.visibility = View.GONE
+                editTextInputIndexManual.visibility = View.GONE
                 // for clos
                 editTextCLOpath.visibility = View.VISIBLE
                 editTextSubPathFolder.visibility = View.VISIBLE
@@ -1541,10 +1539,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 val editor = sharedBiometric.edit()
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 if (compoundButton.isChecked) {
-                    editor.putString(
-                        Constants.imagSwtichEnableManualOrNot,
-                        "imagSwtichEnableManualOrNot"
-                    )
+                    editor.putString(Constants.imagSwtichEnableManualOrNot, "imagSwtichEnableManualOrNot")
                     editor.apply()
                     textUseManual.setText("Use manual")
 

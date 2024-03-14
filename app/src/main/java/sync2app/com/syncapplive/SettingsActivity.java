@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.method.PasswordTransformationMethod;
@@ -44,8 +45,10 @@ import java.util.regex.Pattern;
 import sync2app.com.syncapplive.additionalSettings.AdditionalSettingsActivity;
 import sync2app.com.syncapplive.additionalSettings.MainHelpers.GMailSender;
 import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
+import sync2app.com.syncapplive.additionalSettings.MyTestDownloadAPI;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.TestScreenActivity;
 import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -222,11 +225,11 @@ public class SettingsActivity extends AppCompatActivity {
 
         TextView textHome = binding.textHome;
         TextView textLoginAdmin2 = binding.textLoginAdmin2;
+        TextView textLogoutButton = binding.textLogoutButton;
         TextView textExit = binding.textExit;
         TextView textSettings = binding.textAppSettings;
         TextView textAppAdmin = binding.textAppAdmin;
         TextView textReSync = binding.textReSync;
-        TextView textLaunchOnlineJson = binding.textLaunchOnlineJson;
         TextView textLaunchOnline = binding.textLaunchOnline;
         TextView textLaunchOffline = binding.textLaunchOffline;
         TextView textForgetPassword = binding.textForgetPasswordHome;
@@ -506,40 +509,38 @@ public class SettingsActivity extends AppCompatActivity {
         SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
         SharedPreferences.Editor editorED = mydownloadClass.edit();
 
-        textLaunchOnlineJson.setOnClickListener(new View.OnClickListener() {
+        textLogoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
+                SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editorED = mydownloadClass.edit();
+                editorED.clear();
+                editorED.apply();
 
-                String editTextText = editTextText2.getText().toString().trim();
+                SharedPreferences SIMPLE_SAVED_PASSWORD = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editorEDSIMPLE_SAVED_PASSWORD = SIMPLE_SAVED_PASSWORD.edit();
+                editorEDSIMPLE_SAVED_PASSWORD.clear();
+                editorEDSIMPLE_SAVED_PASSWORD.apply();
 
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
+                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor_sharedBiometric= sharedBiometric.edit();
+                editor_sharedBiometric.clear();
+                editor_sharedBiometric.apply();
 
+                Handler handler1 = new Handler(Looper.getMainLooper());
 
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
+                handler1.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        stopService(new Intent(SettingsActivity.this, NotificationService.class));
+                        stopService(new Intent(SettingsActivity.this, OnChnageService.class));
+                        finish();
+                        finishAffinity();
 
-                    editor.remove(Constants.imgAllowLunchFromOnline);
-                    editor.apply();
+                    }
+                },200 );
 
-                    editorED.remove(Constants.Tapped_OnlineORoffline);
-                    //  editorED.remove(Constants.getFolderClo);
-                    // editorED.remove(Constants.getFolderSubpath);
-                    //   editorED.remove(Constants.syncUrl);
-                    editorED.apply();
-
-                    Intent intent = new Intent(getApplicationContext(), Splash.class);
-                    startActivity(intent);
-                    finish();
-
-                    alertDialog.dismiss();
-
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                    showToastMessage("Wrong password");
-                }
 
             }
         });
@@ -887,6 +888,10 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.preferences, rootKey);
 
 
+            Preference powell_settings = findPreference("powell_settings");
+
+
+
             SwitchPreference swipe_switch = findPreference("swiperefresh");
             EditTextPreference serverUrl_field = findPreference("surl");
 
@@ -1065,6 +1070,29 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
             }
+
+
+
+
+
+
+            if (powell_settings != null) {
+                powell_settings.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+
+                        Intent intent = new Intent(getActivity(), MyTestDownloadAPI.class);
+                        startActivity(intent);
+
+                        return true;
+                    }
+                });
+            }
+
+
+
+
+
 
 
             if (autoToolbar_switch != null) {
