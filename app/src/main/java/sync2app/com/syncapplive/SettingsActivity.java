@@ -528,16 +528,16 @@ public class SettingsActivity extends AppCompatActivity {
                 editor_sharedBiometric.clear();
                 editor_sharedBiometric.apply();
 
+                stopService(new Intent(SettingsActivity.this, NotificationService.class));
+                stopService(new Intent(SettingsActivity.this, OnChnageService.class));
+
                 Handler handler1 = new Handler(Looper.getMainLooper());
 
                 handler1.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        stopService(new Intent(SettingsActivity.this, NotificationService.class));
-                        stopService(new Intent(SettingsActivity.this, OnChnageService.class));
                         finish();
                         finishAffinity();
-
                     }
                 },200 );
 
