@@ -13,6 +13,7 @@ class Constants {
         // for modifying the Json URL
         const val get_UserID = "get_UserID"
         const val get_LicenseKey = "get_LicenseKey"
+        const val get_editTextMaster = "get_editTextMaster"
 
 
         const val customDomainUrl = "https://cp.cloudappserver.co.uk/app_base/public/"

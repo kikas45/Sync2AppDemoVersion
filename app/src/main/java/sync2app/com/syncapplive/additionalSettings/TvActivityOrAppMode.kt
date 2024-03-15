@@ -274,6 +274,9 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
                             val editorValue = simpleSavedPassword.edit()
                             editorValue.putString(Constants.get_masterDomain, baseUrl)
+                            editorValue.putString(Constants.get_UserID, get_UserID)
+                            editorValue.putString(Constants.get_LicenseKey, get_LicenseKey)
+                            editorValue.putString(Constants.get_editTextMaster, get_editTextMaster)
                             editorValue.apply()
 
                             val getpermit = getPermissionStatus(this@TvActivityOrAppMode)

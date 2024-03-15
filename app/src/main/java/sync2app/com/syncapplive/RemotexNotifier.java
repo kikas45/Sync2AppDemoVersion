@@ -10,7 +10,6 @@ import static sync2app.com.syncapplive.constants.Notif_Shown;
 import static sync2app.com.syncapplive.constants.Notif_button_action;
 import static sync2app.com.syncapplive.constants.Notif_desc;
 import static sync2app.com.syncapplive.constants.Notif_title;
-import static sync2app.com.syncapplive.constants.NotificationUrl;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
@@ -43,6 +42,8 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sync2app.com.syncapplive.additionalSettings.utils.Constants;
+
 public class RemotexNotifier extends Service {
     @Nullable
     Handler handler = new Handler();
@@ -61,6 +62,16 @@ public class RemotexNotifier extends Service {
         Log.d("RemoteX","RemoteX Notification Service Active!");
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        SharedPreferences SIMPLE_SAVED_PASSWORD = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
+
+        String get_editTextMaster = SIMPLE_SAVED_PASSWORD.getString(Constants.get_editTextMaster, "");
+        String get_UserID = SIMPLE_SAVED_PASSWORD.getString(Constants.get_UserID, "");
+        String get_LicenseKey = SIMPLE_SAVED_PASSWORD.getString(Constants.get_LicenseKey, "");
+
+
+        String NotificationUrl = get_editTextMaster + "/"  + get_UserID + "/" + get_LicenseKey +  "/AppConfig/remotexNotif.json ";
+
 
         assert handler != null;
         handler.postDelayed(runnable = new Runnable() {

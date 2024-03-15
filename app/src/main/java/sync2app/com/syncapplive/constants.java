@@ -25,7 +25,7 @@ public class constants {
 
     // this is good one
 
-    public static String NotificationUrl = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/AppConfig/remotexNotif.json ";
+  //  public static String NotificationUrl = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/AppConfig/remotexNotif.json ";
 
 
     // this bad one
