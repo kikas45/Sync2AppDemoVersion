@@ -22,7 +22,12 @@ public class constants {
 
     public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 
-   // public static String splashScreenUrl = "https://sync2app.com/abc/123/logo_3.png";
+ //   public static String NotificationUrl = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/AppConfig/appConfig.json";
+
+
+
+
+    // public static String splashScreenUrl = "https://sync2app.com/abc/123/logo_3.png";
     public static String splashScreenUrl = "https://sync2app.com/abc/123/admin_config/icons/logo.png ";
 
 
