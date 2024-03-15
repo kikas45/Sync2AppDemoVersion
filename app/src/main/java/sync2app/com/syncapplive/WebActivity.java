@@ -202,6 +202,8 @@ import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils;
+import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
+import sync2app.com.syncapplive.databinding.CustomNotificationLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYou;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYouListener;
@@ -1168,12 +1170,32 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         String lastNotifxId = preferences.getString("lastId", "");
         if (NotifAvailable & !lastNotifxId.matches(Notif_ID)) {
             try {
-                Dialog dialog = new Dialog(context);
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View view = inflater.inflate(R.layout.notif_layout, null, false);
-                TextView notifTitle = view.findViewById(R.id.notif_title);
-                TextView notifDesc = view.findViewById(R.id.notif_desc);
-                TextView closeThis = view.findViewById(R.id.close_notif);
+
+
+                CustomNotificationLayoutBinding binding = CustomNotificationLayoutBinding.inflate(getLayoutInflater());
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setView(binding.getRoot());
+
+                final AlertDialog dialog = builder.create();
+
+                dialog.setCanceledOnTouchOutside(false);
+                dialog.setCancelable(false);
+
+                // Set the background of the AlertDialog to be transparent
+                if (dialog.getWindow() != null) {
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                }
+
+
+                TextView notifTitle = binding.notifTitle;
+                TextView notifDesc = binding.notifDesc;
+                TextView closeThis = binding.closeNotif;
+                TextView notifButton = binding.notifActionButton;
+                ImageView imageView = binding.notifImg;
+
+
+
                 closeThis.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -1181,7 +1203,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         dialog.cancel();
                     }
                 });
-                Button notifButton = view.findViewById(R.id.notif_action_button);
+
                 notifButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -1205,7 +1227,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         dialog.cancel();
                     }
                 });
-                ImageView imageView = view.findViewById(R.id.notif_img);
+
                 notifTitle.setText(Notif_title);
                 notifDesc.setText(Html.fromHtml(Notif_desc));
 
@@ -1216,7 +1238,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         .into(imageView);  // imageview object
 
 
-                dialog.setContentView(view);
+
                 dialog.setCancelable(false);
 
 
@@ -1244,6 +1266,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
         }
+
     }
 
 

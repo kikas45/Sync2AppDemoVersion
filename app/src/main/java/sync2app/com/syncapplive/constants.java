@@ -20,8 +20,15 @@ public class constants {
 
   //  public static String ServerUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 
-    public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
+  //  public static String NotificationUrl = "https://sync2app.com/abc/123/admin_config/appConfig.json";
 
+
+    // this is good one
+
+    public static String NotificationUrl = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/AppConfig/remotexNotif.json ";
+
+
+    // this bad one
  //   public static String NotificationUrl = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/AppConfig/appConfig.json";
 
 
