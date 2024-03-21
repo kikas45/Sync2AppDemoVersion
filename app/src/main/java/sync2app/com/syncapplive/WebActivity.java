@@ -109,7 +109,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -129,7 +128,6 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -174,11 +172,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 
 import org.jetbrains.annotations.NotNull;
@@ -198,11 +191,10 @@ import java.util.Objects;
 
 import sync2app.com.syncapplive.QrPages.QRSanActivity;
 import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
-import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
+import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils;
-import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
 import sync2app.com.syncapplive.databinding.CustomNotificationLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYou;
@@ -1637,7 +1629,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
                     if (!ServiceUtils.foregroundServiceRunning(getApplicationContext())) {
                         stopService(new Intent(getApplicationContext(), OnChnageService.class));
-                        startService(new Intent(getApplicationContext(), NotificationService.class));
+                        startService(new Intent(getApplicationContext(), SyncInterval.class));
 
                         // showToast(mContext, "Sync On Interval Activated");
 
@@ -1646,7 +1638,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                 } else {
                     if (!ServiceUtils.foregroundServiceRunningOnChange(getApplicationContext())) {
-                        stopService(new Intent(getApplicationContext(), NotificationService.class));
+                        stopService(new Intent(getApplicationContext(), SyncInterval.class));
                         startService(new Intent(getApplicationContext(), OnChnageService.class));
 
                         // showToast(mContext, "Sync On Change Activated");
@@ -1778,8 +1770,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             MyApplication.decrementRunningActivities();
 
-            //  stopService(new Intent(WebActivity.this, NotificationService.class));
-            //  stopService(new Intent(WebActivity.this, NotificationService.class));
+            //  stopService(new Intent(WebActivity.this, SyncInterval.class));
+            //  stopService(new Intent(WebActivity.this, SyncInterval.class));
 
             SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedBiometric.edit();

@@ -49,7 +49,7 @@ import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
-import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
+import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.SavedHistoryListAdapter
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
@@ -1243,7 +1243,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             } else {
                 textSyncOnFileChangeIntervals.setText("Download on change")
                 applicationContext.stopService(
-                    Intent(applicationContext, NotificationService::class.java)
+                    Intent(applicationContext, SyncInterval::class.java)
 
                 )
 
@@ -1280,7 +1280,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             startService(
                                 Intent(
                                     applicationContext,
-                                    NotificationService::class.java
+                                    SyncInterval::class.java
                                 )
                             )
 
@@ -1312,7 +1312,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
 
                         if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
-                            stopService(Intent(applicationContext, NotificationService::class.java))
+                            stopService(Intent(applicationContext, SyncInterval::class.java))
                             startService(Intent(applicationContext, OnChnageService::class.java))
 
                             val editorM = myDownloadClass.edit()
@@ -2943,7 +2943,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             editor222.apply()
 
 
-            stopService(Intent(this@ReSyncActivity, NotificationService::class.java))
+            stopService(Intent(this@ReSyncActivity, SyncInterval::class.java))
             stopService(Intent(this@ReSyncActivity, OnChnageService::class.java))
 
 

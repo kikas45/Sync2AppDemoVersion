@@ -1,32 +1,18 @@
 package sync2app.com.syncapplive;
 
-import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.multidex.MultiDexApplication;
 
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.onesignal.OSNotificationOpenedResult;
 import com.onesignal.OneSignal;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
 import sync2app.com.syncapplive.additionalSettings.CrashReportDB.CrashHandler;
-import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
+import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
-import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 
 
 public class MyApplication extends MultiDexApplication {
@@ -89,7 +75,7 @@ public class MyApplication extends MultiDexApplication {
         // Check if all activities are stopped
         if (numberOfRunningActivities == 0) {
             // Stop the service
-            instance.stopService(new Intent(instance.getApplicationContext(), NotificationService.class));
+            instance.stopService(new Intent(instance.getApplicationContext(), SyncInterval.class));
             instance.stopService(new Intent(instance.getApplicationContext(), OnChnageService.class));
         }
     }

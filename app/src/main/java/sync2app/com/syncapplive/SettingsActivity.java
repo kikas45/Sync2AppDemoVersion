@@ -2,7 +2,6 @@ package sync2app.com.syncapplive;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -48,8 +47,7 @@ import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
 import sync2app.com.syncapplive.additionalSettings.MyTestDownloadAPI;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
-import sync2app.com.syncapplive.additionalSettings.TestScreenActivity;
-import sync2app.com.syncapplive.additionalSettings.myService.NotificationService;
+import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
@@ -489,7 +487,7 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                stopService(new Intent(SettingsActivity.this, NotificationService.class));
+                stopService(new Intent(SettingsActivity.this, SyncInterval.class));
                 stopService(new Intent(SettingsActivity.this, OnChnageService.class));
                 finish();
                 finishAffinity();
@@ -528,7 +526,7 @@ public class SettingsActivity extends AppCompatActivity {
                 editor_sharedBiometric.clear();
                 editor_sharedBiometric.apply();
 
-                stopService(new Intent(SettingsActivity.this, NotificationService.class));
+                stopService(new Intent(SettingsActivity.this, SyncInterval.class));
                 stopService(new Intent(SettingsActivity.this, OnChnageService.class));
 
                 Handler handler1 = new Handler(Looper.getMainLooper());

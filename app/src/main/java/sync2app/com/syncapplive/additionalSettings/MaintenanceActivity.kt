@@ -1,40 +1,25 @@
 package sync2app.com.syncapplive.additionalSettings
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
-import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
-import android.database.Cursor
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.SettingsActivity
-import sync2app.com.syncapplive.WebActivity
-import sync2app.com.syncapplive.additionalSettings.myService.NotificationService
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityMaintenanceBinding
 import sync2app.com.syncapplive.databinding.CustomCrashReportBinding
-import sync2app.com.syncapplive.databinding.CustomFailedLayoutBinding
-import sync2app.com.syncapplive.databinding.CustomShowDownloadProgressBinding
 
 class MaintenanceActivity : AppCompatActivity() {
 
