@@ -275,12 +275,12 @@
 
             <TextView
                 android:id="@+id/textTestConnectionAPPer"
-                style="@style/constrain_gray_outline_stroke"
                 android:layout_width="0dp"
                 android:layout_height="45dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="24dp"
+                android:background="@drawable/constrain_gray_outline_stroke"
                 android:clickable="true"
                 android:focusable="true"
                 android:fontFamily="sans-serif-medium"
@@ -312,8 +312,6 @@
                 android:fontFamily="sans-serif-medium"
                 android:foreground="?selectableItemBackground"
                 android:gravity="center"
-                android:visibility="gone"
-                tools:visibility="visible"
                 android:maxLines="1"
                 android:paddingLeft="18dp"
                 android:paddingTop="8dp"
@@ -322,19 +320,21 @@
                 android:text="Launched Saved Folder"
                 android:textColor="@color/white"
                 android:textSize="14sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editTextInputIndexManual" />
+                app:layout_constraintTop_toBottomOf="@+id/editTextInputIndexManual"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/textDownloadZipSyncOrApiSyncNow"
-                style="@style/cardDesignBuyGift"
                 android:layout_width="0dp"
                 android:layout_height="45dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginBottom="32dp"
+                android:background="@drawable/card_design_buy_gift_card"
                 android:clickable="true"
                 android:focusable="true"
                 android:fontFamily="sans-serif-medium"
@@ -346,6 +346,7 @@
                 android:paddingRight="18dp"
                 android:paddingBottom="8dp"
                 android:text="Connect to Zip Sync"
+                android:textColor="@color/white"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -381,10 +382,10 @@
                 android:text="Test Toggle Mode"
                 android:textSize="14sp"
                 android:visibility="gone"
-                tools:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/divider7" />
+                app:layout_constraintTop_toBottomOf="@+id/divider7"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/textSyncOnFileChangeIntervals"
@@ -450,7 +451,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout4" />
 
 
-        <!--    i hide this view -->
+            <!--    i hide this view -->
 
             <TextView
                 android:id="@+id/textUseStartFile"
@@ -461,17 +462,14 @@
                 android:elegantTextHeight="true"
                 android:gravity="start|center"
                 android:maxLines="1"
-                android:visibility="gone"
                 android:paddingStart="26dp"
                 android:text="For first sync use start file"
                 android:textSize="14sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textDownloadStartFiles" />
             <!--    i hide this view -->
-
-
-
 
 
             <androidx.appcompat.widget.SwitchCompat
@@ -492,10 +490,10 @@
                 android:layout_marginEnd="24dp"
                 android:alpha="1"
                 android:visibility="gone"
-                tools:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/textToogleMode"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textToogleMode" />
+                app:layout_constraintTop_toTopOf="@+id/textToogleMode"
+                tools:visibility="visible" />
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/imagSwtichEnableSyncOnFilecahnge"
@@ -681,7 +679,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
 
-       <!--     i made the vsibility gone for now -->
+            <!--     i made the vsibility gone for now -->
 
             <TextView
                 android:id="@+id/textDownloadStartFiles"
@@ -692,19 +690,18 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
                 android:background="@drawable/round_edit_text_design"
-                android:gravity="center"
-                android:maxLines="1"
-                android:padding="5dp"
-                android:visibility="gone"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?selectableItemBackground"
+                android:gravity="center"
+                android:maxLines="1"
+                android:padding="5dp"
                 android:text="Download start files"
                 android:textSize="14sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textDisplaytime" />
-
 
 
             <View
@@ -721,13 +718,11 @@
             <!--     i made the vsibility gone for now -->
 
 
-
-
             <View
                 android:id="@+id/divider10"
+                style="@style/dividerBackColor"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                style="@style/dividerBackColor"
                 app:layout_constraintBottom_toTopOf="@+id/textUseStartFile"
                 app:layout_constraintEnd_toEndOf="@+id/textUseStartFile"
                 app:layout_constraintStart_toStartOf="@+id/textUseStartFile" />

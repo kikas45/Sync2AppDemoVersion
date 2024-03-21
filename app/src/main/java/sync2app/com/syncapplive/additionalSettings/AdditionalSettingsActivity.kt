@@ -113,13 +113,6 @@ class AdditionalSettingsActivity : AppCompatActivity() {
         }
 
 
-        binding.textTitle.setOnClickListener {
-            setKioskPolicies(true, isAdmin)
-        }
-
-
-
-
 
         binding.apply {
 
@@ -406,15 +399,20 @@ class AdditionalSettingsActivity : AppCompatActivity() {
 
 
     private fun setKioskPolicies(enable: Boolean, isAdmin: Boolean) {
+        val editor = sharedBiometric.edit()
         if (isAdmin) {
             setRestrictions(enable)
             enableStayOnWhilePluggedIn(enable)
             setUpdatePolicy(enable)
             setAsHomeApp(enable)
             setKeyGuardEnabled(enable)
+        } else {
+            setLockTask(enable, isAdmin)
+            setImmersiveMode(enable)
+            editor.remove("imgEnableLockScreen")
+            editor.apply()
+
         }
-        setLockTask(enable, isAdmin)
-        setImmersiveMode(enable)
     }
 
     // region restrictions

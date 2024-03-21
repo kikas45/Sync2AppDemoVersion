@@ -1090,7 +1090,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             String filename = "/index.html";
 
-            String finalFolderPathDesired = "/" + CLO + "/" + DEMO + "/" + "Offline_app";
+            String finalFolderPathDesired = "/" + CLO + "/" + DEMO + "/" + Constants.App;
 
             String destinationFolder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/" + finalFolderPathDesired;
 
@@ -1711,7 +1711,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
                     if (!zip.isEmpty()) {
-                        textSyncMode.setText("SM: " + zip);
+
+                        if (zip.equals("App")){
+                            textSyncMode.setText("SM: Api");
+
+                        }else {
+                            textSyncMode.setText("SM: " + zip);
+                        }
+
                     } else {
                         textSyncMode.setText("SM: --");
                     }

@@ -20,6 +20,7 @@ class Constants {
         const val syn2App = "https://cp.gogle/app_base/public/"
         const val testServer = "hello world"
 
+        // find this direct url on splash screen
         const val get_masterDomain = "get_masterDomain"
 
 
@@ -63,6 +64,10 @@ class Constants {
 
 
         const val SynC_Status = "SynC_Status"
+        const val AppConfig = "AppConfig.mp4"
+        const val AppConfigFolder = "AppConfig"
+        const val Syn2AppLive = "Syn2AppLive"
+        const val Invalid_Config_Url = "Invalid Config Url"
 
 
         const val Error_during_zip_extraction = "Error during extraction"
@@ -138,6 +143,8 @@ class Constants {
         const val imagSwtichEnableSyncFromAPI = "imagSwtichEnableSyncFromAPI"
         const val MY_DOWNLOADER_CLASS = "MY_DOWNLOADER_CLASS"
         const val downloadKey = "downloadKey"
+        const val Extracted = "Extracted"
+        const val App = "App"
 
 
         const val PR_running = "PR: Running"

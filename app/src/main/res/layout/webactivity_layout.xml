@@ -403,6 +403,45 @@
                     app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
 
 
+
+                <TextView
+                    android:id="@+id/textFilecount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:elegantTextHeight="true"
+                    android:gravity="center"
+                    android:text="NF : --"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/textStatusProcess"
+                    app:layout_constraintStart_toEndOf="@+id/textStatusProcess"
+                    app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
+
+
+
+
+                <TextView
+                    android:id="@+id/textFileChange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:elegantTextHeight="true"
+                    android:gravity="center"
+                    android:text="CF : --"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@+id/textStatusProcess"
+                    app:layout_constraintStart_toEndOf="@+id/textStatusProcess"
+                    app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
+
+
             </LinearLayout>
 
 

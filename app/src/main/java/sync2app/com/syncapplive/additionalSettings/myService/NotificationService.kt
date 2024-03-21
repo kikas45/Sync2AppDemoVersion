@@ -72,6 +72,14 @@ class NotificationService : Service() {
     }
 
 
+    private val sharedBiometric: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SHARED_BIOMETRIC,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
     override fun onCreate() {
         super.onCreate()
 
@@ -107,7 +115,6 @@ class NotificationService : Service() {
             val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
             val Zip = myDownloadClass.getString("Zip", "").toString()
             val fileName = myDownloadClass.getString("fileName", "").toString()
-            val Extracted = myDownloadClass.getString("Extracted", "").toString()
             val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
 
 
@@ -158,9 +165,14 @@ class NotificationService : Service() {
     private val downloadCompleteReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
-
+                val get_value_if_Api_is_required = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
                 if (repEatMyProcess == true) {
-                    funUnZipFile()
+                    if (get_value_if_Api_is_required.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                        funUnZipFile()
+                    }else{
+                        stratMyACtivity()
+                        Log.d("NotificationService", "onReceive: Api Completed")
+                    }
                     repEatMyProcess = false
                 }
 
@@ -222,7 +234,7 @@ class NotificationService : Service() {
             val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
             val Zip = myDownloadClass.getString("Zip", "").toString()
             val fileName = myDownloadClass.getString("fileName", "").toString()
-            val Extracted = myDownloadClass.getString("Extracted", "").toString()
+            val Extracted = myDownloadClass.getString(Constants.Extracted, "").toString()
             val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
 
             download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
@@ -243,7 +255,7 @@ class NotificationService : Service() {
     ) {
 
 
-        val DeleteFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+        val DeleteFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileNamy"
 
         val directoryPath =
             Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive$DeleteFolderPath"
@@ -262,7 +274,7 @@ class NotificationService : Service() {
             editior.putString(Constants.getFolderSubpath, getFolderSubpath)
             editior.putString("Zip", Zip)
             editior.putString("fileNamy", fileNamy)
-            editior.putString("Extracted", Extracted)
+            editior.putString(Constants.Extracted, Extracted)
             editior.putString("baseUrl", url)
             editior.apply()
 
@@ -354,7 +366,7 @@ class NotificationService : Service() {
                 val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "")
                 val Zip = myDownloadClass.getString("Zip", "")
                 val fileNamy = myDownloadClass.getString("fileNamy", "")
-                val Extracted = myDownloadClass.getString("Extracted", "")
+                val Extracted = myDownloadClass.getString(Constants.Extracted, "")
 
 
                 val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
@@ -669,7 +681,7 @@ class NotificationService : Service() {
             val fileName = myDownloadClass.getString("fileName", "")
 
 
-            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileName"
 
             val directoryPath =
                 Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath

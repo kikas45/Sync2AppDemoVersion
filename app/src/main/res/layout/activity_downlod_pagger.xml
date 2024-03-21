@@ -234,7 +234,7 @@
             app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
         <TextView
-            android:id="@+id/textContinuPassword222222"
+            android:id="@+id/text_launch_application"
             style="@style/cardDesignBuyGift222"
             android:layout_width="0dp"
             android:layout_height="35dp"

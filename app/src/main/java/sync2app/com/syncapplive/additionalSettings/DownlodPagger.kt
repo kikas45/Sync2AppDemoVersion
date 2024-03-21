@@ -24,6 +24,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -36,6 +37,7 @@ import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityDownlodPaggerBinding
+import sync2app.com.syncapplive.databinding.LaucnOnlineDonloadPaggerBinding
 import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding
 import java.io.File
 import java.io.FileInputStream
@@ -113,12 +115,9 @@ class DownlodPagger : AppCompatActivity() {
 
 
 
-            binding.textContinuPassword222222.setOnClickListener {
-                if (isValid == true) {
-                    showToastMessage("Please wait for download of media")
-                }else{
-                    showToastMessage("Please wait for download of media")
-                }
+            binding.textLaunchApplication.setOnClickListener {
+
+                showPopLauchOnline()
             }
 
 
@@ -163,7 +162,7 @@ class DownlodPagger : AppCompatActivity() {
                 if (baseUrl != null && fileName != null){
                     download(baseUrl, getFolderClo.toString(), getFolderSubpath.toString(), Zip.toString(), fileName.toString(), Extracted.toString(), threeFolderPath.toString())
                 }else{
-                 //   onBackPressed()
+                    //   onBackPressed()
                     startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                     finish()
                 }
@@ -224,6 +223,48 @@ class DownlodPagger : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("InflateParams", "SuspiciousIndentation")
+    private fun showPopLauchOnline() {
+        val bindingCm: LaucnOnlineDonloadPaggerBinding =
+            LaucnOnlineDonloadPaggerBinding.inflate(
+                layoutInflater
+            )
+        val builder = AlertDialog.Builder(this@DownlodPagger)
+        builder.setView(bindingCm.getRoot())
+        val alertDialog = builder.create()
+        alertDialog.setCanceledOnTouchOutside(true)
+        alertDialog.setCancelable(true)
+
+        if (alertDialog.window != null) {
+            alertDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        }
+
+        bindingCm.apply {
+
+            textCancel.setOnClickListener {
+                alertDialog.dismiss()
+            }
+
+
+            textYesButton.setOnClickListener {
+                val editor = sharedP.edit()
+                editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+                editor.apply()
+                second_cancel_download2222()
+                stratLauncOnline()
+                alertDialog.dismiss()
+            }
+
+
+        }
+
+        alertDialog.show()
+    }
+
+
+
+
+
 
     @SuppressLint("Range", "SetTextI18n")
     private fun statusMessage(c: Cursor): String? {
@@ -247,7 +288,7 @@ class DownlodPagger : AppCompatActivity() {
             }
 
             DownloadManager.STATUS_PAUSED -> {
-               // msg = "Resume"
+                // msg = "Resume"
                 msg = "Paused"
                 binding.imagePauseDownload.visibility = View.INVISIBLE
                 binding.imageResumeDownload.visibility = View.VISIBLE
@@ -261,14 +302,23 @@ class DownlodPagger : AppCompatActivity() {
                 binding.imagePauseDownload.isEnabled = false
                 binding.imageResumeDownload.isEnabled = false
 
+                val get_value_if_Api_is_required = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+
                 if (isValid == true) {
                     isValid = false
                     showCustomProgressDialog("Please wait! \n Download in Progress")
                     handler.postDelayed(Runnable {
+                        if (get_value_if_Api_is_required.equals(Constants.imagSwtichEnableSyncFromAPI)){
                             funUnZipFile()
-                        }, 250)
+                        }else{
+                            stratMyACtivity()
+                            showToastMessage("Api Completed")
+                        }
+
+
+                    }, 250)
                 } else {
-                  //  showToastMessage("Something went wrong")
+                    //  showToastMessage("Something went wrong")
                 }
 
 
@@ -290,7 +340,7 @@ class DownlodPagger : AppCompatActivity() {
 
     private fun showCustomProgressDialog(message: String) {
         try {
-           val customProgressDialog = Dialog(this)
+            val customProgressDialog = Dialog(this)
             val binding = ProgressDialogLayoutBinding.inflate(LayoutInflater.from(this))
             customProgressDialog.setContentView(binding.root)
             customProgressDialog.setCancelable(true)
@@ -370,7 +420,7 @@ class DownlodPagger : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         try {
-        MyApplication.incrementRunningActivities()
+            MyApplication.incrementRunningActivities()
         } catch (ignored: java.lang.Exception) {
         }
     }
@@ -402,8 +452,10 @@ class DownlodPagger : AppCompatActivity() {
             MyApplication.decrementRunningActivities()
 
 
-           second_cancel_download2222()
-
+            val get_value_if_Api_is_required = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+            if (get_value_if_Api_is_required.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                second_cancel_download2222()
+            }
 
             if (wakeLock != null && wakeLock!!.isHeld) {
                 wakeLock!!.release()
@@ -416,23 +468,23 @@ class DownlodPagger : AppCompatActivity() {
 
     private fun second_cancel_download2222() {
 
-            try {
+        try {
 
-                val download_ref: Long = sharedP.getLong(Constants.downloadKey, -15)
+            val download_ref: Long = sharedP.getLong(Constants.downloadKey, -15)
 
-                val query = DownloadManager.Query()
-                query.setFilterById(download_ref)
-                val c =
-                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
-                if (c.moveToFirst()) {
-                    manager!!.remove(download_ref)
-                    val editor: SharedPreferences.Editor = sharedP.edit()
-                    editor.remove(Constants.downloadKey)
-                    editor.apply()
-                }
-            } catch (ignored: java.lang.Exception) {
+            val query = DownloadManager.Query()
+            query.setFilterById(download_ref)
+            val c =
+                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+            if (c.moveToFirst()) {
+                manager!!.remove(download_ref)
+                val editor: SharedPreferences.Editor = sharedP.edit()
+                editor.remove(Constants.downloadKey)
+                editor.apply()
             }
+        } catch (ignored: java.lang.Exception) {
         }
+    }
 
 
 
@@ -446,12 +498,12 @@ class DownlodPagger : AppCompatActivity() {
                 val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "")
                 val Zip = sharedP.getString("Zip", "")
                 val fileNamy = sharedP.getString("fileNamy", "")
-                val Extracted = sharedP.getString("Extracted", "")
+                val Extracted = sharedP.getString(Constants.Extracted, "")
 
 
                 val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
                 val finalFolderPathDesired = "/$getFolderClo/$getFolderSubpath/$Extracted"
-              //  val finalFolderPathDesired = "/$getFolderClo/$Extracted"
+                //  val finalFolderPathDesired = "/$getFolderClo/$Extracted"
 
 
 
@@ -463,7 +515,7 @@ class DownlodPagger : AppCompatActivity() {
                 }
 
                 val myFile = File(directoryPathString, File.separator + fileNamy)
-              //  val myFile = File(directoryPathString, fileNamy)
+                //  val myFile = File(directoryPathString, fileNamy)
                 if (myFile.exists()) {
                     extractZip(myFile.toString(), destinationFolder.toString())
                 } else {
@@ -548,56 +600,85 @@ class DownlodPagger : AppCompatActivity() {
 
     private fun stratMyACtivity() {
         try {
-       handler.postDelayed(Runnable {
-
-  /*         val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
-
-           if (get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)){
-               if (!foregroundServiceRunning()) {
-                   applicationContext.startService(Intent(applicationContext, NotificationService::class.java))
-               } else {
-                   applicationContext.stopService(Intent(applicationContext, NotificationService::class.java))
-               }
-           }
-*/
+            handler.postDelayed(Runnable {
 
 
-           val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+                val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
 
-           if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
-               stopService(Intent(applicationContext, OnChnageService::class.java))
-               if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
-                   startService(Intent(applicationContext, NotificationService::class.java))
-               }
-           } else {
-               stopService(Intent(applicationContext, NotificationService::class.java))
-               if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
-                   startService(Intent(applicationContext, OnChnageService::class.java))
-               }
-           }
+                if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+                    stopService(Intent(applicationContext, OnChnageService::class.java))
+                    if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                        startService(Intent(applicationContext, NotificationService::class.java))
+                    }
+                } else {
+                    stopService(Intent(applicationContext, NotificationService::class.java))
+                    if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                        startService(Intent(applicationContext, OnChnageService::class.java))
+                    }
+                }
 
 
 
-           val getFolderClo = sharedP.getString("getFolderClo", "")
-           val getFolderSubpath = sharedP.getString("getFolderSubpath", "")
-           val Zip = sharedP.getString("Zip", "")
-           val fileName = sharedP.getString("fileName", "")
-           val Extracted = sharedP.getString("Extracted", "")
+                val getFolderClo = sharedP.getString("getFolderClo", "")
+                val getFolderSubpath = sharedP.getString("getFolderSubpath", "")
+                val Zip = sharedP.getString("Zip", "")
+                val fileName = sharedP.getString("fileName", "")
+                val Extracted = sharedP.getString("Extracted", "")
 
-           val getUnzipFileFrom =  "/$getFolderClo/$getFolderSubpath/$Extracted"
-           val intent = Intent(applicationContext, WebActivity::class.java)
-           intent.putExtra("getUnzipFileFrom", getUnzipFileFrom)
+                val getUnzipFileFrom =  "/$getFolderClo/$getFolderSubpath/$Extracted"
+                val intent = Intent(applicationContext, WebActivity::class.java)
+                intent.putExtra("getUnzipFileFrom", getUnzipFileFrom)
 
-           startActivity(intent)
-           finish()
-       }, 6000)
+                startActivity(intent)
+                finish()
+            }, 6000)
 
 
         }catch (_:Exception){}
     }
 
+    private fun stratLauncOnline() {
+        try {
 
-private fun showToastMessage(messages: String) {
+            val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+
+            if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+                stopService(Intent(applicationContext, OnChnageService::class.java))
+                if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                    startService(Intent(applicationContext, NotificationService::class.java))
+                }
+            } else {
+                stopService(Intent(applicationContext, NotificationService::class.java))
+                if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                    startService(Intent(applicationContext, OnChnageService::class.java))
+                }
+            }
+
+
+            val getFolderClo = sharedP.getString("getFolderClo", "")
+            val getFolderSubpath = sharedP.getString("getFolderSubpath", "")
+
+            val editor = sharedP.edit()
+
+            val url = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/App/index.html"
+
+            //  editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+            editor.putString(Constants.getFolderClo, getFolderClo)
+            editor.putString(Constants.getFolderSubpath, getFolderSubpath)
+            editor.putString(Constants.syncUrl, url)
+            editor.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOnline)
+            editor.apply()
+
+
+            val intent = Intent(applicationContext, WebActivity::class.java)
+            startActivity(intent)
+            finish()
+
+        }catch (_:Exception){}
+    }
+
+
+    private fun showToastMessage(messages: String) {
 
         try {
             Toast.makeText(applicationContext, messages, Toast.LENGTH_SHORT).show()
@@ -655,7 +736,7 @@ private fun showToastMessage(messages: String) {
             val fileName = sharedP.getString("fileName", "")
 
 
-            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
+            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileName"
 
             val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
 
