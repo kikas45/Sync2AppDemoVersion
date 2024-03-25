@@ -144,6 +144,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
+    private val simpleSavedPassword: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SIMPLE_SAVED_PASSWORD,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
     private var powerManager: PowerManager? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
@@ -300,23 +308,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     @RequiresApi(Build.VERSION_CODES.Q)
     private fun check_for_valid_confileUrl(){
 
-      //  showCustomProgressDialog("Testing connection")
+        //  showCustomProgressDialog("Testing connection")
 
-      //  val ServerUrl = myDownloadClass.getString(Constants.get_masterDomain, "").toString()
-      //  var ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021000/App/Config/app_logo.png"
-     //   val ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/HQ/Zip/App.zip"
-        val ServerUrl = "https://firebasestorage.googleapis.com/v0/b/syn2appkiller.appspot.com/o/myApp.zip?alt=media&token=8b303be6-4490-4fe0-ae6f-47a1b5278926"
+        //  val ServerUrl = "https://firebasestorage.googleapis.com/v0/b/syn2appkiller.appspot.com/o/myApp.zip?alt=media&token=8b303be6-4490-4fe0-ae6f-47a1b5278926"
+        val ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021001/Zip/Config.zip"
 
 
-      //  var ServerUrl =  "https://cp.cloudappserver.co.uk/app_base/public/CLO/HQ/Zip/App.zip"
-      //  var ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021000/App/Config/app_logo.png"
-     //  var ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/BV/141629/App/Config/Splash.mp4"
 
-        //    ServerUrl =   "https://sync2app.com/abc/123/admin_config/appConfig.json";
         val sharedLicenseKeys = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, MODE_PRIVATE)
 
-       val  get_UserID = sharedLicenseKeys.getString(Constants.get_UserID, "")!!
-       val  get_LicenseKey = sharedLicenseKeys.getString(Constants.get_LicenseKey, "")!!
+        val  get_UserID = sharedLicenseKeys.getString(Constants.get_UserID, "")!!
+        val  get_LicenseKey = sharedLicenseKeys.getString(Constants.get_LicenseKey, "")!!
 
 
         if (isNetworkAvailable()){
@@ -462,7 +464,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }
 
 
-        downloadConfiGFile(get_UserID, get_LicenseKey, ServerUrl, Constants.AppConfig)
+        downloadConfiGFile(get_UserID, get_LicenseKey, ServerUrl, Constants.Config)
         alertDialog.show()
 
         isDownloadComplete = false // Flag to track download completion
@@ -472,9 +474,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             try {
                 while (!isDownloadComplete) {
 
-                   runOnUiThread {
-                       getDownloadStatus(bindingCM.progressBarPref, bindingCM.teextDisplaydownload, get_UserID, get_LicenseKey, ServerUrl, Constants.AppConfig )
-                   }
+                    runOnUiThread {
+                        getDownloadStatus(bindingCM.progressBarPref, bindingCM.teextDisplaydownload, get_UserID, get_LicenseKey, ServerUrl, Constants.Config )
+                    }
 
 
 
@@ -499,7 +501,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
 
-            val folderName = "AppConfig"
+            val folderName = Constants.Config
             val Syn2AppLive = "Syn2AppLive"
 
             val DeleteFolderPath = "/$Syn2AppLive/$get_UserID/$get_LicenseKey/$folderName/$fileName"
@@ -622,10 +624,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 val Syn2AppLive = Constants.Syn2AppLive
 
                 val finalFolderPath = "/$get_UserID/$get_LicenseKey"
-                val finalFolderPathDesired = "/$get_UserID/$get_LicenseKey/$folderName"
+
+                val get_Clo = simpleSavedPassword.getString(Constants.get_UserID, "")
+                val get_DEmo = simpleSavedPassword.getString(Constants.get_LicenseKey, "")
+
+                val newConfigFolder  = "/$get_Clo/$get_DEmo/App/"
 
                 val directoryPathString = Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive" + finalFolderPath
-                val destinationFolder = File(Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive/" + finalFolderPathDesired)
+                val destinationFolder = File(Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive/" + newConfigFolder)
 
                 if (!destinationFolder.exists()) {
                     destinationFolder.mkdirs()
@@ -719,6 +725,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
     }
+
+
     override fun onBackPressed() {
 
 

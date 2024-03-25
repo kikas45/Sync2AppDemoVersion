@@ -64,7 +64,7 @@ class Constants {
 
 
         const val SynC_Status = "SynC_Status"
-        const val AppConfig = "AppConfig.mp4"
+        const val Config = "Config.zip"
         const val AppConfigFolder = "AppConfig"
         const val Syn2AppLive = "Syn2AppLive"
         const val Invalid_Config_Url = "Invalid Config Url"

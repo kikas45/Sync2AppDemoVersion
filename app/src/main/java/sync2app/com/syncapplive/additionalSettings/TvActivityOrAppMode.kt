@@ -188,7 +188,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
         binding.apply {
             editTextUserID.setText("CLO")
-            editTextLicenseKey.setText("DE_MO_2021000")
+            editTextLicenseKey.setText("DE_MO_2021001")
 
             textAppMode.setOnClickListener {
                 handleFormVerification()
@@ -259,7 +259,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     ) {
         if (get_UserID.isNotEmpty() && get_LicenseKey.isNotEmpty() && get_editTextMaster.isNotEmpty()) {
 
-            val baseUrl = "$get_editTextMaster/$get_UserID/$get_LicenseKey/AppConfig/appConfig.json"
+            val baseUrl = "$get_editTextMaster/$get_UserID/$get_LicenseKey/App/Config/appConfig.json"
 
             if (get_editTextMaster.startsWith("https://") || get_editTextMaster.startsWith("http://")) {
                 showCustomProgressDialog()
@@ -297,7 +297,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
             } else {
 
-                showToastMessage("Invalid url format")
+                showToastMessage("Invalid Master Url Format")
 
             }
 
