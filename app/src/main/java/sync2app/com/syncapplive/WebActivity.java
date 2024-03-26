@@ -321,7 +321,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     int lastAction;
     String currentDownloadFileName;
     String currentDownloadFileMimeType;
-    RelativeLayout webconbt;
+
     int PERMISSION_ALL = 1;
     String[] PERMISSIONS = {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -513,7 +513,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         urlEdittext = findViewById(R.id.urledittextbox);
         urllayout = findViewById(R.id.urllayoutroot);
 
-        webconbt = findViewById(R.id.webco);
         web_button = findViewById(R.id.web_button);
 
         // webx_layout = findViewById(R.id.webx_layout);
@@ -566,7 +565,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         scroolToStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final int scrollAmount = (int) (horizontalScrollView.getChildAt(0).getWidth() * 0.2);
+                final int scrollAmount = (int) (horizontalScrollView.getChildAt(0).getWidth() * 0.30);
                 horizontalScrollView.post(new Runnable() {
                     @Override
                     public void run() {
@@ -668,17 +667,26 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         break;
 
                     case MotionEvent.ACTION_UP:
-                        if (lastAction == MotionEvent.ACTION_DOWN) {
-                            // If the last action was a down touch, it was a click, not a drag
-                            v.performClick();
-                        }
+                        // Delay before performing click action
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (lastAction == MotionEvent.ACTION_DOWN) {
+                                    v.performClick();
+                                }
+                            }
+                        }, 300); // Adjust delay time as needed
                         break;
 
                     default:
                         return false;
                 }
                 return true;
+
+
+
             }
+
         });
 
 
@@ -3181,7 +3189,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
                     showToast(mContext, "Tap The Back Button to Go Settings Page");
                 }
-
+                loadTheMainWebview();
                 alertDialog.dismiss();
             }
         });

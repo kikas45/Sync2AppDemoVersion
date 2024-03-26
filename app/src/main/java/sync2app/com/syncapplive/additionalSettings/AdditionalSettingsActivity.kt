@@ -58,6 +58,7 @@ import sync2app.com.syncapplive.databinding.ActivityAppAdminBinding
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import kotlin.math.log
 
 class AdditionalSettingsActivity : AppCompatActivity() {
 
@@ -363,7 +364,8 @@ class AdditionalSettingsActivity : AppCompatActivity() {
 
             val fileUri = FileProvider.getUriForFile(
                 applicationContext,
-                "$nameOfpackage.fileprovider",
+               // "$nameOfpackage.fileprovider",
+                "$nameOfpackage.provider",
                 File(directoryPath)
             )
 
@@ -374,6 +376,8 @@ class AdditionalSettingsActivity : AppCompatActivity() {
             }
 
             startActivity(Intent.createChooser(shareIntent, "Share APK using"))
+
+            Log.d("shareMyApk", "shareMyApk: sucesss ")
 
 
         } catch (e: Exception) {
