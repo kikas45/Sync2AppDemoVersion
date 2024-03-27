@@ -28,19 +28,18 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
-import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.SavedHistoryListAdapter
-import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkStoragePermission
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.urlchecks.getPermissionStatus
 import sync2app.com.syncapplive.additionalSettings.urlchecks.requestStoragePermission
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.additionalSettings.utils.Utility
-import sync2app.com.syncapplive.databinding.ActivityTvOrAppModeBinding
+import sync2app.com.syncapplive.databinding.ActivityTvOrAppModePageBinding
 import sync2app.com.syncapplive.databinding.CustomApiHardCodedLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomApiUrlLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomGrantAccessPageBinding
@@ -49,7 +48,7 @@ import java.io.File
 import java.util.Objects
 
 class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickListener {
-    private lateinit var binding: ActivityTvOrAppModeBinding
+    private lateinit var binding: ActivityTvOrAppModePageBinding
     private var hasPermission = false
     private var isReady = false
 
@@ -109,7 +108,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     @SuppressLint("CommitPrefEdits", "SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityTvOrAppModeBinding.inflate(layoutInflater)
+        binding = ActivityTvOrAppModePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // SIMPLE PASSWORD
@@ -160,6 +159,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             if (compoundButton.isChecked) {
 
                 binding.texturlsSavedDownload.text = "Select Partner Url"
+                binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.light_gray_wash))
                 binding.textPartnerUrlLunch.text = "Select Partner Url"
 
                 editoreee.remove(Constants.Saved_Domains_Name)
@@ -170,6 +170,8 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
                 binding.textPartnerUrlLunch.text = "Select Custom Domain"
                 binding.texturlsSavedDownload.text = "Select Custom Domain"
+
+                binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.light_gray_wash))
 
                 getUrlBasedOnSpinnerText = ""
 
@@ -187,8 +189,8 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
         binding.apply {
-            editTextUserID.setText("CLO")
-            editTextLicenseKey.setText("DE_MO_2021001")
+         //   editTextUserID.setText("CLO")
+          //  editTextLicenseKey.setText("DE_MO_2021001")
 
             textAppMode.setOnClickListener {
                 handleFormVerification()
@@ -208,8 +210,8 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     }
 
     private fun handleFormVerification() {
-        val get_UserID = binding.editTextUserID.text.toString()
-        val get_LicenseKey = binding.editTextLicenseKey.text.toString()
+        val get_UserID = binding.editTextUserID.text.toString().trim()
+        val get_LicenseKey = binding.editTextLicenseKey.text.toString().trim()
 
         hideKeyBoard(binding.editTextUserID)
 
@@ -217,7 +219,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
             val get_Saved_Domains_Urls =
-                simpleSavedPassword.getString(Constants.Saved_Domains_Urls, "").toString()
+                simpleSavedPassword.getString(Constants.Saved_Domains_Urls, "").toString().trim()
 
             if (binding.imgUserMasterDomainORCustom.isChecked) {
 
@@ -684,6 +686,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             textApiServer.setOnClickListener {
                 binding.texturlsSavedDownload.text = CP_server
                 getUrlBasedOnSpinnerText = CP_server
+                binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
 
                 alertDialog.dismiss()
             }
@@ -692,6 +695,8 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             textCloudServer.setOnClickListener {
                 binding.texturlsSavedDownload.text = API_Server
                 getUrlBasedOnSpinnerText = API_Server
+                binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
+
 
                 alertDialog.dismiss()
             }
@@ -800,6 +805,9 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         val urls = domainUrl.url + ""
         if (name.isNotEmpty()) {
             binding.texturlsSavedDownload.text = name
+            binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
+
+
         }
 
         // Note - later you can use the url as well , the  name is displayed on textview

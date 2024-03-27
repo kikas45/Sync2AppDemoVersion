@@ -111,6 +111,7 @@ class Constants {
         const val getSaveSubFolderInPutFiled = "getSaveSubFolderInPutFiled"
         const val getSavedEditTextInputSynUrlZip = "getSavedEditTextInputSynUrlZip"
         const val showDownloadSyncStatus = "showDownloadSyncStatus"
+        const val imagShowOnlineStatus = "imagShowOnlineStatus"
 
         const val MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
         const val SAVE_NAVIGATION = "SAVE_NAVIGATION"

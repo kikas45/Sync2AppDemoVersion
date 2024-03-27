@@ -438,6 +438,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     private RatingBar ratingbar;
     private String lasturl;
     private ImageView web_button;
+    private ImageView imageCirclGreenOnline;
+    private ImageView imageCircleBlueOffline;
     // private LinearLayout web_button_root_layout; /// change
     //  private ConstraintLayout webx_layout; /// change
 
@@ -523,6 +525,8 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         bottomToolbar_img_5 = findViewById(R.id.bottomtoolbar_btn_5);
         bottomToolbar_img_6 = findViewById(R.id.bottomtoolbar_btn_6);
         bottomtoolbar_btn_7 = findViewById(R.id.bottomtoolbar_btn_7);
+        imageCircleBlueOffline = findViewById(R.id.imageCircleBlueOffline);
+        imageCirclGreenOnline = findViewById(R.id.imageCirclGreenOnline);
 
         MyApplication.incrementRunningActivities();
 
@@ -1001,9 +1005,19 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
+        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+        String get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "");
+
 
         if (networkInfo != null && networkInfo.isConnected()) {
             webView.loadUrl(url);
+
+            if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+                imageCirclGreenOnline.setVisibility(View.VISIBLE);
+                imageCircleBlueOffline.setVisibility(View.INVISIBLE);
+
+            }
+
         } else {
             showPopForTVConfiguration(Constants.badRequest);
         }
@@ -1060,6 +1074,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         webView.clearView();
         webView.clearMatches();
 
+        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+        String get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "");
+
+        if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+            imageCirclGreenOnline.setVisibility(View.VISIBLE);
+            imageCircleBlueOffline.setVisibility(View.INVISIBLE);
+
+        }
 
         if (UrlIntent.hasExtra("url")) {
             webView.loadUrl(Objects.requireNonNull(getIntent().getStringExtra("url")));
@@ -1136,6 +1158,16 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
                 webView.loadUrl(filePath);
+
+
+                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
+                String get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "");
+
+                if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+                    imageCirclGreenOnline.setVisibility(View.INVISIBLE);
+                    imageCircleBlueOffline.setVisibility(View.VISIBLE);
+                }
+
 
             } else {
 

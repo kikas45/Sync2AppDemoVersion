@@ -550,7 +550,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val request = DownloadManager.Request(Uri.parse(url))
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+      //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setTitle(fileName)
         request.allowScanningByMediaScanner()
         request.setDestinationInExternalPublicDir(
@@ -2918,7 +2918,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+          //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             request.setTitle(fileNamy)
             request.allowScanningByMediaScanner()
             request.setDestinationInExternalPublicDir(

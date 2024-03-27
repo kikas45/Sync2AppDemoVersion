@@ -24,6 +24,7 @@
     <color name="deep_green">#318F34</color>
     <color name="deep_blue_light">#21485A</color>
     <color name="light_gray">#676A6C</color>
+    <color name="light_gray_wash">#6D7274</color>
     <color name="light_blue_wash">#6799A5</color>
     <color name="light_blue_wash_lithter">#BBD0E4</color>
     <color name="dark_light_gray">#302E2E</color>
@@ -36,6 +37,7 @@
     <color name="colorPrimaryDark">#16E37F</color>
     <color name="colorAccent">#03DAC5</color>
     <color name="logo_green">#88D834</color>
+    <color name="logo_blue">#0F9FE7</color>
 
 
     <!-- dots active colors -->

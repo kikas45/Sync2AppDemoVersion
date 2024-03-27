@@ -41,12 +41,52 @@ class MaintenanceActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         MyApplication.incrementRunningActivities()
-
+        val editor = sharedBiometric.edit()
 
         Handler(Looper.getMainLooper()).postDelayed({
             getCarshReports()
         }, 700)
 
+
+        // show online Status
+
+        binding.apply {
+
+            imagShowOnlineStatus.setOnCheckedChangeListener { compoundButton, isValued -> // we are putting the values into SHARED PREFERENCE
+                if (compoundButton.isChecked) {
+
+                    editor.putString(Constants.imagShowOnlineStatus, "imagShowOnlineStatus")
+                    editor.apply()
+                    binding.textShowOnlineStatus.text = "Hide Online Status"
+
+                } else {
+                    editor.remove(Constants.imagShowOnlineStatus)
+                    editor.apply()
+                    binding.textShowOnlineStatus.text = "Show Online Status"
+                }
+            }
+
+
+            val get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "")
+
+            imagShowOnlineStatus.isChecked = get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)
+
+            if (get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+
+                binding.textShowOnlineStatus.text = "Hide Online Status"
+
+            } else {
+
+                binding.textShowOnlineStatus.text = "Show Online Status"
+
+            }
+
+
+
+
+
+
+        }
 
 
 
@@ -54,7 +94,7 @@ class MaintenanceActivity : AppCompatActivity() {
         binding.apply {
 
 
-            val editor = sharedBiometric.edit()
+
 
 
             /// enable the Auto Boot

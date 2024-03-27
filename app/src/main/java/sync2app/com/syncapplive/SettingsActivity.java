@@ -47,6 +47,7 @@ import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
 import sync2app.com.syncapplive.additionalSettings.MyTestDownloadAPI;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.TvActivityOrAppMode;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -511,7 +512,7 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+/*                SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editorED = mydownloadClass.edit();
                 editorED.clear();
                 editorED.apply();
@@ -519,11 +520,12 @@ public class SettingsActivity extends AppCompatActivity {
                 SharedPreferences SIMPLE_SAVED_PASSWORD = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editorEDSIMPLE_SAVED_PASSWORD = SIMPLE_SAVED_PASSWORD.edit();
                 editorEDSIMPLE_SAVED_PASSWORD.clear();
-                editorEDSIMPLE_SAVED_PASSWORD.apply();
+                editorEDSIMPLE_SAVED_PASSWORD.apply();*/
 
                 SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor_sharedBiometric= sharedBiometric.edit();
-                editor_sharedBiometric.clear();
+                editor_sharedBiometric.remove(Constants.MY_TV_OR_APP_MODE);
+                editor_sharedBiometric.remove(Constants.FIRST_TIME_APP_START);
                 editor_sharedBiometric.apply();
 
                 stopService(new Intent(SettingsActivity.this, SyncInterval.class));
@@ -534,8 +536,14 @@ public class SettingsActivity extends AppCompatActivity {
                 handler1.postDelayed(new Runnable() {
                     @Override
                     public void run() {
+
+                        Intent myactivity = new Intent(SettingsActivity.this, TvActivityOrAppMode.class);
+                        startActivity(myactivity);
                         finish();
-                        finishAffinity();
+
+
+                        finish();
+
                     }
                 },200 );
 

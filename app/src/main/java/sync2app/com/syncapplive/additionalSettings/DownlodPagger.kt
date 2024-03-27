@@ -814,7 +814,7 @@ class DownlodPagger : AppCompatActivity() {
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+          //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             request.setTitle(fileNamy)
             request.allowScanningByMediaScanner()
             request.setDestinationInExternalPublicDir(

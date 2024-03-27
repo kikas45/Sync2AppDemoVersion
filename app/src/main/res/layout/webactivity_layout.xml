@@ -454,6 +454,29 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+    <ImageView
+        android:id="@+id/imageCirclGreenOnline"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_circle_blue"
+        app:tint="@color/logo_green" />
+
+    <ImageView
+        android:id="@+id/imageCircleBlueOffline"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginEnd="10dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_circle_blue"
+        app:tint="@color/logo_blue"
+        tools:visibility="visible" />
 
 
 

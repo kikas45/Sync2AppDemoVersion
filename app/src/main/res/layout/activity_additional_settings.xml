@@ -366,7 +366,7 @@
                 android:paddingLeft="24dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                android:text="Share Apk"
+                android:text="Share Apk via WhatsApp"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
