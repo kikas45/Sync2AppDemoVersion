@@ -631,7 +631,7 @@
                 android:layout_height="25dp"
                 android:layout_marginEnd="38dp"
                 android:src="@drawable/ic_arrow_move_front"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/textMaintencePage"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textMaintencePage"

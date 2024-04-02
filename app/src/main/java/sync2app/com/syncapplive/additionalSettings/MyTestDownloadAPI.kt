@@ -195,7 +195,7 @@ class MyTestDownloadAPI : AppCompatActivity() {
         val stringBuilder = StringBuilder()
         try {
             val downloadUrl =
-                "https://cloudappserver.co.uk/cp/app_base/public/$clo/$demo/Api/update.csv"
+               "https://cloudappserver.co.uk/cp/app_base/public/$clo/$demo/Start/start.csv"
             Log.d("downloadUrl", "downloadUrl: $downloadUrl")
 
             val url = URL(downloadUrl)

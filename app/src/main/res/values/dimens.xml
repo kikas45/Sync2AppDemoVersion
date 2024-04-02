@@ -20,5 +20,5 @@
     <dimen name="desc_padding">40dp</dimen>
     <dimen name="notif_title_size">20sp</dimen>
     <dimen name="_12sp">12sp</dimen>
-    <dimen name="_15dp">10sp</dimen>
+    <dimen name="_15dp">0sp</dimen>
 </resources>

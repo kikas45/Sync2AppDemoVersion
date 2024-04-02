@@ -43,7 +43,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="input_path_e_g_de_mo_2021000">Input path e.g DE_MO_2021000</string>
-    <string name="input_url_zip">Input url zip</string>
+
+<!--    Input Manual url path-->
+    <string name="input_url_zip">Input url zip e.g https://example.com</string>
+    <string name="input_index_url">Input url index e.g https://myApp/index.html</string>
+
     <string name="input_path_e_g_clo">Input path e.g CLO</string>
     <string name="test_connection">Test Connection</string>
     <string name="hello_please">Hello\n please turn on the following features  for TV Mode\nImmersive mode\n\nHide bottom bar\n\n Show bottom menu icon\n\nFull screen\n\nHide floating</string>

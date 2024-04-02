@@ -48,42 +48,60 @@ class MaintenanceActivity : AppCompatActivity() {
         }, 700)
 
 
+
+
+
         // show online Status
 
         binding.apply {
 
+
             imagShowOnlineStatus.setOnCheckedChangeListener { compoundButton, isValued -> // we are putting the values into SHARED PREFERENCE
                 if (compoundButton.isChecked) {
-
-                    editor.putString(Constants.imagShowOnlineStatus, "imagShowOnlineStatus")
-                    editor.apply()
-                    binding.textShowOnlineStatus.text = "Hide Online Status"
-
-                } else {
                     editor.remove(Constants.imagShowOnlineStatus)
                     editor.apply()
-                    binding.textShowOnlineStatus.text = "Show Online Status"
+                    binding.textShowOnlineStatus.text = "Show Online Status Indicator"
+
+                } else {
+                    editor.putString(Constants.imagShowOnlineStatus, "imagShowOnlineStatus")
+                    editor.apply()
+                    binding.textShowOnlineStatus.text = "Hide Online Status Indicator"
                 }
             }
 
 
-            val get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "")
 
-            imagShowOnlineStatus.isChecked = get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)
 
-            if (get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+            val get_indicator_satate = sharedBiometric.getString(Constants.img_Make_OnlineIndicator_Default_visible, "")
 
-                binding.textShowOnlineStatus.text = "Hide Online Status"
+            if (get_indicator_satate.isNullOrEmpty()){
+                editor.putString(Constants.img_Make_OnlineIndicator_Default_visible, "img_Make_OnlineIndicator_Default_visible")
+                editor.remove(Constants.imagShowOnlineStatus)
+                editor.apply()
+                binding.textShowOnlineStatus.text = "Show Online Status Indicator"
+                binding.imagShowOnlineStatus.isChecked = true
 
-            } else {
+            }else{
 
-                binding.textShowOnlineStatus.text = "Show Online Status"
+                val get_imagShowOnlineStatus = sharedBiometric.getString(Constants.imagShowOnlineStatus, "")
+
+                imagShowOnlineStatus.isChecked = get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)
+
+                if (get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
+
+                    binding.textShowOnlineStatus.text = "Hide Online Status Indicator"
+                    binding.imagShowOnlineStatus.isChecked = false
+
+                } else {
+                    binding.textShowOnlineStatus.text = "Show Online Status Indicator"
+                    binding.imagShowOnlineStatus.isChecked = true
+
+
+                }
+
+
 
             }
-
-
-
-
 
 
         }

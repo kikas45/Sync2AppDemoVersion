@@ -7,91 +7,23 @@
     tools:context=".additionalSettings.TestScreenActivity">
 
 
+    <Button
+        android:id="@+id/btnMakeCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/textDisplayText"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:elegantTextHeight="true"
-        android:ellipsize="end"
-        android:gravity="center|start"
-        android:maxLines="2"
-        android:text="To: My Sms Text Message"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView20"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView20"
-        app:layout_constraintTop_toTopOf="@+id/imageView20" />
-
-    <TextView
-        android:id="@+id/textSendMySms"
-        style="@style/cardOutlineBlue"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="sans-serif-medium"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center"
-        android:paddingLeft="18dp"
-        android:paddingTop="8dp"
-        android:paddingRight="18dp"
-        android:paddingBottom="8dp"
-        android:text="Send SMS"
-        android:textColor="@color/deep_blue"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textCopySms"
-        style="@style/cardOutlineBlue"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:fontFamily="sans-serif-medium"
-        android:foreground="?selectableItemBackground"
-        android:gravity="center"
-        android:paddingLeft="18dp"
-        android:paddingTop="8dp"
-        android:paddingRight="18dp"
-        android:paddingBottom="8dp"
-        android:text="Copy SMS"
-        android:textColor="@color/deep_blue"
-        android:textSize="14sp"
-        app:layout_constraintBottom_toTopOf="@+id/textSendMySms"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <ImageView
-        android:id="@+id/imageView20"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_email_read_24" />
-
-    <TextView
-        android:id="@+id/timePickerEdt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textDisplayText" />
-
-
-
-
-
+        app:layout_constraintTop_toBottomOf="@+id/btnMakeCall" />
 </androidx.constraintlayout.widget.ConstraintLayout>

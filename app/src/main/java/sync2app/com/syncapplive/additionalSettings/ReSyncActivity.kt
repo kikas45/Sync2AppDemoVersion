@@ -103,6 +103,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private var fil_CLO = ""
     private var fil_DEMO = ""
     private var fil_baseUrl = ""
+    private var fil_appIndex = ""
 
     private var getUrlBasedOnSpinnerText = ""
     private var API_Server = "API-Cloud App Server"
@@ -183,9 +184,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
-        wakeLock = powerManager!!.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourApp::MyWakelockTag")
+        wakeLock =
+            powerManager!!.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourApp::MyWakelockTag")
         wakeLock!!.acquire()
 
+      //  binding.editTextInputSynUrlZip.setText("https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021001/Zip/App.zip")
+      //  binding.editTextInputIndexManual.setText("https://www.cnbc.com/world/?region=world")
 
         manager = applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager?
 
@@ -200,6 +204,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             val getSavedEditTextInputSynUrlZip =
                 myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "")
 
+            val getSaved_manaul_index_edit_url_Input =
+                myDownloadClass.getString(Constants.getSaved_manaul_index_edit_url_Input, "")
+
             if (!getSavedCLOImPutFiled.isNullOrEmpty()) {
                 editTextCLOpath.setText(getSavedCLOImPutFiled)
             }
@@ -211,6 +218,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             if (!getSavedEditTextInputSynUrlZip.isNullOrEmpty()) {
                 editTextInputSynUrlZip.setText(getSavedEditTextInputSynUrlZip)
+            }
+
+            if (!getSaved_manaul_index_edit_url_Input.isNullOrEmpty()) {
+                editTextInputIndexManual.setText(getSaved_manaul_index_edit_url_Input)
             }
 
             initViewTooggle()
@@ -304,32 +315,28 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun check_for_valid_confileUrl(){
-
-        //  showCustomProgressDialog("Testing connection")
-
-        //  val ServerUrl = "https://firebasestorage.googleapis.com/v0/b/syn2appkiller.appspot.com/o/myApp.zip?alt=media&token=8b303be6-4490-4fe0-ae6f-47a1b5278926"
-        val ServerUrl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021001/Zip/Config.zip"
-
-
+    private fun check_for_valid_confileUrl() {
 
         val sharedLicenseKeys = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, MODE_PRIVATE)
 
-        val  get_UserID = sharedLicenseKeys.getString(Constants.get_UserID, "")!!
-        val  get_LicenseKey = sharedLicenseKeys.getString(Constants.get_LicenseKey, "")!!
+        val get_tMaster = sharedLicenseKeys.getString(Constants.get_editTextMaster, "").toString()
+        val get_UserID = sharedLicenseKeys.getString(Constants.get_UserID, "").toString()
+        val get_LicenseKey = sharedLicenseKeys.getString(Constants.get_LicenseKey, "").toString()
+
+        val ServerUrl = "$get_tMaster/$get_UserID/$get_LicenseKey/Zip/Config.zip"
 
 
-        if (isNetworkAvailable()){
+        if (isNetworkAvailable()) {
             lifecycleScope.launch {
                 try {
                     val result = checkUrlExistence(ServerUrl)
                     if (result) {
-                        showConfirmationDialog(get_UserID, get_LicenseKey,  ServerUrl)
+                        showConfirmationDialog(get_UserID, get_LicenseKey, ServerUrl)
                     } else {
 
-                        showPopsForMyConnectionTest("", "",
+                        showPopsForMyConnectionTest(
+                            "", "",
                             Constants.Invalid_Config_Url
                         )
                         customProgressDialog.dismiss()
@@ -341,19 +348,24 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 //                    }, 900)
                 }
             }
-        }else{
+        } else {
             showToastMessage("No Internet Connection")
         }
     }
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun showConfirmationDialog(get_UserID:String, get_LicenseKey:String, ServerUrl:String) {
+    private fun showConfirmationDialog(
+        get_UserID: String,
+        get_LicenseKey: String,
+        ServerUrl: String,
+    ) {
         customProgressDialog.dismiss()
 
-        val bindingCM: ContinueWithConfigDownloadBinding = ContinueWithConfigDownloadBinding.inflate(
-            LayoutInflater.from(this)
-        )
+        val bindingCM: ContinueWithConfigDownloadBinding =
+            ContinueWithConfigDownloadBinding.inflate(
+                LayoutInflater.from(this)
+            )
         val alertDialogBuilder = AlertDialog.Builder(this@ReSyncActivity)
 
         alertDialogBuilder.setView(bindingCM.root)
@@ -381,7 +393,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }
 
         bindingCM.textUpdate.setOnClickListener {
-            showCustomDialog(get_UserID, get_LicenseKey , ServerUrl)
+            showCustomDialog(get_UserID, get_LicenseKey, ServerUrl)
             alertDialog.dismiss()
         }
 
@@ -390,8 +402,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
     }
-
-
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -430,14 +440,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         alertDialog.show()
 
 
-
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun showCustomDialog(get_UserID:String, get_LicenseKey:String, ServerUrl:String) {
-        val bindingCM: SampleProgressConfigLayoutBinding = SampleProgressConfigLayoutBinding.inflate(
-            LayoutInflater.from(this)
-        )
+    private fun showCustomDialog(get_UserID: String, get_LicenseKey: String, ServerUrl: String) {
+        val bindingCM: SampleProgressConfigLayoutBinding =
+            SampleProgressConfigLayoutBinding.inflate(
+                LayoutInflater.from(this)
+            )
         val alertDialogBuilder = AlertDialog.Builder(this@ReSyncActivity)
 
         alertDialogBuilder.setView(bindingCM.root)
@@ -456,7 +466,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             binding.imagSwtichEnableConfigFileOnline.isChecked = false
             binding.textConfigfileOnline.text = "Use online config"
 
-            cancel_config_download(get_UserID,get_LicenseKey,ServerUrl )
+            cancel_config_download(get_UserID, get_LicenseKey, ServerUrl)
 
             isDownloadComplete = true
 
@@ -475,7 +485,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 while (!isDownloadComplete) {
 
                     runOnUiThread {
-                        getDownloadStatus(bindingCM.progressBarPref, bindingCM.teextDisplaydownload, get_UserID, get_LicenseKey, ServerUrl, Constants.Config )
+                        getDownloadStatus(
+                            bindingCM.progressBarPref,
+                            bindingCM.teextDisplaydownload,
+                            get_UserID,
+                            get_LicenseKey,
+                            ServerUrl,
+                            Constants.Config
+                        )
                     }
 
 
@@ -492,11 +509,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }.start()
 
 
-
     }
 
 
-    private fun cancel_config_download(get_UserID:String, get_LicenseKey:String,fileName:String ) {
+    private fun cancel_config_download(
+        get_UserID: String,
+        get_LicenseKey: String,
+        fileName: String,
+    ) {
         try {
 
             val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
@@ -513,11 +533,13 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
 
-            if (download_ref !=- 15L){
+            if (download_ref != -15L) {
                 val query = DownloadManager.Query()
                 query.setFilterById(download_ref)
                 val c =
-                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(query)
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                        query
+                    )
                 if (c.moveToFirst()) {
                     manager!!.remove(download_ref)
                     val editor: SharedPreferences.Editor = myDownloadClass.edit()
@@ -532,12 +554,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
+    private fun downloadConfiGFile(
+        get_UserID: String,
+        get_LicenseKey: String,
+        url: String,
+        fileName: String,
+    ) {
 
-
-
-    private fun downloadConfiGFile(get_UserID:String, get_LicenseKey:String, url: String, fileName: String) {
-
-        val Syn2AppLive = "Syn2AppLive"
+        val Syn2AppLive = Constants.Syn2AppLive
 
         val DeleteFolderPath = "/$Syn2AppLive/$get_UserID/$get_LicenseKey/$fileName"
 
@@ -547,10 +571,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         delete(file)
 
 
-
         val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val request = DownloadManager.Request(Uri.parse(url))
-      //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+        //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
         request.setTitle(fileName)
         request.allowScanningByMediaScanner()
         request.setDestinationInExternalPublicDir(
@@ -565,10 +588,16 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-
     @RequiresApi(Build.VERSION_CODES.Q)
     @SuppressLint("SetTextI18n", "Range")
-    fun getDownloadStatus(progressBarPref: ProgressBar, textprogressPercentage:TextView, get_UserID:String, get_LicenseKey:String, url: String, fileName: String) {
+    fun getDownloadStatus(
+        progressBarPref: ProgressBar,
+        textprogressPercentage: TextView,
+        get_UserID: String,
+        get_LicenseKey: String,
+        url: String,
+        fileName: String,
+    ) {
         try {
 
             val download_ref = myDownloadClass.getLong(Constants.downloadKey, -15)
@@ -590,18 +619,20 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 // Calculate the percentage of completion
-                val progressPercentage = (bytes_downloaded.toFloat() / bytes_total.toFloat() * 100).toInt()
-                textprogressPercentage.text = ""+  progressPercentage.toString() + "%  Zip Downloaded"
+                val progressPercentage =
+                    (bytes_downloaded.toFloat() / bytes_total.toFloat() * 100).toInt()
+                textprogressPercentage.text =
+                    "" + progressPercentage.toString() + "%  Zip Downloaded"
 
 
                 if (c.moveToFirst()) {
                     val status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))
 
-                    if (status == DownloadManager.STATUS_SUCCESSFUL ) {
+                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
 
                         runOnUiThread {
                             isDownloadComplete = true
-                            funUnZipFile(get_UserID, get_LicenseKey, url,fileName )
+                            funUnZipFile(get_UserID, get_LicenseKey, url, fileName)
                         }
                     }
 
@@ -613,7 +644,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun funUnZipFile( get_UserID:String, get_LicenseKey:String, url: String, fileName: String) {
+    private fun funUnZipFile(
+        get_UserID: String,
+        get_LicenseKey: String,
+        url: String,
+        fileName: String,
+    ) {
         try {
 
             showCustomProgressDialog("Please wait for files to unpack")
@@ -628,10 +664,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 val get_Clo = simpleSavedPassword.getString(Constants.get_UserID, "")
                 val get_DEmo = simpleSavedPassword.getString(Constants.get_LicenseKey, "")
 
-                val newConfigFolder  = "/$get_Clo/$get_DEmo/App/"
+                val newConfigFolder = "/$get_Clo/$get_DEmo/App/"
 
-                val directoryPathString = Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive" + finalFolderPath
-                val destinationFolder = File(Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive/" + newConfigFolder)
+                val directoryPathString =
+                    Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive" + finalFolderPath
+                val destinationFolder =
+                    File(Environment.getExternalStorageDirectory().absolutePath + "/Download/$Syn2AppLive/" + newConfigFolder)
 
                 if (!destinationFolder.exists()) {
                     destinationFolder.mkdirs()
@@ -790,9 +828,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         }
 
 
-
-
     }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -803,7 +840,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 wakeLock!!.release()
             }
 
-        }catch (_:Exception){}
+        } catch (_: Exception) {
+        }
     }
 
 
@@ -892,7 +930,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             if (getFolderClo222.isNotEmpty() && getFolderSubpath22.isNotEmpty()) {
                                 testConnectionSetup_API_Test(getFolderClo222, getFolderSubpath22)
                                 editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo222)
-                                editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath22)
+                                editor.putString(
+                                    Constants.getSaveSubFolderInPutFiled,
+                                    getFolderSubpath22
+                                )
                                 editor.apply()
 
                             } else {
@@ -913,18 +954,30 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     /// when the button is checked
 
+                    // for maunal download
                     val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
-                    if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
-                        httpNetSingleUrlTest(editInputUrl)
-                        editor.putString(
-                            Constants.getSavedEditTextInputSynUrlZip,
-                            editInputUrl
-                        )
+                    // to luanch a live url manual
+                    val editInputAppIndex = editTextInputIndexManual.text.toString().trim()
+
+                    if (isUrlValid(editInputUrl) && isUrlValid(editInputAppIndex)) {
+                        httpNetSingleUrlTest(editInputUrl, editInputAppIndex )
+
+                        editor.putString(Constants.getSavedEditTextInputSynUrlZip, editInputUrl)
+                        editor.putString(Constants.getSaved_manaul_index_edit_url_Input, editInputAppIndex)
                         editor.apply()
                     } else {
+
+                        if (!isUrlValid(editInputUrl)) {
+                            binding.editTextInputSynUrlZip.error = "Invalid url format"
+                        }
+
+                        if (!isUrlValid(editInputAppIndex)) {
+                            binding.editTextInputIndexManual.error = "Invalid url format"
+                        }
+
                         showToastMessage("Invalid url format")
-                        binding.editTextInputSynUrlZip.error = "Invalid url format"
                     }
+
 
                 }
 
@@ -941,8 +994,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Testing connection")
 
-
-            val editor = myDownloadClass.edit()
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
                 val baseUrl =
@@ -962,7 +1013,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                             mUserViewModel.addUser(user)
                             customProgressDialog.dismiss()
@@ -976,7 +1027,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             customProgressDialog.dismiss()
                         }
                     } finally {
-                     //   customProgressDialog.dismiss()
+                        //   customProgressDialog.dismiss()
 
                     }
                 }
@@ -1001,7 +1052,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                             mUserViewModel.addUser(user)
                             customProgressDialog.dismiss()
@@ -1015,7 +1066,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             customProgressDialog.dismiss()
                         }
                     } finally {
-                      //  customProgressDialog.dismiss()
+                        //  customProgressDialog.dismiss()
                     }
                 }
 
@@ -1027,17 +1078,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-    private fun httpNetSingleUrlTest(baseUrl33: String) {
+    private fun httpNetSingleUrlTest(editInputUrl: String, editInputAppIndex:String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Testing connection")
 
 
-            val lastString = baseUrl33.substringAfterLast("/")
+            val lastString = editInputUrl.substringAfterLast("/")
             val fileNameWithoutExtension = lastString.substringBeforeLast(".")
 
             lifecycleScope.launch {
                 try {
-                    val result = checkUrlExistence(baseUrl33)
+                    val result = checkUrlExistence(editInputUrl)
                     if (result) {
                         showPopsForMyConnectionTest(
                             "CLO",
@@ -1045,7 +1096,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             "Successful"
                         )
 
-                        val user = User(CLO = "", DEMO = "", EditUrl = baseUrl33)
+                        val user = User(CLO = "", DEMO = "", EditUrl = editInputUrl, EditUrlIndex =editInputAppIndex )
                         mUserViewModel.addUser(user)
                         customProgressDialog.dismiss()
 
@@ -1055,7 +1106,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         customProgressDialog.dismiss()
                     }
                 } finally {
-                  //  customProgressDialog.dismiss()
+                    //  customProgressDialog.dismiss()
                 }
             }
 
@@ -1108,7 +1159,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             textView12.setOnClickListener {
-              //  setUpCustomeTimmer()
+                //  setUpCustomeTimmer()
                 showSyncDialog()
             }
 
@@ -1473,7 +1524,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 val editor = sharedBiometric.edit()
                 hideKeyBoard(binding.editTextInputSynUrlZip)
                 if (compoundButton.isChecked) {
-                    editor.putString(Constants.imagSwtichEnableSyncFromAPI, Constants.imagSwtichEnableSyncFromAPI
+                    editor.putString(
+                        Constants.imagSwtichEnableSyncFromAPI, Constants.imagSwtichEnableSyncFromAPI
                     )
                     editor.apply()
                     textSynfromApiZip.setText("Use ZIP Sync")
@@ -1482,7 +1534,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                     textDownloadZipSyncOrApiSyncNow.setBackgroundResource(R.drawable.card_design_buy_gift_card)
-                    textDownloadZipSyncOrApiSyncNow.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
+                    textDownloadZipSyncOrApiSyncNow.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.white
+                        )
+                    )
 
 
                 } else {
@@ -1496,8 +1553,12 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                     textDownloadZipSyncOrApiSyncNow.setBackgroundResource(R.drawable.light_background_blue_color)
-                    textDownloadZipSyncOrApiSyncNow.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
-
+                    textDownloadZipSyncOrApiSyncNow.setTextColor(
+                        ContextCompat.getColor(
+                            applicationContext,
+                            R.color.deep_blue
+                        )
+                    )
 
 
                 }
@@ -1942,86 +2003,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-        @SuppressLint("InflateParams", "SuspiciousIndentation")
-        private fun setUpCustomeTimmer() {
-            val bindingCm: CustomSetUpTimerOptionLayoutBinding =
-                CustomSetUpTimerOptionLayoutBinding.inflate(
-                    layoutInflater
-                )
-            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-            builder.setView(bindingCm.getRoot())
-            val alertDialog = builder.create()
-            alertDialog.setCanceledOnTouchOutside(true)
-            alertDialog.setCancelable(true)
-
-            // Set the background of the AlertDialog to be transparent
-            if (alertDialog.window != null) {
-                alertDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            }
-
-            bindingCm.apply {
-
-
-                textCancel.setOnClickListener {
-                    alertDialog.dismiss()
-                }
-
-
-
-                textOkayAccept.setOnClickListener {
-                    val getHourValue = editTexthour.text.toString()
-                    val getHourMinutes = editTextMinutes.text.toString()
-
-                    val hours = getHourValue.toIntOrNull() ?: 0
-                    val minutes = getHourMinutes.toIntOrNull() ?: 0
-
-                    val totalMinutes = hours * 60 + minutes
-
-                    if (totalMinutes < 1) {
-                        showToastMessage("Time cannot be less than 1 minute")
-                        alertDialog.dismiss()
-                        return@setOnClickListener // Abort further execution
-                    }
-
-                    if (getHourMinutes.isNotEmpty() || getHourMinutes.isNotEmpty()) {
-
-                        binding.textDisplaytime.text = "$totalMinutes $Minutes"
-                        binding.textIntervalsSelect.text = "$totalMinutes $Minutes"
-
-                        val editor = myDownloadClass.edit()
-                        editor.putLong(Constants.getTimeDefined, totalMinutes.toLong())
-                        editor.apply()
-
-
-                        if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                            || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
-                        ) {
-                            val intent = Intent(Constants.UpdateTimmer_Reciver)
-                            sendBroadcast(intent)
-
-                            val editor = myDownloadClass.edit()
-                            editor.remove(Constants.SAVED_CN_TIME)
-                            editor.apply()
-                        } else {
-                            // showToastMessage("Service not running")
-                        }
-                    } else {
-                        showToastMessage("Invalid Input Filed")
-                        binding.textDisplaytime.text = "Sync interval timer"
-                        binding.textIntervalsSelect.text = "Sync interval timer"
-                    }
-
-                    alertDialog.dismiss()
-                }
-
-
-            }
-
-            alertDialog.show()
-        }
-
-
-
     private fun showSyncDialog() {
 
         //create dialog
@@ -2087,7 +2068,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             if (ServiceUtils.foregroundServiceRunning(applicationContext)
-                || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                || ServiceUtils.foregroundServiceRunningOnChange(applicationContext)
+            ) {
                 val intent = Intent(Constants.UpdateTimmer_Reciver)
                 sendBroadcast(intent)
 
@@ -2275,18 +2257,34 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     }
                 } else {
 
+                    // When allowed to use manual
+
+                    // for maunal download
                     val editInputUrl = editTextInputSynUrlZip.text.toString().trim()
-                    if (editInputUrl.isNotEmpty() && isUrlValid(editInputUrl)) {
-                        httpNetSingleDwonload(editInputUrl)
-                        editor.putString(
-                            Constants.getSavedEditTextInputSynUrlZip,
-                            editInputUrl
-                        )
+                    // to luanch a live url manual
+                    val editInputAppIndex = editTextInputIndexManual.text.toString().trim()
+
+                    if (isUrlValid(editInputUrl) && isUrlValid(editInputAppIndex)) {
+
+                        httpNetSingleDwonload(editInputUrl, editInputAppIndex)
+
+                        editor.putString(Constants.getSavedEditTextInputSynUrlZip, editInputUrl)
+                        editor.putString(Constants.getSaved_manaul_index_edit_url_Input, editInputAppIndex)
+
                         editor.apply()
 
                     } else {
+
+                        if (!isUrlValid(editInputUrl)) {
+                            binding.editTextInputSynUrlZip.error = "Invalid url format"
+                        }
+
+                        if (!isUrlValid(editInputAppIndex)) {
+                            binding.editTextInputIndexManual.error = "Invalid url format"
+                        }
+
                         showToastMessage("Invalid url format")
-                        binding.editTextInputSynUrlZip.error = "Invalid url format"
+
                     }
 
                 }
@@ -2310,7 +2308,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
 
 
@@ -2331,7 +2330,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                             mUserViewModel.addUser(user)
 
@@ -2374,7 +2373,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                             mUserViewModel.addUser(user)
 
@@ -2400,10 +2399,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun httpNetSingleDwonload(baseUrl: String) {
+    private fun httpNetSingleDwonload(editInputUrl: String, editInputAppIndex:String) {
         handler.postDelayed(Runnable {
             showCustomProgressDialog("Please wait")
-            val lastString = baseUrl.substringAfterLast("/")
+            val lastString = editInputUrl.substringAfterLast("/")
             val fileNameWithoutExtension = lastString.substringBeforeLast(".")
 
 
@@ -2411,11 +2410,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 lifecycleScope.launch {
                     try {
-                        val result = checkUrlExistence(baseUrl)
+                        val result = checkUrlExistence(editInputUrl)
                         if (result) {
-                            startDownloadSingles(baseUrl, "Zip", "App.zip")
+                            startDownloadSingles(editInputUrl, "Zip", "App.zip")
 
-                            val user = User(CLO = "", DEMO = "", EditUrl = baseUrl)
+                            val user = User(CLO = "", DEMO = "", EditUrl = editInputUrl, EditUrlIndex = editInputAppIndex)
                             mUserViewModel.addUser(user)
 
                         } else {
@@ -2436,10 +2435,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 lifecycleScope.launch {
                     try {
-                        val result = checkUrlExistence(baseUrl)
+                        val result = checkUrlExistence(editInputUrl)
                         if (result) {
-                            startDownloadSingles(baseUrl, "Api", "App.zip")
-                            val user = User(CLO = "", DEMO = "", EditUrl = baseUrl)
+                            startDownloadSingles(editInputUrl, "Api", "App.zip")
+                            val user = User(CLO = "", DEMO = "", EditUrl = editInputUrl, EditUrlIndex =  editInputAppIndex)
                             mUserViewModel.addUser(user)
                         } else {
 
@@ -2499,7 +2498,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 val user = User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                                 mUserViewModel.addUser(user)
                                 customProgressDialog.dismiss()
@@ -2514,7 +2513,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 customProgressDialog.dismiss()
                             }
                         } finally {
-                           // customProgressDialog.dismiss()
+                            // customProgressDialog.dismiss()
                         }
                     }
 
@@ -2542,7 +2541,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 val user = User(
                                     CLO = getFolderClo,
                                     DEMO = getFolderSubpath,
-                                    EditUrl = ""
+                                    EditUrl = "", EditUrlIndex = ""
                                 )
                                 mUserViewModel.addUser(user)
                                 customProgressDialog.dismiss()
@@ -2556,7 +2555,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 customProgressDialog.dismiss()
                             }
                         } finally {
-                         //   customProgressDialog.dismiss()
+                            //   customProgressDialog.dismiss()
                         }
                     }
 
@@ -2619,7 +2618,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                                 // save also to room data base
                                 val user =
-                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "")
+                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "", EditUrlIndex = "")
                                 mUserViewModel.addUser(user)
 
                             } else {
@@ -2663,7 +2662,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                                 // save also to room data base
                                 val user =
-                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "")
+                                    User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "", EditUrlIndex = "")
                                 mUserViewModel.addUser(user)
 
                             } else {
@@ -2676,7 +2675,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                             }
                         } finally {
                             handler.postDelayed(Runnable {
-                              //  customProgressDialog.dismiss()
+                                //  customProgressDialog.dismiss()
                             }, 900)
                         }
                     }
@@ -2718,9 +2717,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         bindingCM.apply {
 
-            if (message.equals(Constants.Invalid_Config_Url)){
+            if (message.equals(Constants.Invalid_Config_Url)) {
                 textYourUrlTest.text = Constants.Invalid_Config_Url
-            }else{
+            } else {
                 val userPath = "Username-$getFolderClo\nlicense-$getFolderSubpath"
                 textYourUrlTest.text = userPath
             }
@@ -2757,7 +2756,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         if (binding.imagSwtichEnableConfigFileOnline.isChecked && isCompltedAndReady == false) {
             check_for_valid_confileUrl()
 
-        }else{
+        } else {
             binding.apply {
 
                 customProgressDialog.dismiss()
@@ -2768,7 +2767,15 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
 
-                download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted, threeFolderPath)
+                download(
+                    baseUrl,
+                    getFolderClo,
+                    getFolderSubpath,
+                    Zip,
+                    fileName,
+                    Extracted,
+                    threeFolderPath
+                )
 
                 /// similar but used on under second cancel downoad in danwload pager
                 val editor = myDownloadClass.edit()
@@ -2785,11 +2792,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 if (binding.imagSwtichEnableLaucngOnline.isChecked) {
-                    editor.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOnline)
+                    editor.putString(
+                        Constants.Tapped_OnlineORoffline,
+                        Constants.tapped_launchOnline
+                    )
                     editor.putString(Constants.syncUrl, url)
 
                 } else {
-                    editor.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOffline)
+                    editor.putString(
+                        Constants.Tapped_OnlineORoffline,
+                        Constants.tapped_launchOffline
+                    )
 
                 }
 
@@ -2807,7 +2820,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         if (binding.imagSwtichEnableConfigFileOnline.isChecked) {
             check_for_valid_confileUrl()
 
-        }else{
+        } else {
             binding.apply {
 
                 val Extracted = Constants.App
@@ -2826,8 +2839,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             }
         }
-
-
 
 
     }
@@ -2918,7 +2929,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-          //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             request.setTitle(fileNamy)
             request.allowScanningByMediaScanner()
             request.setDestinationInExternalPublicDir(
@@ -2980,6 +2991,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         val clo = photo.CLO.toString()
         val demo = photo.DEMO
         val editurl = photo.EditUrl
+        val editurlAppIndex = photo.EditUrlIndex
 
         if (!clo.isNullOrEmpty()) {
             binding.editTextCLOpath.setText(clo)
@@ -2997,12 +3009,27 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         }
 
+
+
+
         if (!editurl.isNullOrEmpty()) {
             binding.editTextInputSynUrlZip.setText(editurl)
             fil_baseUrl = editurl
 
             binding.textLauncheSaveDownload.visibility = View.VISIBLE
         }
+
+
+
+
+        if (!editurlAppIndex.isNullOrEmpty()) {
+            binding.editTextInputIndexManual.setText(editurlAppIndex)
+            fil_appIndex = editurlAppIndex
+
+            binding.textLauncheSaveDownload.visibility = View.VISIBLE
+        }
+
+
 
         customSavedDownloadDialog.dismiss()
     }
@@ -3041,33 +3068,82 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 textLunchOnline.setText("Launch offline")
 
-                if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
-
-                    val url =
-                        "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
-
-                    imagSwtichEnableLaucngOnline.isChecked = true
 
 
-                    editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+                val imagSwtichEnableManualOrNot = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
-                    editor.putString(Constants.getFolderClo, fil_CLO)
-                    editor.putString(Constants.getFolderSubpath, fil_DEMO)
-                    editor.putString(Constants.syncUrl, url)
-                    editor.putString(
-                        Constants.Tapped_OnlineORoffline,
-                        Constants.tapped_launchOnline
-                    )
+                if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)){
+
+                    // Use manual
+
+                    if (fil_baseUrl.isNotEmpty() && fil_appIndex.isNotEmpty()) {
+
+                        val url =
+                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+
+                        imagSwtichEnableLaucngOnline.isChecked = true
 
 
-                    editor.apply()
+                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
 
-                    val intent = Intent(applicationContext, WebActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                        editor.putString(Constants.getSavedEditTextInputSynUrlZip, fil_baseUrl)
+                        editor.putString(Constants.getSaved_manaul_index_edit_url_Input, fil_appIndex)
+                        editor.putString(Constants.syncUrl, url)
+                        editor.putString(
+                            Constants.Tapped_OnlineORoffline,
+                            Constants.tapped_launchOnline
+                        )
 
-                } else {
-                    showToastMessage("Select Saved Download Path")
+
+                        editor.apply()
+
+                        val intent = Intent(applicationContext, WebActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+                        showToastMessage("Select Saved Download Path")
+                    }
+
+
+
+
+                }else{
+
+                    // Do Not use Manual
+
+
+                    if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
+
+                        val url =
+                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+
+                        imagSwtichEnableLaucngOnline.isChecked = true
+
+
+                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+
+                        editor.putString(Constants.getFolderClo, fil_CLO)
+                        editor.putString(Constants.getFolderSubpath, fil_DEMO)
+                        editor.putString(Constants.syncUrl, url)
+                        editor.putString(
+                            Constants.Tapped_OnlineORoffline,
+                            Constants.tapped_launchOnline
+                        )
+
+
+                        editor.apply()
+
+                        val intent = Intent(applicationContext, WebActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+                        showToastMessage("Select Saved Download Path")
+                    }
+
+
+
                 }
 
 
@@ -3084,39 +3160,85 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             binding.apply {
                 val editor = myDownloadClass.edit()
 
-                if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
+                val imagSwtichEnableManualOrNot = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
-                    val url =
-                        "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+                if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)) {
 
-                    imagSwtichEnableLaucngOnline.isChecked = true
+                    // Use manual
 
-                    editor.putString(
-                        Constants.imgAllowLunchFromOnline,
-                        "imgAllowLunchFromOnline"
-                    )
 
-                    editor.putString(Constants.getFolderClo, fil_CLO)
-                    editor.putString(Constants.getFolderSubpath, fil_DEMO)
-                    editor.putString(Constants.syncUrl, url)
-                    editor.putString(
-                        Constants.Tapped_OnlineORoffline,
-                        Constants.tapped_launchOffline
-                    )
+                    if (fil_baseUrl.isNotEmpty() && fil_appIndex.isNotEmpty()) {
 
-                    editor.apply()
+                        val url =
+                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
 
-                    textLunchOnline.setText("Launch online")
+                        imagSwtichEnableLaucngOnline.isChecked = true
 
-                    val intent = Intent(applicationContext, WebActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                        editor.putString(
+                            Constants.imgAllowLunchFromOnline,
+                            "imgAllowLunchFromOnline"
+                        )
 
-                } else {
-                    showToastMessage("Select Saved Download Path")
+                        editor.putString(Constants.getSavedEditTextInputSynUrlZip, fil_baseUrl)
+                        editor.putString(Constants.getSaved_manaul_index_edit_url_Input, fil_appIndex)
+                        editor.putString(Constants.syncUrl, url)
+                        editor.putString(
+                            Constants.Tapped_OnlineORoffline,
+                            Constants.tapped_launchOffline
+                        )
+
+                        editor.apply()
+
+                        textLunchOnline.setText("Launch online")
+
+                        val intent = Intent(applicationContext, WebActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+                        showToastMessage("Select Saved Download Path")
+                    }
+
+
+                }else{
+
+                    // Do not use manual
+                    if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
+
+                        val url =
+                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+
+                        imagSwtichEnableLaucngOnline.isChecked = true
+
+                        editor.putString(
+                            Constants.imgAllowLunchFromOnline,
+                            "imgAllowLunchFromOnline"
+                        )
+
+                        editor.putString(Constants.getFolderClo, fil_CLO)
+                        editor.putString(Constants.getFolderSubpath, fil_DEMO)
+                        editor.putString(Constants.syncUrl, url)
+                        editor.putString(
+                            Constants.Tapped_OnlineORoffline,
+                            Constants.tapped_launchOffline
+                        )
+
+                        editor.apply()
+
+                        textLunchOnline.setText("Launch online")
+
+                        val intent = Intent(applicationContext, WebActivity::class.java)
+                        startActivity(intent)
+                        finish()
+
+                    } else {
+                        showToastMessage("Select Saved Download Path")
+                    }
 
 
                 }
+
+
 
                 alertDialog.dismiss()
             }

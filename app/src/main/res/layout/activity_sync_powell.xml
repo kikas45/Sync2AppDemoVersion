@@ -265,7 +265,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="24dp"
                 android:background="@drawable/round_edit_text_design"
-                android:hint="Input index url"
+                android:hint="@string/input_index_url"
                 android:inputType="text"
                 android:paddingStart="15dp"
                 android:textSize="14sp"

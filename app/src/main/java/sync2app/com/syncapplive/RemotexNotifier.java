@@ -65,12 +65,12 @@ public class RemotexNotifier extends Service {
 
         SharedPreferences SIMPLE_SAVED_PASSWORD = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
 
-        String get_editTextMaster = SIMPLE_SAVED_PASSWORD.getString(Constants.get_editTextMaster, "");
+        String get_tMaster = SIMPLE_SAVED_PASSWORD.getString(Constants.get_editTextMaster, "");
         String get_UserID = SIMPLE_SAVED_PASSWORD.getString(Constants.get_UserID, "");
         String get_LicenseKey = SIMPLE_SAVED_PASSWORD.getString(Constants.get_LicenseKey, "");
 
 
-        String NotificationUrl = get_editTextMaster + "/"  + get_UserID + "/" + get_LicenseKey +  "/AppConfig/remotexNotif.json ";
+        String NotificationUrl = get_tMaster + "/"  + get_UserID + "/" + get_LicenseKey +  "/AppConfig/remotexNotif.json ";
 
 
         assert handler != null;

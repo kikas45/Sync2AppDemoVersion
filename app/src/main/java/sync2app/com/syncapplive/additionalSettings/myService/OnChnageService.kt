@@ -73,6 +73,13 @@ class OnChnageService : Service() {
         )
     }
 
+    private val simple_saved_passowrd: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SIMPLE_SAVED_PASSWORD,
+            Context.MODE_PRIVATE
+        )
+    }
+
     private val sharedBiometric: SharedPreferences by lazy {
         applicationContext.getSharedPreferences(
             Constants.SHARED_BIOMETRIC,
@@ -118,9 +125,6 @@ class OnChnageService : Service() {
         val editor = myDownloadClass.edit()
 
         countdownTimerServerUpdater?.cancel()
-        //  attemptRequestAgain(5)
-        //  startOrResumeTimer(5)
-
 
         val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
         val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()
@@ -135,8 +139,15 @@ class OnChnageService : Service() {
             if (networkInfo != null && networkInfo!!.isConnected) {
 
                 if (currentTime.isEmpty() || severTime.isEmpty()) {
-                    getServerTimeFromJson()
-                    //  showToastMessage("Checking")
+
+                    val get_tMaster: String = simple_saved_passowrd.getString(Constants.get_editTextMaster, "").toString()
+                    val get_UserID: String = simple_saved_passowrd.getString(Constants.get_UserID, "").toString()
+                    val get_LicenseKey: String = simple_saved_passowrd.getString(Constants.get_LicenseKey, "").toString()
+
+                    val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+
+                    getServerTimeFromJson(get_tMaster, dynamicPart)
+
 
                     editor.putString(Constants.SynC_Status, Constants.PR_running)
                     editor.apply()
@@ -512,21 +523,19 @@ class OnChnageService : Service() {
 
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun fetchData() {
+    private fun fetchData(baseUrl: String, dynamicPart: String) {
 
         val editor = myDownloadClass.edit()
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val response = Retro_On_Change.api.getAppConfig()
+                val api = Retro_On_Change.create(baseUrl)
+                val response = api.getAppConfig(dynamicPart)
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
 
-                        //    showToastMessage("fetch data")
                         val getvalue = response.body()?.last_updated.toString()
-
-
                         editor.putString(Constants.CurrentServerTime, getvalue)
                         editor.apply()
 
@@ -536,7 +545,7 @@ class OnChnageService : Service() {
                         val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
 
                         if (currentTime == severTime) {
-                            //    showToastMessage("This same ")
+
 
                             editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
                             editor.apply()
@@ -545,37 +554,29 @@ class OnChnageService : Service() {
                             val intent22 = Intent(Constants.RECIVER_PROGRESS)
                             sendBroadcast(intent22)
 
-
-                            // newly added
                             myHandler.postDelayed(Runnable {
 
                                 if (isDownloading == false) {
                                     editor.putString(Constants.SynC_Status, Constants.PR_running)
                                     editor.apply()
-                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                                    sendBroadcast(intent22)
+                                    val intent2244 = Intent(Constants.RECIVER_PROGRESS)
+                                    sendBroadcast(intent2244)
 
                                 } else {
-                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                                    sendBroadcast(intent22)
+                                    val intent22111 = Intent(Constants.RECIVER_PROGRESS)
+                                    sendBroadcast(intent22111)
 
                                     showToastMessage("Sync Already in Progress")
 
 
                                     if (isRxtracting == true) {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Extracting
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
                                         editor.apply()
 
                                     } else {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Downloading
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
                                         editor.apply()
 
                                     }
@@ -587,12 +588,11 @@ class OnChnageService : Service() {
 
 
                         } else {
-                            //  showToastMessage("Different")
 
                             if (isDownloading == false) {
                                 makeADownload()
 
-                                getServerTimeFromJson()
+                                getServerTimeFromJson(baseUrl, dynamicPart)
 
                                 editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
                                 editor.apply()
@@ -610,18 +610,12 @@ class OnChnageService : Service() {
 
                                     if (isRxtracting == true) {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Extracting
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
                                         editor.apply()
 
                                     } else {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Downloading
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
                                         editor.apply()
 
                                     }
@@ -646,15 +640,10 @@ class OnChnageService : Service() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    //    showToastMessage("Error: ${e.message}")
+                    showToastMessage("Error: ${e.message}")
 
                     showToastMessage("No internet Connection")
 
-                 //   editor.putString(Constants.SynC_Status, "Error Network")
-                 //   editor.apply()
-
-                 //   val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                 //   sendBroadcast(intent22)
 
                 }
             }
@@ -663,20 +652,20 @@ class OnChnageService : Service() {
 
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getServerTimeFromJson() {
+    private fun getServerTimeFromJson(baseUrl:String, dynamicPart:String) {
+
 
         val editor = myDownloadClass.edit()
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val response = Retro_On_Change.api.getAppConfig()
+                val api = Retro_On_Change.create(baseUrl)
+                val response = api.getAppConfig(dynamicPart)
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
 
-                        // showToastMessage("Server time")
                         val getvalue = response.body()?.last_updated.toString()
-
 
                         editor.putString(Constants.SeverTimeSaved, getvalue)
                         editor.putString(Constants.CurrentServerTime, getvalue)
@@ -696,15 +685,7 @@ class OnChnageService : Service() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    //   showToastMessage("Error: ${e.message}")
-
-                    //   showToastMessage("No internet Connection")
-
-                    //     editor.putString(Constants.SynC_Status, "No internet Connection")
-                    //   editor.apply()
-
-                 //   val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                 //   sendBroadcast(intent22)
+                       showToastMessage("Error: ${e.message}")
 
                 }
             }
@@ -743,11 +724,17 @@ class OnChnageService : Service() {
 
                     if (networkInfo22 != null && networkInfo22.isConnected) {
 
+                        val get_tMaster: String = simple_saved_passowrd.getString(Constants.get_editTextMaster, "").toString()
+                        val get_UserID: String = simple_saved_passowrd.getString(Constants.get_UserID, "").toString()
+                        val get_LicenseKey: String = simple_saved_passowrd.getString(Constants.get_LicenseKey, "").toString()
+
+                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+
                         // start the time again
                         val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent11)
 
-                        fetchData()
+                        fetchData(get_tMaster, dynamicPart)
 
 
                         editor.putString(Constants.SynC_Status, Constants.PR_running)

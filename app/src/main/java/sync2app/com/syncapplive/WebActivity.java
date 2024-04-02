@@ -548,7 +548,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         drawerItem7 = findViewById(R.id.drawer_item_7);
 
 
-
         ImageView scroolToEnd = findViewById(R.id.scroolToEnd);
         ImageView scroolToStart = findViewById(R.id.scroolTostart);
         final HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontalScrollView2);
@@ -578,7 +577,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 });
             }
         });
-
 
 
         drawerItem7.setOnClickListener(new View.OnClickListener() {
@@ -686,7 +684,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         return false;
                 }
                 return true;
-
 
 
             }
@@ -821,6 +818,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             String get_AppMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
             String imgAllowLunchFromOnline = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
 
+            String imagSwtichEnableManualOrNot = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "");
+
+            String getSaved_manaul_index_edit_url_Input = my_DownloadClass.getString(Constants.getSaved_manaul_index_edit_url_Input, "");
+
 
             String Tapped_OnlineORoffline = my_DownloadClass.getString(Constants.Tapped_OnlineORoffline, "");
 
@@ -829,33 +830,45 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             String fil_DEMO = my_DownloadClass.getString(Constants.getFolderSubpath, "");
 
 
-            String use_offline = sharedBiometric.getString(Constants.USE_OFFLINE_FOLDER, "");
-
-
             if (imgAllowLunchFromOnline.equals(Constants.imgAllowLunchFromOnline)) {
 
                 try {
                     if (Tapped_OnlineORoffline.equals(Constants.tapped_launchOnline)) {
-                        // showToast(mContext, "launched online checked to launch single url appended");
 
-                        if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+                        // let check if manual url was enabled
+                        if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)) {
 
-
-                            String url = my_DownloadClass.getString(Constants.get_ModifiedUrl, "");
-                            String imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "");
-
-                            if (imagSwtichPartnerUrl.equals(Constants.imagSwtichPartnerUrl)) {
-                                String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
-                                load_Launch_Online_Mode(vurl);
-
+                            if (!getSaved_manaul_index_edit_url_Input.isEmpty()) {
+                                load_Launch_Online_Mode(getSaved_manaul_index_edit_url_Input);
                             } else {
-                                String appended_url = url     +  "/" +      fil_CLO + "/" + fil_DEMO + "/App/index.html";
-                                load_Launch_Online_Mode(appended_url);
+                                showPopForTVConfiguration(Constants.badRequest);
+                                showToast(mContext, "Bad manual url");
+
                             }
 
                         } else {
-                            showPopForTVConfiguration(Constants.badRequest);
-                            //  showToast(mContext, "single url appended 22");
+
+
+                            // No manual url is allowed
+                            // showToast(mContext, "launched online checked to launch single url appended");
+                            if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+
+                                String url = my_DownloadClass.getString(Constants.get_ModifiedUrl, "");
+                                String imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "");
+
+                                if (imagSwtichPartnerUrl.equals(Constants.imagSwtichPartnerUrl)) {
+                                    String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                    load_Launch_Online_Mode(vurl);
+
+                                } else {
+                                    String appended_url = url + "/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                    load_Launch_Online_Mode(appended_url);
+                                }
+
+                            } else {
+                                showPopForTVConfiguration(Constants.badRequest);
+                                //  showToast(mContext, "single url appended 22");
+                            }
                         }
 
 
@@ -899,14 +912,42 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     if (Tapped_OnlineORoffline.equals(Constants.tapped_launchOnline)) {
                         // showToast(mContext, "launched not checked, we start original URl ");
 
-                        if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
-                            String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                        // let check if manual url was enabled
+                        if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)) {
 
-                            load_Launch_Online_Mode(vurl);
+                            if (!getSaved_manaul_index_edit_url_Input.isEmpty()) {
+                                load_Launch_Online_Mode(getSaved_manaul_index_edit_url_Input);
+                            } else {
+                                showPopForTVConfiguration(Constants.badRequest);
+                                showToast(mContext, "Bad manual url");
+
+                            }
 
                         } else {
-                            showPopForTVConfiguration(Constants.UnableToFindIndex);
+
+                            if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+                                // String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                // load_Launch_Online_Mode(vurl);
+
+                                String url = my_DownloadClass.getString(Constants.get_ModifiedUrl, "");
+                                String imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "");
+
+                                if (imagSwtichPartnerUrl.equals(Constants.imagSwtichPartnerUrl)) {
+                                    String vurl = "https://cp.cloudappserver.co.uk/app_base/public/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                    load_Launch_Online_Mode(vurl);
+
+                                } else {
+                                    String appended_url = url + "/" + fil_CLO + "/" + fil_DEMO + "/App/index.html";
+                                    load_Launch_Online_Mode(appended_url);
+                                }
+
+
+                            } else {
+                                showPopForTVConfiguration(Constants.UnableToFindIndex);
+                            }
+
                         }
+
 
                     } else if (Tapped_OnlineORoffline.equals(Constants.tapped_launchOffline)) {
                         //  showToast(mContext, "launched not checked, Starting with path CLO/DEMO...");
@@ -1016,6 +1057,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 imageCirclGreenOnline.setVisibility(View.VISIBLE);
                 imageCircleBlueOffline.setVisibility(View.INVISIBLE);
 
+            } else {
+                imageCirclGreenOnline.setVisibility(View.INVISIBLE);
+                imageCircleBlueOffline.setVisibility(View.INVISIBLE);
             }
 
         } else {
@@ -1079,6 +1123,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
             imageCirclGreenOnline.setVisibility(View.VISIBLE);
+            imageCircleBlueOffline.setVisibility(View.INVISIBLE);
+
+        } else {
+            imageCirclGreenOnline.setVisibility(View.INVISIBLE);
             imageCircleBlueOffline.setVisibility(View.INVISIBLE);
 
         }
@@ -1166,6 +1214,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
                     imageCirclGreenOnline.setVisibility(View.INVISIBLE);
                     imageCircleBlueOffline.setVisibility(View.VISIBLE);
+                }else {
+                    imageCirclGreenOnline.setVisibility(View.INVISIBLE);
+                    imageCircleBlueOffline.setVisibility(View.INVISIBLE);
+
                 }
 
 
@@ -1227,7 +1279,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 ImageView imageView = binding.notifImg;
 
 
-
                 closeThis.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -1268,7 +1319,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         .placeholder(R.drawable.img_logo_icon) // any placeholder to load at start
                         .error(R.drawable.img_logo_icon)  // any image in case of error
                         .into(imageView);  // imageview object
-
 
 
                 dialog.setCancelable(false);
@@ -1744,10 +1794,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     if (!zip.isEmpty()) {
 
-                        if (zip.equals("App")){
+                        if (zip.equals("App")) {
                             textSyncMode.setText("SM: Api");
 
-                        }else {
+                        } else {
                             textSyncMode.setText("SM: " + zip);
                         }
 
@@ -3455,7 +3505,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     }
 
 
-
     /// we added
 
     private class Downloader implements DownloadListener {
@@ -3548,7 +3597,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     assert downloadManager != null;
                     try {
                         downloadManager.enqueue(request);
-                    } catch (Exception e) {
+                    } catch ( Exception e ) {
                         e.printStackTrace();
                         Toast.makeText(mContext, e.toString(), Toast.LENGTH_SHORT).show();
                     }
@@ -3574,7 +3623,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         }
     }
-
 
 
 }

@@ -1,6 +1,9 @@
 package sync2app.com.syncapplive.additionalSettings
 
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
@@ -11,10 +14,18 @@ import android.widget.TimePicker
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
+import sync2app.com.syncapplive.additionalSettings.OnFileChange.Retro_On_Change
+import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityTestScreenBinding
 import java.util.Calendar
 
@@ -25,15 +36,30 @@ class TestScreenActivity : AppCompatActivity() {
     var hour = 0
     var min = 0
 
+
+    private val simple_saved_passowrd: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SIMPLE_SAVED_PASSWORD,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTestScreenBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
 
-        binding.textDisplayText.setOnClickListener {
+        binding.btnMakeCall.setOnClickListener {
 
-            showSyncDialog()
+            val get_tMaster: String = simple_saved_passowrd.getString(Constants.get_editTextMaster, "").toString()
+            val get_UserID: String = simple_saved_passowrd.getString(Constants.get_UserID, "").toString()
+            val get_LicenseKey: String = simple_saved_passowrd.getString(Constants.get_LicenseKey, "").toString()
+
+            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+            fetchData(get_tMaster, dynamicPart)
+
         }
 
 
@@ -49,66 +75,83 @@ class TestScreenActivity : AppCompatActivity() {
     }
 
 
-    private fun showSyncDialog() {
+/*
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun fetchData(Pathurl:String) {
 
-        //create dialog
-        val syncDialog = AlertDialog.Builder(this).create()
-        val inflater = this.layoutInflater
-        val viewOptions: View = inflater.inflate(R.layout.time_picker_dialog, null)
 
-        //widgets
-        val timePicker = viewOptions.findViewById<TimePicker>(R.id.timePicker)
-        val cancelBtn = viewOptions.findViewById<Button>(R.id.cancelBtn)
-        val setBtn = viewOptions.findViewById<Button>(R.id.setBtn)
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val response = Retro_On_Change.api.getAppConfig(Pathurl)
 
-        //dialog props
-        syncDialog.setView(viewOptions)
-        syncDialog.window!!.attributes.windowAnimations = R.style.PauseDialogAnimation
-        syncDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
 
-        //initialize time picker
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            timePicker.hour = 0
-            timePicker.minute = 0
-            timePicker.setIs24HourView(true)
-            val calendar = Calendar.getInstance()
-            timePicker.setOnTimeChangedListener { view: TimePicker?, hourOfDay: Int, minute: Int ->
+                        //    showToastMessage("fetch data")
+                        val getvalue = response.body()?.last_updated.toString()
 
-                //get time
-                hour = hourOfDay
-                min = minute
+                        binding.textDisplayText.text = getvalue.toString()
+
+
+                    } else {
+                        showToastMessage("bad request")
+                        binding.textDisplayText.text = "bad request"
+                    }
+
+
+                }
+            } catch (e: HttpException) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("HTTP Exception: ${e.message()}")
+                    binding.textDisplayText.text = "HTTP Exception: ${e.message()}"
+
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("Error: ${e.message}")
+
+                    binding.textDisplayText.text = "Error: ${e.message}"
+
+                    showToastMessage("No internet Connection")
+
+
+                }
             }
         }
-
-        //cancel
-        cancelBtn.setOnClickListener { v: View? ->
-
-            //dismiss
-            syncDialog.dismiss()
-        }
-
-        //grant access
-        setBtn.setOnClickListener { v: View? ->
-
-            //calculate minutes
-            val totalMins: Int = hour * 60 + min
-
-
-            //set on edt
-            binding.textDisplayText.setText(String.format("%02d:%02d", hour, min))
-
-
-            //reset temp data
-            hour = 0
-            min = 0
-
-            //close dialog
-            syncDialog.dismiss()
-        }
-
-        //show dialog
-        syncDialog.show()
     }
 
+*/
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun fetchData(baseUrl: String, dynamicPart: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val api = Retro_On_Change.create(baseUrl)
+                val response = api.getAppConfig(dynamicPart)
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        val getvalue = response.body()?.last_updated.toString()
+                        binding.textDisplayText.text = getvalue
+                    } else {
+                        showToastMessage("bad request")
+                        binding.textDisplayText.text = "bad request"
+                    }
+                }
+            } catch (e: HttpException) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("HTTP Exception: ${e.message()}")
+                    binding.textDisplayText.text = "HTTP Exception: ${e.message()}"
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("Error: ${e.message}")
+                    binding.textDisplayText.text = "Error: ${e.message}"
+                    showToastMessage("No internet Connection")
+                }
+            }
+        }
+    }
 
 }

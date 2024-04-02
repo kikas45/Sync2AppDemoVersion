@@ -194,7 +194,7 @@
                 android:paddingLeft="24dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                android:text="Show Online Status"
+                android:text="Show Online Status Indicator"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@+id/imagEnableDownloadStatus"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -219,6 +219,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
                 android:alpha="1"
+                android:checked="true"
                 app:layout_constraintBottom_toBottomOf="@+id/textShowOnlineStatus"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textCheckDownloadStatus2" />

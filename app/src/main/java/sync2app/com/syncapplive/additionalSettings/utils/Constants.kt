@@ -35,8 +35,7 @@ class Constants {
 
 
         // for check time stamp change in JSon Server
-        const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/PTime/"
-
+      //  const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021001/PTime/"
 
 
 
@@ -110,8 +109,13 @@ class Constants {
         const val getSavedCLOImPutFiled = "getSavedCLOImPutFiled"
         const val getSaveSubFolderInPutFiled = "getSaveSubFolderInPutFiled"
         const val getSavedEditTextInputSynUrlZip = "getSavedEditTextInputSynUrlZip"
+        const val getSaved_manaul_index_edit_url_Input = "getSaved_manaul_index_edit_url_Input"
+
+
+        // use for Indicator Panel
         const val showDownloadSyncStatus = "showDownloadSyncStatus"
         const val imagShowOnlineStatus = "imagShowOnlineStatus"
+        const val img_Make_OnlineIndicator_Default_visible = "img_Make_OnlineIndicator_Default_visible"
 
         const val MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
         const val SAVE_NAVIGATION = "SAVE_NAVIGATION"
