@@ -2050,8 +2050,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
             //set on edt
-            binding.textDisplaytime.setText(String.format("%02d:%02d", hour, min))
-            binding.textIntervalsSelect.setText(String.format("%02d:%02d", hour, min))
+
+            // i want the time to set has 1 minute , 2 minute , 3 minute, etc
+         //   binding.textDisplaytime.setText(String.format("%02d:%02d", hour, min))
+          //  binding.textIntervalsSelect.setText(String.format("%02d:%02d", hour, min))
+
+            binding.textDisplaytime.text = getFormattedTime(hour, min)
+            binding.textIntervalsSelect.text = getFormattedTime(hour, min)
+
 
 
             //reset temp data
@@ -2086,6 +2092,17 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         syncDialog.show()
     }
 
+
+    private fun getFormattedTime(hour: Int, minute: Int): String {
+        val totalMinutes = hour * 60 + minute
+
+        return when {
+            totalMinutes == 1 -> "1 minute"
+            totalMinutes == 2 -> "2 minutes"
+            totalMinutes % 60 == 0 -> "${totalMinutes / 60} hour(s)"
+            else -> "$totalMinutes minutes"
+        }
+    }
 
     private fun funManulOrNotInteView() {
         binding.apply {
