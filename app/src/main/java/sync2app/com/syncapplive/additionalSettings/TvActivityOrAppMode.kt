@@ -33,6 +33,8 @@ import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
+import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
+import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.UserViewModel
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkStoragePermission
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.urlchecks.getPermissionStatus
@@ -57,6 +59,8 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     private var CP_server = "CP-Cloud App Server"
 
     private val mApiViewModel by viewModels<ApiUrlViewModel>()
+
+    private val mUserViewModel by viewModels<UserViewModel>()
 
 
     private val adapterApi by lazy {
@@ -100,6 +104,22 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     private val simpleSavedPassword: SharedPreferences by lazy {
         applicationContext.getSharedPreferences(
             Constants.SIMPLE_SAVED_PASSWORD,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
+    private val sharedBiometric: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SHARED_BIOMETRIC,
             Context.MODE_PRIVATE
         )
     }
@@ -222,11 +242,17 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 simpleSavedPassword.getString(Constants.Saved_Domains_Urls, "").toString().trim()
 
             if (binding.imgUserMasterDomainORCustom.isChecked) {
+                // add the toggle check for Sync Page
+                val editor = sharedBiometric.edit()
+                editor.putString(Constants.imagSwtichPartnerUrl, "imagSwtichPartnerUrl")
+                editor.apply()
+
 
                 if (getUrlBasedOnSpinnerText.isNotEmpty()) {
                     when (getUrlBasedOnSpinnerText) {
                         CP_server -> {
 
+                            /// val customDomainUrl = "https://cp.cloudappserver.co.uk/app_base/public/"
                             val get_editTextMaster = Constants.customDomainUrl
                             checkMyConnection(get_UserID, get_LicenseKey, get_editTextMaster)
                         }
@@ -243,7 +269,15 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 }
 
             }else if (get_Saved_Domains_Urls.isNotEmpty()) {
+
+                // remove the toggle check for Sync Page
+                val editor = sharedBiometric.edit()
+                editor.remove(Constants.imagSwtichPartnerUrl)
+                editor.apply()
+                // test my connection
                 checkMyConnection(get_UserID, get_LicenseKey, get_Saved_Domains_Urls)
+
+
             } else {
                 showToastMessage("Select Custom Domain")
             }
@@ -281,10 +315,38 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                             editorValue.putString(Constants.get_editTextMaster, get_editTextMaster)
                             editorValue.apply()
 
+
+                            /// used for the getting first path which will be prefilled on Sync-page
+                            val editorValueBio = myDownloadClass.edit()
+                            editorValueBio.putString(Constants.getSavedCLOImPutFiled, get_UserID)
+                            editorValueBio.putString(Constants.getSaveSubFolderInPutFiled, get_LicenseKey)
+
+
+                            editorValueBio.putString(Constants.getFolderClo, get_UserID)
+                            editorValueBio.putString(Constants.getFolderSubpath, get_LicenseKey)
+
+                            // use to control Start of the Sync Mechanisms
+                            editorValueBio.putString(Constants.Manage_My_Sync_Start, "Manage_My_Sync_Start")
+
+                            editorValueBio.apply()
+
+                            val user = User(CLO = get_UserID, DEMO = get_LicenseKey, EditUrl = "", EditUrlIndex = "")
+                            mUserViewModel.addUser(user)
+
+
                             val getpermit = getPermissionStatus(this@TvActivityOrAppMode)
                             if (getpermit.equals("true") && checkMultiplePermission()){
                                 isReadToMove_All_Permission()
                             }
+
+
+                            if (!binding.imgUserMasterDomainORCustom.isChecked) {
+                                // save the modified url
+                                val editorDownload = myDownloadClass.edit()
+                                editorDownload.putString(Constants.get_ModifiedUrl, get_editTextMaster)
+                                editorDownload.apply()
+                            }
+
 
                         } else {
 
@@ -688,6 +750,11 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 getUrlBasedOnSpinnerText = CP_server
                 binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
 
+
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.Saved_Parthner_Name, CP_server)
+                editor.apply()
+
                 alertDialog.dismiss()
             }
 
@@ -697,6 +764,9 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 getUrlBasedOnSpinnerText = API_Server
                 binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.deep_blue))
 
+                val editor = myDownloadClass.edit()
+                editor.putString(Constants.Saved_Parthner_Name, API_Server)
+                editor.apply()
 
                 alertDialog.dismiss()
             }
@@ -816,6 +886,15 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             editor.putString(Constants.Saved_Domains_Name, name)
             editor.putString(Constants.Saved_Domains_Urls, urls)
             editor.apply()
+
+
+            val editorDowbload = myDownloadClass.edit()
+            editorDowbload.putString(Constants.Saved_Domains_Name, name)
+            editorDowbload.putString(Constants.Saved_Domains_Urls, urls)
+            editorDowbload.apply()
+
+
+
         }
 
 

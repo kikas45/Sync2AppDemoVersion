@@ -140,13 +140,31 @@ class OnChnageService : Service() {
 
                 if (currentTime.isEmpty() || severTime.isEmpty()) {
 
-                    val get_tMaster: String = simple_saved_passowrd.getString(Constants.get_editTextMaster, "").toString()
-                    val get_UserID: String = simple_saved_passowrd.getString(Constants.get_UserID, "").toString()
-                    val get_LicenseKey: String = simple_saved_passowrd.getString(Constants.get_LicenseKey, "").toString()
+                    val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+                    val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+                    val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
 
-                    val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                    val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
 
-                    getServerTimeFromJson(get_tMaster, dynamicPart)
+                    if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+                        val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
+                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                        getServerTimeFromJson(un_dynaic_path, dynamicPart)
+
+                        Log.d("OnChnageService"," $un_dynaic_path$dynamicPart")
+
+                    } else {
+
+                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                        getServerTimeFromJson(get_tMaster, dynamicPart)
+
+                        Log.d("OnChnageService","$get_tMaster$dynamicPart")
+
+                    }
+
+
+
+
 
 
                     editor.putString(Constants.SynC_Status, Constants.PR_running)
@@ -189,7 +207,7 @@ class OnChnageService : Service() {
         unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
 
-    //    second_cancel_download()
+        //    second_cancel_download()
 
 
     }
@@ -198,11 +216,12 @@ class OnChnageService : Service() {
     private val downloadCompleteReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == DownloadManager.ACTION_DOWNLOAD_COMPLETE) {
-                val get_value_if_Api_is_required = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+                val get_value_if_Api_is_required =
+                    sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
                 if (repEatMyProcess == true) {
-                    if (get_value_if_Api_is_required.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                    if (get_value_if_Api_is_required.equals(Constants.imagSwtichEnableSyncFromAPI)) {
                         funUnZipFile()
-                    }else{
+                    } else {
                         stratMyACtivity()
                         Log.d("OnChnageService", "onReceive: Api Completed")
                     }
@@ -303,7 +322,7 @@ class OnChnageService : Service() {
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-          //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            //  request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             request.setTitle(fileNamy)
             request.allowScanningByMediaScanner()
             request.setDestinationInExternalPublicDir(
@@ -571,12 +590,18 @@ class OnChnageService : Service() {
 
                                     if (isRxtracting == true) {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Extracting
+                                        )
                                         editor.apply()
 
                                     } else {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Downloading
+                                        )
                                         editor.apply()
 
                                     }
@@ -610,12 +635,18 @@ class OnChnageService : Service() {
 
                                     if (isRxtracting == true) {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Extracting
+                                        )
                                         editor.apply()
 
                                     } else {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                        editor.putString(
+                                            Constants.SynC_Status,
+                                            Constants.PR_Downloading
+                                        )
                                         editor.apply()
 
                                     }
@@ -652,7 +683,7 @@ class OnChnageService : Service() {
 
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun getServerTimeFromJson(baseUrl:String, dynamicPart:String) {
+    private fun getServerTimeFromJson(baseUrl: String, dynamicPart: String) {
 
 
         val editor = myDownloadClass.edit()
@@ -685,7 +716,7 @@ class OnChnageService : Service() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                       showToastMessage("Error: ${e.message}")
+                    showToastMessage("Error: ${e.message}")
 
                 }
             }
@@ -724,18 +755,29 @@ class OnChnageService : Service() {
 
                     if (networkInfo22 != null && networkInfo22.isConnected) {
 
-                        val get_tMaster: String = simple_saved_passowrd.getString(Constants.get_editTextMaster, "").toString()
-                        val get_UserID: String = simple_saved_passowrd.getString(Constants.get_UserID, "").toString()
-                        val get_LicenseKey: String = simple_saved_passowrd.getString(Constants.get_LicenseKey, "").toString()
-
-                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-
                         // start the time again
+
+                        val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+                        val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+                        val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+
+                        val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+                        if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+                            val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
+                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                            fetchData(un_dynaic_path, dynamicPart)
+                            Log.d("OnChnageService","Img  $un_dynaic_path$dynamicPart")
+                        } else {
+
+                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                            fetchData(get_tMaster, dynamicPart)
+                            Log.d("OnChnageService","$get_tMaster$dynamicPart")
+                        }
+
+
                         val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent11)
-
-                        fetchData(get_tMaster, dynamicPart)
-
 
                         editor.putString(Constants.SynC_Status, Constants.PR_running)
                         editor.apply()
@@ -747,11 +789,11 @@ class OnChnageService : Service() {
                         showToastMessage("No internet Connection")
 
 
-                      //  editor.putString(Constants.SynC_Status, "Error Network")
-                     //   editor.apply()
+                        //  editor.putString(Constants.SynC_Status, "Error Network")
+                        //   editor.apply()
 
-                    //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                     //   sendBroadcast(intent22)
+                        //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        //   sendBroadcast(intent22)
 
                         val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                         sendBroadcast(intent11)

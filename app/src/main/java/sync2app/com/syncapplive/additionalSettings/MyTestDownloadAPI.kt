@@ -2,6 +2,7 @@ package sync2app.com.syncapplive.additionalSettings
 
 import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.AsyncTask
@@ -11,11 +12,15 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import sync2app.com.syncapplive.R
+import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesApi
+import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel
+import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.UserViewModel
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityMyTestDownloadApiBinding
 import java.io.BufferedReader
@@ -25,6 +30,7 @@ import java.net.URL
 
 class MyTestDownloadAPI : AppCompatActivity() {
     private lateinit var binding: ActivityMyTestDownloadApiBinding
+    private val mUserViewModel by viewModels<FilesViewModel>()
 
     private lateinit var myTextView: TextView
     private lateinit var editClo: EditText
@@ -52,7 +58,7 @@ class MyTestDownloadAPI : AppCompatActivity() {
         binding.apply {
             editTexyForClO.setText("CLO")
             // editTexyForDeMO.setText("DE_MO_2021000")
-            editTexyForDeMO.setText("HQ")
+            editTexyForDeMO.setText("DE_MO_2021001")
 
             btnDownload.setOnClickListener {
 
@@ -86,32 +92,8 @@ class MyTestDownloadAPI : AppCompatActivity() {
 
         binding.textDisplayText.setOnClickListener {
 
-            val getvalues = myDownloadClass.getString("url1", "").toString()
-            val getvalues22 = myDownloadClass.getString("url2", "").toString()
-            val getvalues33 = myDownloadClass.getString("url3", "").toString()
-
-            val (url1, fileName1) = extractUrlAndFileName(getvalues)
-            val (url2, fileName2) = extractUrlAndFileName(getvalues22)
-            val (url3, fileName3) = extractUrlAndFileName(getvalues33)
-
-          //  download(url1, fileName1)
-          //  download(url2, fileName2)
-          //  download(url3, fileName3)
-
-         //   myTextView.setText("$url1 \n$fileName1")
-
-
-            val urlsAndFileNames = listOf(
-                extractUrlAndFileName(getvalues),
-                extractUrlAndFileName(getvalues22),
-                extractUrlAndFileName(getvalues33)
-            )
-
-            downloadSequentially(urlsAndFileNames)
-
-            myTextView.setText(urlsAndFileNames.toString())
-
-
+          //  downloadSequentially()
+            startActivity(Intent(applicationContext, TestScreenActivity::class.java))
 
         }
     }
@@ -129,18 +111,8 @@ class MyTestDownloadAPI : AppCompatActivity() {
 
 
 
-    private fun extractUrlAndFileName(input: String): Pair<String, String> {
-        // Remove the leading and trailing quotes if present
-        val sanitizedInput = input.trim('"')
-        // Extract the URL and file name
-        val url = sanitizedInput.substringBeforeLast(',')
-        val fileName = sanitizedInput.substringAfterLast('/')
-
-        return Pair(url, fileName)
-    }
-
     private fun download(url: String, fileName: String) {
-        val path = "/PowellJoe"
+        val path = "/MyAPiDownloads"
 
         val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         val request = DownloadManager.Request(Uri.parse(url))
@@ -165,16 +137,59 @@ class MyTestDownloadAPI : AppCompatActivity() {
     private fun saveURLPairs(csvData: String) {
         val pairs = parseCSV(csvData)
 
-        Log.d("downloadURLs", "saveURLPairs: CSV data - $csvData")
-        Log.d("downloadURLs", "saveURLPairs: Parsed pairs - $pairs")
+        // Add files to Room Database
+        lifecycleScope.launch(Dispatchers.IO) {
+            for ((index, line) in pairs.withIndex()) {
+                val parts = line.split(",").map { it.trim() }
+                if (parts.isEmpty()) continue // Skip empty lines
 
-        val editor = myDownloadClass.edit()
-        for ((index, pair) in pairs.withIndex()) {
-            editor.putString("url${index + 1}", pair)
+                val sn = parts[0]
+                val folderName = StringBuilder()
+                var isFirst = true
+                for (i in 1 until parts.size) {
+                    if (parts[i].isEmpty()) {
+                        if (isFirst) {
+                            folderName.append("MyApiFolder")
+                            isFirst = false
+                        } else {
+                            folderName.append("/MyApiFolder")
+                        }
+                    } else {
+                        if (!isFirst) folderName.append("/")
+                        folderName.append(parts[i])
+                        isFirst = false
+                    }
+                }
+                val fileName = folderName.substring(folderName.lastIndexOf("/") + 1)
+                val status = "" // Set your status here
+
+                val files = FilesApi(SN = sn, FolderName = folderName.toString(), FileName = fileName, Status = status)
+                mUserViewModel.addFiles(files)
+            }
         }
-        editor.apply()
-        showToastMessage("URL pairs saved successfully")
     }
+
+
+    /*
+        private fun saveURLPairs(csvData: String) {
+            val pairs = parseCSV(csvData)
+
+            // Add files to Room Database
+            lifecycleScope.launch(Dispatchers.IO) {
+                for ((index, line) in pairs.withIndex()) {
+                    val parts = line.split(",").map { it.trim() }
+                    val sn = parts[0]
+                    val folderName = parts.drop(1).dropLastWhile { it.isEmpty() }.joinToString(separator = "/") { if (it.isEmpty()) "MainFolder" else it }
+                    val fileName = parts.lastOrNull { it.isNotEmpty() } ?: continue
+                    val status = "" // Set your status here
+
+                    val files = FilesApi(SN = sn, FolderName = folderName, FileName = fileName, Status = status)
+                    mUserViewModel.addFiles(files)
+                }
+            }
+        }
+
+    */
 
 
     // for no need of comma CSV
@@ -194,8 +209,9 @@ class MyTestDownloadAPI : AppCompatActivity() {
     private fun downloadCSV(clo: String, demo: String): String {
         val stringBuilder = StringBuilder()
         try {
-            val downloadUrl =
-               "https://cloudappserver.co.uk/cp/app_base/public/$clo/$demo/Start/start.csv"
+          //  val downloadUrl = "https://cloudappserver.co.uk/cp/app_base/public/$clo/$demo/Api/update.csv"
+            val downloadUrl = "https://cloudappserver.co.uk/cp/app_base/public/$clo/$demo/Start/start.csv"
+
             Log.d("downloadUrl", "downloadUrl: $downloadUrl")
 
             val url = URL(downloadUrl)

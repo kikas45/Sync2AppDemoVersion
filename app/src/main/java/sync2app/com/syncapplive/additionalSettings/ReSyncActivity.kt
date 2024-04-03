@@ -188,8 +188,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             powerManager!!.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "YourApp::MyWakelockTag")
         wakeLock!!.acquire()
 
-      //  binding.editTextInputSynUrlZip.setText("https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021001/Zip/App.zip")
-      //  binding.editTextInputIndexManual.setText("https://www.cnbc.com/world/?region=world")
 
         manager = applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager?
 
@@ -1431,8 +1429,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             //// logic for Select Partner Url
 
             val imagPartnerurl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
-            imagSwtichPartnerUrl.isChecked =
-                imagPartnerurl.equals(Constants.imagSwtichPartnerUrl)
+            imagSwtichPartnerUrl.isChecked = imagPartnerurl.equals(Constants.imagSwtichPartnerUrl)
 
             val get_Saved_Domains_Name = myDownloadClass.getString(Constants.Saved_Domains_Name, "")
             val Saved_Parthner_Name = myDownloadClass.getString(Constants.Saved_Parthner_Name, "")
@@ -2192,14 +2189,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                             getFolderClo,
                                             getFolderSubpath
                                         )
-                                        editor.putString(
-                                            Constants.getSavedCLOImPutFiled,
-                                            getFolderClo
-                                        )
-                                        editor.putString(
-                                            Constants.getSaveSubFolderInPutFiled,
-                                            getFolderSubpath
-                                        )
+                                        editor.putString(Constants.getSavedCLOImPutFiled, getFolderClo)
+                                        editor.putString(Constants.getSaveSubFolderInPutFiled, getFolderSubpath)
                                         editor.apply()
 
                                     } else {
@@ -2308,8 +2299,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
 
-                val baseUrl =
-                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                val baseDomain = Constants.customDomainUrl
+                val baseUrl = "$baseDomain/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
 
 
@@ -2352,8 +2343,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
             } else {
 
-                val baseUrl =
-                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/App/index.html"
+                val baseDomain = Constants.customDomainUrl
+                val baseUrl = "$baseDomain/$getFolderClo/$getFolderSubpath/App/index.html"
 
 
 
@@ -2904,6 +2895,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             editior.putString("fileNamy", fileNamy)
             editior.putString(Constants.Extracted, Extracted)
 
+            // used to control Sync Start from  set up page
+            editior.remove(Constants.Manage_My_Sync_Start)
+
+
             val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
 
             if (get_savedIntervals != 0L) {
@@ -3035,7 +3030,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint("MissingInflatedId", "SetTextI18n")
     private fun showPopForLaunch_Oblin_offline() {
         val bindingCM: CustomSelectLauncOrOfflinePopLayoutBinding =
             CustomSelectLauncOrOfflinePopLayoutBinding.inflate(
@@ -3069,7 +3064,6 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 textLunchOnline.setText("Launch offline")
 
 
-
                 val imagSwtichEnableManualOrNot = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
                 if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)){
@@ -3078,28 +3072,33 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     if (fil_baseUrl.isNotEmpty() && fil_appIndex.isNotEmpty()) {
 
-                        val url =
-                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
-
-                        imagSwtichEnableLaucngOnline.isChecked = true
 
 
-                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+                            // this url does not affect the Outcome of Master Domain
+                            val url = "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
 
-                        editor.putString(Constants.getSavedEditTextInputSynUrlZip, fil_baseUrl)
-                        editor.putString(Constants.getSaved_manaul_index_edit_url_Input, fil_appIndex)
-                        editor.putString(Constants.syncUrl, url)
-                        editor.putString(
-                            Constants.Tapped_OnlineORoffline,
-                            Constants.tapped_launchOnline
-                        )
+                            imagSwtichEnableLaucngOnline.isChecked = true
 
 
-                        editor.apply()
+                         //   editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
 
-                        val intent = Intent(applicationContext, WebActivity::class.java)
-                        startActivity(intent)
-                        finish()
+                            editor.putString(Constants.getSavedEditTextInputSynUrlZip, fil_baseUrl)
+                            editor.putString(
+                                Constants.getSaved_manaul_index_edit_url_Input,
+                                fil_appIndex
+                            )
+                            editor.putString(Constants.syncUrl, url)
+                            editor.putString(
+                                Constants.Tapped_OnlineORoffline,
+                                Constants.tapped_launchOnline
+                            )
+
+
+                            editor.apply()
+
+                            val intent = Intent(applicationContext, WebActivity::class.java)
+                            startActivity(intent)
+                            finish()
 
                     } else {
                         showToastMessage("Select Saved Download Path")
@@ -3115,13 +3114,13 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
 
-                        val url =
-                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+                            // this url does not affect the Outcome of Master Domain
+                        val url = "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
 
                         imagSwtichEnableLaucngOnline.isChecked = true
 
 
-                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
+                      //  editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
 
                         editor.putString(Constants.getFolderClo, fil_CLO)
                         editor.putString(Constants.getFolderSubpath, fil_DEMO)
@@ -3137,6 +3136,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         val intent = Intent(applicationContext, WebActivity::class.java)
                         startActivity(intent)
                         finish()
+
 
                     } else {
                         showToastMessage("Select Saved Download Path")
@@ -3164,28 +3164,20 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 if (imagSwtichEnableManualOrNot.equals(Constants.imagSwtichEnableManualOrNot)) {
 
-                    // Use manual
-
 
                     if (fil_baseUrl.isNotEmpty() && fil_appIndex.isNotEmpty()) {
 
-                        val url =
-                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+                        // this url does not affect the Outcome of Master Domain
+                        val url = "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
 
-                        imagSwtichEnableLaucngOnline.isChecked = true
+                        imagSwtichEnableLaucngOnline.isChecked = false
 
-                        editor.putString(
-                            Constants.imgAllowLunchFromOnline,
-                            "imgAllowLunchFromOnline"
-                        )
+                       // editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
 
                         editor.putString(Constants.getSavedEditTextInputSynUrlZip, fil_baseUrl)
                         editor.putString(Constants.getSaved_manaul_index_edit_url_Input, fil_appIndex)
                         editor.putString(Constants.syncUrl, url)
-                        editor.putString(
-                            Constants.Tapped_OnlineORoffline,
-                            Constants.tapped_launchOffline
-                        )
+                        editor.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOffline)
 
                         editor.apply()
 
@@ -3194,6 +3186,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         val intent = Intent(applicationContext, WebActivity::class.java)
                         startActivity(intent)
                         finish()
+
+
 
                     } else {
                         showToastMessage("Select Saved Download Path")
@@ -3205,15 +3199,14 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                     // Do not use manual
                     if (fil_CLO.isNotEmpty() && fil_DEMO.isNotEmpty()) {
 
-                        val url =
-                            "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
 
-                        imagSwtichEnableLaucngOnline.isChecked = true
 
-                        editor.putString(
-                            Constants.imgAllowLunchFromOnline,
-                            "imgAllowLunchFromOnline"
-                        )
+                            // this url does not affect the Outcome of Master Domain
+                        val url = "https://cp.cloudappserver.co.uk/app_base/public/$fil_CLO/$fil_DEMO/App/index.html"
+
+                        imagSwtichEnableLaucngOnline.isChecked = false
+
+                      //  editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline")
 
                         editor.putString(Constants.getFolderClo, fil_CLO)
                         editor.putString(Constants.getFolderSubpath, fil_DEMO)
@@ -3230,6 +3223,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                         val intent = Intent(applicationContext, WebActivity::class.java)
                         startActivity(intent)
                         finish()
+
+
 
                     } else {
                         showToastMessage("Select Saved Download Path")

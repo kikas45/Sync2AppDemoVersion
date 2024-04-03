@@ -1711,10 +1711,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             String fil_CLO = my_DownloadClass.getString(Constants.getFolderClo, "");
             String fil_DEMO = my_DownloadClass.getString(Constants.getFolderSubpath, "");
 
+            // use to control Sync start
+            String Manage_My_Sync_Start = my_DownloadClass.getString(Constants.Manage_My_Sync_Start, "");
+
 
             String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
 
-            if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty()) {
+            if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
                 if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
                     if (!ServiceUtils.foregroundServiceRunning(getApplicationContext())) {

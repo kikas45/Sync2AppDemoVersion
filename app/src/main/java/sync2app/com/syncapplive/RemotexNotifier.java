@@ -118,6 +118,7 @@ public class RemotexNotifier extends Service {
                             Notif_title = remoteNotifJson.getString("liveNotifTitle");
                             Notif_desc = remoteNotifJson.getString("liveNotifDesc");
                             Notif_Img_url = remoteNotifJson.getString("liveNotifImage");
+                            Log.d("Notif_Img_url", Notif_Img_url.toString());
                             Notif_button_action = remoteNotifJson.getString("liveNotifUrl");
 
                             NotifLinkExternal = remoteNotifJson.getBoolean("liveNotifLinkExternal");

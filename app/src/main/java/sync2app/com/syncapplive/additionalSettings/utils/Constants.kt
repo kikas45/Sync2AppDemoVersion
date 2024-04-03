@@ -78,6 +78,8 @@ class Constants {
         const val CurrentServerTime = "CurrentServerTime"
         const val media_ready = "Media ready"
 
+        const val Manage_My_Sync_Start = "Manage_My_Sync_Start"
+
 
         const val Saved_Domains_Name = "Saved_Domains_Name"
         const val Saved_Domains_Urls = "Saved_Domains_Urls"
@@ -124,6 +126,7 @@ class Constants {
         const val shortcut_website_id = "id_website"
         const val shortcut_messages_id = "id_messages"
 
+        // modified end path for master Domain
         const val get_ModifiedUrl = "get_ModifiedUrl"
 
         const val imgAllowFingerPrint = "imgAllowFingerPrint"

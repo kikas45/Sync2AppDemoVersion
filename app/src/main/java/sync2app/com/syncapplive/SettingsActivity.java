@@ -576,6 +576,13 @@ public class SettingsActivity extends AppCompatActivity {
                         //   editorED.remove(Constants.syncUrl);
                         editorED.apply();
 
+
+                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline");
+                        editor.apply();
+
+
+
+
                         Intent intent = new Intent(getApplicationContext(), WebActivity.class);
                         startActivity(intent);
                         finish();
@@ -633,6 +640,9 @@ public class SettingsActivity extends AppCompatActivity {
                     // editorED.remove(Constants.getFolderSubpath);
                     //   editorED.remove(Constants.syncUrl);
                     editorED.apply();
+
+                    editor.remove(Constants.imgAllowLunchFromOnline);
+                    editor.apply();
 
                     Intent intent = new Intent(getApplicationContext(), WebActivity.class);
                     startActivity(intent);
