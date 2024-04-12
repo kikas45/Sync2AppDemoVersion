@@ -10,6 +10,7 @@ import androidx.multidex.MultiDexApplication;
 import com.onesignal.OSNotificationOpenedResult;
 import com.onesignal.OneSignal;
 
+import io.paperdb.Paper;
 import sync2app.com.syncapplive.additionalSettings.CrashReportDB.CrashHandler;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
@@ -28,6 +29,8 @@ public class MyApplication extends MultiDexApplication {
         super.onCreate();
 
         instance = this;
+
+        Paper.init(this);
 
         new Handler().postDelayed(new Runnable() {
             @Override

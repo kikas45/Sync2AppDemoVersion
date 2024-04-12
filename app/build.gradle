@@ -142,34 +142,13 @@ dependencies {
     implementation files('libs/mail.jar')
 
 
+
+    // save files on papper book Db
+    implementation 'io.github.pilgr:paperdb:2.7.2'
+
+
 }
 
-
-dependencies {
-
-
-    implementation 'com.google.firebase:firebase-crashlytics:18.3.2'
-    implementation 'com.google.firebase:firebase-database:20.1.0'
-    def work_version = "2.8.1"
-
-    // (Java only)
-    implementation "androidx.work:work-runtime:$work_version"
-
-    // Kotlin + coroutines
-    implementation "androidx.work:work-runtime-ktx:$work_version"
-
-    // optional - RxJava2 support
-    implementation "androidx.work:work-rxjava2:$work_version"
-
-    // optional - GCMNetworkManager support
-    implementation "androidx.work:work-gcm:$work_version"
-
-    // optional - Test helpers
-    androidTestImplementation "androidx.work:work-testing:$work_version"
-
-    // optional - Multiprocess support
-    implementation "androidx.work:work-multiprocess:$work_version"
-}
 
 kapt {
     correctErrorTypes = true

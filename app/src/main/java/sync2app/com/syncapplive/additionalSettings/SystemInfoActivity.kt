@@ -48,6 +48,13 @@ class SystemInfoActivity : AppCompatActivity() {
         )
     }
 
+    private val simpleSavedPassword: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.SIMPLE_SAVED_PASSWORD,
+            Context.MODE_PRIVATE
+        )
+    }
+
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -133,10 +140,20 @@ class SystemInfoActivity : AppCompatActivity() {
         binding.textErrorText.visibility = View.VISIBLE
 
 
-
         GlobalScope.launch(Dispatchers.IO) {
             try {
+
+                val get_tMaster = simpleSavedPassword.getString(Constants.get_editTextMaster, "").toString()
+                val get_UserID = simpleSavedPassword.getString(Constants.get_UserID, "").toString()
+                val get_LicenseKey = simpleSavedPassword.getString(Constants.get_LicenseKey, "").toString()
+
+
+                val baseUrl = "$get_tMaster/$get_UserID/$get_LicenseKey/Hdw/"
+
+                RetrofitInstance.initialize(baseUrl)
+
                 val response = RetrofitInstance.api.getAppConfig()
+
                 val editor = hardwareData.edit()
 
                 withContext(Dispatchers.Main) {

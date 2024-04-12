@@ -328,6 +328,9 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                             // use to control Start of the Sync Mechanisms
                             editorValueBio.putString(Constants.Manage_My_Sync_Start, "Manage_My_Sync_Start")
 
+                            editorValueBio.remove(Constants.SynC_Status)
+                            editorValueBio.remove(Constants.SAVED_CN_TIME)
+
                             editorValueBio.apply()
 
                             val user = User(CLO = get_UserID, DEMO = get_LicenseKey, EditUrl = "", EditUrlIndex = "")

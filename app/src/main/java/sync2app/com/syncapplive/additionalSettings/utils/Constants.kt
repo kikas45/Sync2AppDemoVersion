@@ -9,6 +9,11 @@ class Constants {
         const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST = 2
 
 
+        //for Api CSv Download
+
+        const val myCSvEndPath = "Start/start1.csv"
+
+
 
         // for modifying the Json URL
         const val get_UserID = "get_UserID"
@@ -25,14 +30,11 @@ class Constants {
 
 
 
+        // for getting Api Urls in the Json
+        const val BASE_URL_API = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021001/DOM/"
 
         // Hradwre Json
-        const val BASE_URL = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
-
-
-        // for getting Api Urls in the Json
-        const val BASE_URL_API = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/DOM/"
-
+      //  const val BASE_URL = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021000/Hdw/"
 
         // for check time stamp change in JSon Server
       //  const val BASE_URL_ON_CHANGE = "https://cp.cloudappserver.co.uk/app_base/public/CLO/DE_MO_2021001/PTime/"
@@ -67,6 +69,12 @@ class Constants {
         const val AppConfigFolder = "AppConfig"
         const val Syn2AppLive = "Syn2AppLive"
         const val Invalid_Config_Url = "Invalid Config Url"
+
+        // for sync Api
+        const val numberOfFiles = "numberOfFiles"
+        const val filesChange = "filesCounts"
+        const val textDownladByes = "textDownladByes"
+        const val progressBarPref = "progressBarPref"
 
 
         const val Error_during_zip_extraction = "Error during extraction"

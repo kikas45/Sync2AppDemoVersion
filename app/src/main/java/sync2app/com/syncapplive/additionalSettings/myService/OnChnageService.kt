@@ -117,14 +117,25 @@ class OnChnageService : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
+        val editor = myDownloadClass.edit()
+        editor.remove(Constants.SynC_Status)
+        editor.remove(Constants.SAVED_CN_TIME)
+        editor.remove(Constants.textDownladByes)
+        editor.remove(Constants.progressBarPref)
+        editor.remove(Constants.progressBarPref)
+        editor.remove(Constants.filesChange)
+        editor.remove(Constants.numberOfFiles)
+
+        editor.apply()
+        countdownTimerServerUpdater?.cancel()
+
+
 
         showToastMessage("Sync On Change Activated")
 
         val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
         val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
-        val editor = myDownloadClass.edit()
 
-        countdownTimerServerUpdater?.cancel()
 
         val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
         val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "").toString()

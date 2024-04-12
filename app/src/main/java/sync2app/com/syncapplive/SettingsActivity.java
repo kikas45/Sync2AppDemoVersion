@@ -491,7 +491,11 @@ public class SettingsActivity extends AppCompatActivity {
                 stopService(new Intent(SettingsActivity.this, SyncInterval.class));
                 stopService(new Intent(SettingsActivity.this, OnChnageService.class));
                 finish();
-                finishAffinity();
+               // finishAffinity();
+              //  finishAndRemoveTask();
+
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(1);
 
             }
         });

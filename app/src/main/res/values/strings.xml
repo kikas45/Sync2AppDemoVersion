@@ -44,7 +44,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="input_path_e_g_de_mo_2021000">Input path e.g DE_MO_2021000</string>
 
-<!--    Input Manual url path-->
+    <!--    Input Manual url path-->
     <string name="input_url_zip">Input url zip e.g https://example.com</string>
     <string name="input_index_url">Input url index e.g https://myApp/index.html</string>
 

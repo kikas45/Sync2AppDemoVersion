@@ -96,8 +96,6 @@ class DownlodPagger : AppCompatActivity() {
         wakeLock!!.acquire()
 
 
-
-
         manager = getApplicationContext()
             .getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
@@ -154,7 +152,8 @@ class DownlodPagger : AppCompatActivity() {
 
             if (threeFolderPath !=null &&baseUrl !=null){
                 textTitleFileName.text = fileName.toString()
-                textPathFolderName.text = "$getFolderClo/$getFolderSubpath/$Zip"
+              //  textPathFolderName.text = "$getFolderClo/$getFolderSubpath/$Zip"
+                textPathFolderName.text = "$getFolderClo/$getFolderSubpath"
             }
 
             textRetryBtn.setOnClickListener {
@@ -202,11 +201,11 @@ class DownlodPagger : AppCompatActivity() {
                         .toLong()
                 @SuppressLint("Range") val bytes_total =
                     c.getInt(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)).toLong()
-                val dl_progress =
-                    (bytes_downloaded.toDouble() / bytes_total.toDouble() * 100f).toInt()
+                val dl_progress = (bytes_downloaded.toDouble() / bytes_total.toDouble() * 100f).toInt()
+
                 binding.progressBarPref.setProgress(dl_progress)
-                binding.downloadBytes.setText(
-                    bytesIntoHumanReadable(
+
+                binding.downloadBytes.setText(bytesIntoHumanReadable(
                         bytes_downloaded.toString().toLong()
                     ) + "/" + bytesIntoHumanReadable(bytes_total.toString().toLong())
                 )

@@ -104,6 +104,18 @@ class SyncInterval : Service() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
+        val editor = myDownloadClass.edit()
+        editor.remove(Constants.SynC_Status)
+        editor.remove(Constants.SAVED_CN_TIME)
+        editor.remove(Constants.textDownladByes)
+        editor.remove(Constants.progressBarPref)
+        editor.remove(Constants.progressBarPref)
+        editor.remove(Constants.filesChange)
+        editor.remove(Constants.numberOfFiles)
+
+        editor.apply()
+        countdownTimer?.cancel()
+
 
         showToastMessage("Sync On Interval Activated")
 
@@ -668,46 +680,6 @@ class SyncInterval : Service() {
         }
 
     }
-
-    private fun second_cancel_download() {
-        try {
-
-            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
-
-            val getFolderClo = myDownloadClass.getString("getFolderClo", "")
-            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "")
-            val Zip = myDownloadClass.getString("Zip", "")
-            val fileName = myDownloadClass.getString("fileName", "")
-
-
-            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileName"
-
-            val directoryPath =
-                Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
-
-            val myFile = File(directoryPath, fileName.toString())
-            delete(myFile)
-
-
-            val query = DownloadManager.Query()
-            query.setFilterById(download_ref)
-            val c =
-                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
-                    query
-                )
-            if (c.moveToFirst()) {
-                manager!!.remove(download_ref)
-                val editor: SharedPreferences.Editor = myDownloadClass.edit()
-                editor.remove(Constants.downloadKey)
-                editor.apply()
-
-            }
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
-
-
-
 
 }
 

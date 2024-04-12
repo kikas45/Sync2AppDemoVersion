@@ -597,6 +597,7 @@ public class Splash extends AppCompatActivity {
                                         myactivity.putExtra("url", jsonUrl);
                                         startActivity(myactivity);
                                         finish();
+                                        Toast.makeText(context, "Webby", Toast.LENGTH_SHORT).show();
 
                                     }
 

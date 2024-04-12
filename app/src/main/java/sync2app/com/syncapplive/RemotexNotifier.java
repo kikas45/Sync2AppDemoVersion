@@ -19,6 +19,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -28,6 +30,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -38,6 +41,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -170,45 +176,65 @@ public class RemotexNotifier extends Service {
     }
 
     private void SendNotifX(String Title, String messageBody) {
-
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("lastIdPanel", Notif_ID).apply();
 
         Intent intent = new Intent(this, WebActivity.class);
-        if (Notif_button_action.startsWith("http")|Notif_button_action.startsWith("https")){
+        if (Notif_button_action.startsWith("http") | Notif_button_action.startsWith("https")) {
             intent.putExtra("url", Notif_button_action);
         }
-
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_IMMUTABLE);
 
-        String channelId = getString(R.string.default_notification_channel_id);
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        Glide.with(getApplicationContext())
+                .asBitmap()
+                .load(Notif_Img_url)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        sendNotificationWithLargeIcon(Title, messageBody, resource, pendingIntent);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+
+                    @Override
+                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                        super.onLoadFailed(errorDrawable);
+                        // Handle load failed event if needed
+                    }
+                });
+    }
+
+    private void sendNotificationWithLargeIcon(String title, String messageBody, Bitmap largeIcon, PendingIntent pendingIntent) {
         NotificationCompat.Builder notificationBuilder =
-                null;
-        notificationBuilder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
-                .setContentTitle(Title)
-                .setContentText(Html.fromHtml(messageBody))
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                .setContentIntent(pendingIntent);
+                new NotificationCompat.Builder(this, getString(R.string.default_notification_channel_id))
+                        .setSmallIcon(R.mipmap.ic_launcher_round)
+                        .setStyle(new NotificationCompat.BigPictureStyle().bigPicture(largeIcon))
+                        .setContentTitle(title)
+                        .setContentText(Html.fromHtml(messageBody))
+                        .setAutoCancel(true)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                        .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(channelId,
+            NotificationChannel channel = new NotificationChannel(getString(R.string.default_notification_channel_id),
                     "Channel human readable title",
                     NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
+        // Notify using the built notification
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
+
 }
 

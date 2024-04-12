@@ -50,6 +50,7 @@ import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.SettingsActivity
 import sync2app.com.syncapplive.additionalSettings.devicelock.MyDeviceAdminReceiver
+import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.SyncPage
 import sync2app.com.syncapplive.additionalSettings.scanutil.CustomShortcuts
 import sync2app.com.syncapplive.additionalSettings.scanutil.DefaultCustomShortCut
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
@@ -116,6 +117,13 @@ class AdditionalSettingsActivity : AppCompatActivity() {
 
 
         binding.apply {
+
+            textTitle.setOnClickListener {
+                val intent = Intent(applicationContext, TestScreenActivity::class.java)
+               // val intent = Intent(applicationContext, MyTestDownloadAPI::class.java)
+             //   val intent = Intent(applicationContext, SyncPage::class.java)
+                startActivity(intent)
+            }
 
 
             textSyncManager.setOnClickListener {

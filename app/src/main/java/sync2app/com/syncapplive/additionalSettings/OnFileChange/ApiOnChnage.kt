@@ -22,10 +22,6 @@ interface ApiOnChnage {
 
 
 interface ApiOnChnage {
-    @GET("timestamp.json")
-    suspend fun getAppConfig(): Response<ModelOnChnage>
-
-    // If you want to pass dynamic part in URL
     @GET("{dynamicPart}/timestamp.json")
     suspend fun getAppConfig(@Path("dynamicPart") dynamicPart: String): Response<ModelOnChnage>
 }

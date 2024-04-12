@@ -147,6 +147,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewFeature;
@@ -190,6 +191,8 @@ import java.util.Date;
 import java.util.Objects;
 
 import sync2app.com.syncapplive.QrPages.QRSanActivity;
+import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel;
+import sync2app.com.syncapplive.additionalSettings.myService.MyApiService;
 import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
@@ -414,6 +417,12 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     TextView textLocation;
     TextView textStatusProcess;
 
+
+    TextView textFileChange ;
+    TextView textDownladByes ;
+    TextView textFilecount ;
+    ProgressBar progressBarPref;
+
     private WebView mWebviewPop;
     private AdView mAdView;
     private SwipeRefreshLayout swipeView;
@@ -452,6 +461,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     private PowerManager.WakeLock wakeLock;
 
 
+    private FilesViewModel mUserViewModel;
+
+
+
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
@@ -476,6 +489,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             setTheme(R.style.DarkTheme);
         }
 
+        mUserViewModel = new ViewModelProvider(this).get(FilesViewModel.class);
 
         setContentView(R.layout.webactivity_layout);
 
@@ -614,6 +628,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         countDownTime = findViewById(R.id.countDownTime);
         textLocation = findViewById(R.id.textLocation);
         textStatusProcess = findViewById(R.id.textStatusProcess);
+
+
+        textFileChange = findViewById(R.id.textFileChange);
+        textDownladByes = findViewById(R.id.textDownladByes);
+        textFilecount = findViewById(R.id.textFilecount);
+        progressBarPref = findViewById(R.id.progressBarPref);
+
 
         imageWiFiOFF = findViewById(R.id.imageWiFiOFF);
         imageWiFiOn = findViewById(R.id.imageWiFiOn);
@@ -1274,7 +1295,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                 TextView notifTitle = binding.notifTitle;
                 TextView notifDesc = binding.notifDesc;
-                TextView closeThis = binding.closeNotif;
+                ImageView closeThis = binding.closeNotif;
                 TextView notifButton = binding.notifActionButton;
                 ImageView imageView = binding.notifImg;
 
@@ -1587,11 +1608,46 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 myHandler.removeCallbacks(runnableDn);
             }
 
-            TextView textDownladByes = findViewById(R.id.textDownladByes);
-            ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
-            MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
+            SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+            String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-            downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
+            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+
+                TextView textDownladByes = findViewById(R.id.textDownladByes);
+                ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
+                MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
+
+                downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
+
+
+            }else {
+
+                SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+
+                String dnBytes = my_DownloadClass.getString(Constants.textDownladByes, "");
+                String dnProgress = my_DownloadClass.getString(Constants.progressBarPref, "");
+
+                TextView textDownladByes = findViewById(R.id.textDownladByes);
+                ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
+
+                if (!dnBytes.isEmpty() && !dnBytes.equals("100%")) {
+                    textDownladByes.setText(dnBytes + "");
+                    textDownladByes.setVisibility(View.VISIBLE);
+                } else {
+                    textDownladByes.setVisibility(View.GONE);
+                }
+
+
+                if (!dnProgress.isEmpty() && !dnProgress.equals("100")) {
+                    int dnSieze = Integer.parseInt(dnProgress.toString());
+                    progressBarPref.setProgress(dnSieze);
+                    progressBarPref.setVisibility(View.VISIBLE);
+                } else {
+                    progressBarPref.setVisibility(View.GONE);
+                }
+
+            }
+
 
 
             if (myHandler != null) {
@@ -1611,10 +1667,24 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
         try {
+
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    updateSyncView();
+
+                    SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+                    String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+
+                    if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                        updateSyncViewZip();
+                    }else {
+                        updateSyncViewAPi();
+                    }
+
+
+
+
+
                 }
             }, 1000);
 
@@ -1651,7 +1721,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             isAppOpen = true;
 
             if (jsonUrl == null) {
-                Intent intent = new Intent(mContext, Splash.class);
+                Intent intent = new Intent(mContext, Splash.class); ///
                 startActivity(intent);
                 finish();
             }
@@ -1717,31 +1787,66 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
 
-            if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+            String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-                if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
-                    if (!ServiceUtils.foregroundServiceRunning(getApplicationContext())) {
-                        stopService(new Intent(getApplicationContext(), OnChnageService.class));
-                        startService(new Intent(getApplicationContext(), SyncInterval.class));
+            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
 
-                        // showToast(mContext, "Sync On Interval Activated");
+                if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+
+                    textFilecount.setVisibility(View.INVISIBLE);
+                    textFileChange.setVisibility(View.INVISIBLE);
+
+
+                    if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
+                        if (!ServiceUtils.foregroundServiceRunning(getApplicationContext())) {
+                            stopService(new Intent(getApplicationContext(), OnChnageService.class));
+                            startService(new Intent(getApplicationContext(), SyncInterval.class));
+
+                            /*textFilecount.setText("NF: 1");
+                            textFileChange.setText("CF: 1");*/
+
+                            // showToast(mContext, "Sync On Interval Activated");
+
+                        }
+
+
+                    } else {
+                        if (!ServiceUtils.foregroundServiceRunningOnChange(getApplicationContext())) {
+                            stopService(new Intent(getApplicationContext(), SyncInterval.class));
+                            startService(new Intent(getApplicationContext(), OnChnageService.class));
+
+                            // showToast(mContext, "Sync On Change Activated");
+
+                        }
+
 
                     }
-
-
-                } else {
-                    if (!ServiceUtils.foregroundServiceRunningOnChange(getApplicationContext())) {
-                        stopService(new Intent(getApplicationContext(), SyncInterval.class));
-                        startService(new Intent(getApplicationContext(), OnChnageService.class));
-
-                        // showToast(mContext, "Sync On Change Activated");
-
-                    }
-
 
                 }
 
+            }else {
+
+
+
+                if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+
+                    textFilecount.setVisibility(View.VISIBLE);
+                    textFileChange.setVisibility(View.VISIBLE);
+
+                    if (!ServiceUtils.foregroundServiceMyAPi(getApplicationContext())) {
+                        stopService(new Intent(getApplicationContext(), SyncInterval.class));
+                        stopService(new Intent(getApplicationContext(), OnChnageService.class));
+                        startService(new Intent(getApplicationContext(), MyApiService.class));
+
+                    }
+
+                }
+
+
+
             }
+
+
 
 
         } catch ( Exception e ) {
@@ -1753,7 +1858,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     }
 
     @SuppressLint("SetTextI18n")
-    private void updateSyncView() {
+    private void updateSyncViewZip() {
 
         runOnUiThread(new Runnable() {
             @Override
@@ -1772,11 +1877,12 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     String getFolderSubpath = my_DownloadClass.getString(Constants.getFolderSubpath, "");
                     String zip = my_DownloadClass.getString("Zip", "");
                     String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
+                    String Manage_My_Sync_Start = my_DownloadClass.getString(Constants.Manage_My_Sync_Start, "");
 
                     myDownloadStatus();
 
 
-                    Long get_SavedTime = my_DownloadClass.getLong(Constants.SAVED_CN_TIME, 0);
+                    long get_SavedTime = my_DownloadClass.getLong(Constants.SAVED_CN_TIME, 0);
 
                     if (get_SavedTime == 0) {
                         //
@@ -1788,14 +1894,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
 
-                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
                         textLocation.setText(finalFolderPath);
                     } else {
                         textLocation.setText("LN: --");
                     }
 
 
-                    if (!zip.isEmpty()) {
+                    if (!zip.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
                         if (zip.equals("App")) {
                             textSyncMode.setText("SM: Api");
@@ -1811,11 +1917,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     //  String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
 
-                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty()) {
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
                         long getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0);
 
-                        if (getTimeDefined != 0L) {
+                        if (getTimeDefined != 0L && Manage_My_Sync_Start.isEmpty()) {
                             textSynIntervals.setText("ST: " + getTimeDefined + " Mins");
                         } else {
                             textSynIntervals.setText("ST: --");
@@ -1843,6 +1949,143 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
     }
+
+
+    @SuppressLint("SetTextI18n")
+    private void updateSyncViewAPi() {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                try {
+
+                    // then do not use Api
+                    SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+
+
+                    //   TextView textStatusProcess = findViewById(R.id.textStatusProcess);
+                    String numberOfFiles = my_DownloadClass.getString(Constants.numberOfFiles, "");
+                    String filesChange = my_DownloadClass.getString(Constants.filesChange, "");
+                    String dnBytes = my_DownloadClass.getString(Constants.textDownladByes, "");
+                    String dnProgress = my_DownloadClass.getString(Constants.progressBarPref, "");
+
+                    String get_progress = my_DownloadClass.getString(Constants.SynC_Status, "");
+
+                    String getFolderClo = my_DownloadClass.getString(Constants.getFolderClo, "");
+                    String getFolderSubpath = my_DownloadClass.getString(Constants.getFolderSubpath, "");
+                    String zip = my_DownloadClass.getString("Zip", "");
+                    String Manage_My_Sync_Start = my_DownloadClass.getString(Constants.Manage_My_Sync_Start, "");
+
+
+
+
+                    myDownloadStatus();
+
+
+                    long get_SavedTime = my_DownloadClass.getLong(Constants.SAVED_CN_TIME, 0);
+
+                    if (get_SavedTime == 0) {
+                        //
+                    } else {
+                        restoreTimerState();
+
+                    }
+
+
+                    String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
+
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+                        textLocation.setText(finalFolderPath);
+                    } else {
+                        textLocation.setText("LN: --");
+                    }
+
+
+                    if (!zip.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+
+                        if (zip.equals("App")) {
+                            textSyncMode.setText("SM: Api");
+
+                        } else {
+                            textSyncMode.setText("SM: " + zip);
+                        }
+
+                    } else {
+                        textSyncMode.setText("SM: --");
+                    }
+
+
+                    //  String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
+
+                    if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+
+                        long getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0);
+
+                        if (getTimeDefined != 0L && Manage_My_Sync_Start.isEmpty()) {
+                            textSynIntervals.setText("ST: " + getTimeDefined + " Mins");
+                        } else {
+                            textSynIntervals.setText("ST: --");
+                        }
+
+                        if (isConnected()) {
+                            if (!get_progress.isEmpty()) {
+                                textStatusProcess.setText(get_progress + "");
+                            } else {
+                                textStatusProcess.setText("PR: Running");
+                            }
+                        } else {
+                            textStatusProcess.setText("No Internet");
+                        }
+
+
+                        if (!numberOfFiles.isEmpty()) {
+                            textFilecount.setText(numberOfFiles + "");
+                        } else {
+                            textFilecount.setText("NF:--");
+                        }
+
+                        if (!filesChange.isEmpty()) {
+                            textFileChange.setText(filesChange + "");
+                        } else {
+                            textFileChange.setText("CF:--");
+                        }
+
+                        if (!dnBytes.isEmpty() && !dnBytes.equals("100%")) {
+                            textDownladByes.setText(dnBytes + "");
+                            textDownladByes.setVisibility(View.VISIBLE);
+                        } else {
+                            textDownladByes.setVisibility(View.GONE);
+                        }
+
+                        ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
+
+                        if (!dnProgress.isEmpty() && !dnProgress.equals("100")) {
+                            int dnSieze = Integer.parseInt(dnProgress.toString());
+                            progressBarPref.setProgress(dnSieze);
+                            progressBarPref.setVisibility(View.VISIBLE);
+                        } else {
+                            progressBarPref.setVisibility(View.GONE);
+                        }
+
+
+
+                    }
+
+
+                } catch ( Exception e ) {
+                }
+
+
+
+            }
+        });
+
+
+    }
+
+
 
 
     @Override
@@ -3296,7 +3539,15 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        updateSyncView();
+                        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+                        String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+
+                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                            updateSyncViewZip();
+                        }else {
+                            updateSyncViewAPi();
+                        }
+
                     }
                 }, 1000);
 
@@ -3316,7 +3567,16 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        updateSyncView();
+
+                        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+                        String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+
+                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                            updateSyncViewZip();
+                        }else {
+                            updateSyncViewAPi();
+                        }
+
                     }
                 }, 1000);
 
@@ -3334,6 +3594,17 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             if (intent.getAction() != null && intent.getAction().equals(Constants.RECIVER_PROGRESS)) {
 
                 myDownloadStatus();
+
+                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+                String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+
+                if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                    updateSyncViewZip();
+                }else {
+                    updateSyncViewAPi();
+                }
+
+
             }
         }
     };

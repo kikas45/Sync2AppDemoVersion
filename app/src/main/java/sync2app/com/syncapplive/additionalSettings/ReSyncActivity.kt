@@ -19,6 +19,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
@@ -49,6 +50,9 @@ import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
+import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesApi
+import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel
+import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DnViewModel
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.SavedHistoryListAdapter
@@ -70,8 +74,12 @@ import sync2app.com.syncapplive.databinding.CustomSetUpTimerOptionLayoutBinding
 import sync2app.com.syncapplive.databinding.FinishWithConfigDownloadBinding
 import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding
 import sync2app.com.syncapplive.databinding.SampleProgressConfigLayoutBinding
+import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.Objects
 import java.util.zip.ZipInputStream
 
@@ -83,6 +91,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     private val mUserViewModel by viewModels<UserViewModel>()
 
     private val mApiViewModel by viewModels<ApiUrlViewModel>()
+
+    private val mFilesViewModel by viewModels<FilesViewModel>()
+    private val dnViewModel by viewModels<DnViewModel>()
 
 
     private val adapter by lazy {
@@ -193,6 +204,18 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
         MyApplication.incrementRunningActivities()
 
+
+        binding.textTitle.setOnClickListener {
+            val intent = Intent(applicationContext, WebbyTestActivity::class.java)
+            startActivity(intent)
+        }
+
+
+
+
+
+
+
         binding.apply {
 
             val getSavedCLOImPutFiled =
@@ -225,7 +248,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             initViewTooggle()
 
 
-
+            mFilesViewModel.deleteAllFiles()
+            dnViewModel.deleteAllFiles()
 
             textTestConnectionAPPer.setOnClickListener {
                 hideKeyBoard(binding.editTextInputSynUrlZip)
@@ -1334,12 +1358,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                         if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
                             stopService(Intent(applicationContext, OnChnageService::class.java))
-                            startService(
-                                Intent(
-                                    applicationContext,
-                                    SyncInterval::class.java
-                                )
-                            )
+                            startService(Intent(applicationContext, SyncInterval::class.java))
 
                             val editorM = myDownloadClass.edit()
                             editorM.remove(Constants.SynC_Status)
@@ -1646,7 +1665,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
     }
 
 
-    @SuppressLint("InflateParams", "SuspiciousIndentation")
+    @SuppressLint("InflateParams", "SuspiciousIndentation", "SetTextI18n")
     private fun definedTimeIntervals() {
         val bindingCm: CustomDefinedTimeIntervalsBinding =
             CustomDefinedTimeIntervalsBinding.inflate(
@@ -2361,7 +2380,9 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             } else {
 
                 val baseDomain = Constants.customDomainUrl
-                val baseUrl = "$baseDomain/$getFolderClo/$getFolderSubpath/App/index.html"
+                val myCSvEndPath = Constants.myCSvEndPath
+               // val baseUrl = "$baseDomain/$getFolderClo/$getFolderSubpath/App/index.html"
+                val baseUrl = "$baseDomain/$getFolderClo/$getFolderSubpath/$myCSvEndPath"
 
 
 
@@ -2532,8 +2553,10 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 } else {
-                    val get_Full_url =
-                        Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/App/index.html"
+                   // val get_Full_url = Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/App/index.html"
+
+                    val myCSvEndPath = Constants.myCSvEndPath
+                     val get_Full_url = "$Saved_Domains_Urls/$getFolderClo/$getFolderSubpath/$myCSvEndPath"
 
                     showToastMessageLong(get_Full_url)
 
@@ -2607,8 +2630,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 if (binding.imagSwtichEnableSyncFromAPI.isChecked) {
-                    val get_Full_url =
-                        Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                    val get_Full_url = "$Saved_Domains_Urls/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
                     showToastMessageLong(get_Full_url)
 
@@ -2651,8 +2673,11 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
                 } else {
-                    val get_Full_url =
-                        Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/App/index.html"
+                 //   val get_Full_url = Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/App/index.html"
+
+                    val myCSvEndPath = Constants.myCSvEndPath
+                    val get_Full_url = Saved_Domains_Urls + "/$getFolderClo/$getFolderSubpath/$myCSvEndPath"
+
 
                     showToastMessageLong(get_Full_url)
 
@@ -2775,15 +2800,30 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
 
 
-                download(
-                    baseUrl,
-                    getFolderClo,
-                    getFolderSubpath,
-                    Zip,
-                    fileName,
-                    Extracted,
-                    threeFolderPath
-                )
+                if (binding.imagSwtichEnableSyncFromAPI.isChecked){
+
+                    download(
+                        baseUrl,
+                        getFolderClo,
+                        getFolderSubpath,
+                        Zip,
+                        fileName,
+                        Extracted,
+                        threeFolderPath
+                    )
+                }else{
+
+                    callApiClassActivity(   baseUrl,
+                        getFolderClo,
+                        getFolderSubpath,
+                        Zip,
+                        fileName,
+                        Extracted,
+                        threeFolderPath)
+
+                }
+
+
 
                 /// similar but used on under second cancel downoad in danwload pager
                 val editor = myDownloadClass.edit()
@@ -2818,6 +2858,46 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
             }
         }
 
+
+    }
+
+    private fun callApiClassActivity(
+        url: String,
+        getFolderClo: String,
+        getFolderSubpath: String,
+        Zip: String,
+        fileNamy: String,
+        Extracted: String,
+        threeFolderPath: String,
+
+    ) {
+        val intent = Intent(applicationContext, DownloadTheApisActivity::class.java)
+        startActivity(intent)
+        finish()
+
+
+        val editior = myDownloadClass.edit()
+        editior.putString(Constants.getFolderClo, getFolderClo)
+        editior.putString(Constants.getFolderSubpath, getFolderSubpath)
+        editior.putString("Zip", Zip)
+        editior.putString("fileNamy", fileNamy)
+        editior.putString(Constants.Extracted, Extracted)
+
+        // used to control Sync Start from  set up page
+        editior.remove(Constants.Manage_My_Sync_Start)
+
+
+        val get_savedIntervals = myDownloadClass.getLong(Constants.getTimeDefined, 0)
+
+        if (get_savedIntervals != 0L) {
+            editior.putLong(Constants.getTimeDefined, get_savedIntervals)
+
+        } else {
+            editior.putLong(Constants.getTimeDefined, Constants.t_5min)
+
+        }
+
+        editior.apply()
 
     }
 
@@ -3408,6 +3488,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
         } catch (ignored: java.lang.Exception) {
         }
     }
+
+
 
 
 }

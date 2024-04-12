@@ -14,7 +14,7 @@
         android:id="@+id/constraintLayout5"
         style="@style/cardDesignAccountNumber"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|top"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
@@ -23,13 +23,14 @@
         android:padding="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/action_bar_root"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:background="@color/deep_blue"
             app:layout_constraintEnd_toEndOf="@+id/constraintLayout5"
             app:layout_constraintStart_toStartOf="@+id/constraintLayout5"
@@ -52,6 +53,19 @@
                 app:tint="@color/white" />
 
 
+            <ImageView
+                android:id="@+id/close_notif"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="-10dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_close_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/white" />
+
+
             <TextView
                 android:id="@+id/notif_title"
                 android:layout_width="0dp"
@@ -60,14 +74,13 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="10dp"
-                android:gravity="center|start"
-                android:maxLength="150"
+                android:gravity="center|start|top"
                 android:maxLines="2"
                 android:text="Notification Title Notification Title Notification Title Notification Title Notification Title Notification Title Notification TitleNotification Title sfsdgsgggg"
                 android:textColor="@color/white"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/close_notif"
                 app:layout_constraintStart_toEndOf="@+id/close_bs"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -80,16 +93,18 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         <ImageView
             android:id="@+id/notif_img"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
-            android:scaleType="fitXY"
+            android:scaleType="fitCenter"
             android:src="@drawable/img_logo_icon"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -100,11 +115,11 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollView"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_marginBottom="16dp"
             android:fitsSystemWindows="true"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/close_notif"
+            app:layout_constraintBottom_toTopOf="@+id/notifActionButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/notif_img">
@@ -121,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="16dp"
                     android:elegantTextHeight="true"
@@ -139,38 +154,12 @@
 
 
         <TextView
-            android:id="@+id/notif_action_button"
+            android:id="@+id/notifActionButton"
             style="@style/cardDesignBuyGift222"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:selectableItemBackground"
-            android:gravity="center"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:text="Launch"
-            android:textColor="@color/black"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="@+id/close_notif"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/close_notif"
-            app:layout_constraintTop_toTopOf="@+id/close_notif"
-            tools:visibility="visible" />
-
-
-        <TextView
-            android:id="@+id/close_notif"
-            style="@style/cardDesignBuyGift"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="sans-serif-medium"
@@ -180,10 +169,10 @@
             android:paddingTop="8dp"
             android:paddingRight="18dp"
             android:paddingBottom="8dp"
-            android:text="Close"
+            android:text="Launch"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/notif_action_button"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/nestedScrollView" />
 
