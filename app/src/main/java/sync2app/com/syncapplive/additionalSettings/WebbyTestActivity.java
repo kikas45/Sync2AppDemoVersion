@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import sync2app.com.syncapplive.R;
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel;
-import sync2app.com.syncapplive.additionalSettings.myService.MyApiService;
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -72,11 +72,11 @@ public class WebbyTestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                stopService(new Intent(getApplicationContext(), MyApiService.class));
+                stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
                 stopService(new Intent(getApplicationContext(), SyncInterval.class));
                 stopService(new Intent(getApplicationContext(), OnChnageService.class));
-                if (!ServiceUtils.foregroundServiceMyAPi(getApplicationContext())) {
-                    startService(new Intent(getApplicationContext(), MyApiService.class));
+                if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(getApplicationContext())) {
+                    startService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
 
                 }
 

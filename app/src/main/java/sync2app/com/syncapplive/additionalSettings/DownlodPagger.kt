@@ -32,8 +32,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.WebActivity
-import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync
+import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
+import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityDownlodPaggerBinding
@@ -397,6 +399,7 @@ class DownlodPagger : AppCompatActivity() {
 
         } catch (ignored: java.lang.Exception) {
         }
+
         if (myHandler != null) {
             myHandler.postDelayed(runnable, 500)
         }
@@ -601,20 +604,24 @@ class DownlodPagger : AppCompatActivity() {
         try {
             handler.postDelayed(Runnable {
 
+                    val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
 
-                val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+                    if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+                        stopService(Intent(applicationContext, OnChnageService::class.java))
+                        stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                        stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                        if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                            startService(Intent(applicationContext, SyncInterval::class.java))
+                        }
+                    } else {
+                        stopService(Intent(applicationContext, SyncInterval::class.java))
+                        stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                        stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                        if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                            startService(Intent(applicationContext, OnChnageService::class.java))
+                        }
+                    }
 
-                if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
-                    stopService(Intent(applicationContext, OnChnageService::class.java))
-                    if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
-                        startService(Intent(applicationContext, SyncInterval::class.java))
-                    }
-                } else {
-                    stopService(Intent(applicationContext, SyncInterval::class.java))
-                    if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
-                        startService(Intent(applicationContext, OnChnageService::class.java))
-                    }
-                }
 
 
 
@@ -636,22 +643,28 @@ class DownlodPagger : AppCompatActivity() {
         }catch (_:Exception){}
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private fun stratLauncOnline() {
         try {
 
-            val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+            val get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "").toString()
 
-            if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
-                stopService(Intent(applicationContext, OnChnageService::class.java))
-                if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
-                    startService(Intent(applicationContext, SyncInterval::class.java))
+                if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
+                    stopService(Intent(applicationContext, OnChnageService::class.java))
+                    stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                    if (!ServiceUtils.foregroundServiceRunning(applicationContext)) {
+                        startService(Intent(applicationContext, SyncInterval::class.java))
+                    }
+                } else {
+                    stopService(Intent(applicationContext, SyncInterval::class.java))
+                    stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                    if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
+                        startService(Intent(applicationContext, OnChnageService::class.java))
+                    }
                 }
-            } else {
-                stopService(Intent(applicationContext, SyncInterval::class.java))
-                if (!ServiceUtils.foregroundServiceRunningOnChange(applicationContext)) {
-                    startService(Intent(applicationContext, OnChnageService::class.java))
-                }
-            }
+
 
 
             val getFolderClo = sharedP.getString("getFolderClo", "")
@@ -795,7 +808,7 @@ class DownlodPagger : AppCompatActivity() {
             editior.putString("Zip", Zip)
             editior.putString("fileNamy", fileNamy)
             editior.putString("Extracted", Extracted)
-            editior.putString("baseUrl", url)
+            editior.putString(Constants.baseUrl, url)
 
             editior.remove(Constants.PASS_URL)
             editior.apply()

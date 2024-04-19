@@ -33,6 +33,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.additionalSettings.OnFileChange.Retro_On_Change
+import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import java.io.File
 import java.io.FileInputStream
@@ -46,6 +47,9 @@ class OnChnageService : Service() {
         Handler(Looper.getMainLooper())
     }
 
+    private val handler: Handler by lazy {
+        Handler(Looper.getMainLooper())
+    }
 
     var isDownloading = false
     var isRxtracting = false
@@ -90,6 +94,18 @@ class OnChnageService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+        val editorDN = myDownloadClass.edit()
+        editorDN.remove(Constants.SynC_Status)
+     //  editorDN.remove(Constants.SAVED_CN_TIME)
+        editorDN.remove(Constants.textDownladByes)
+        editorDN.remove(Constants.progressBarPref)
+        editorDN.remove(Constants.progressBarPref)
+        editorDN.remove(Constants.filesChange)
+        editorDN.remove(Constants.numberOfFiles)
+
+        editorDN.apply()
+
+
         manager = getApplicationContext().getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
         registerReceiver(
@@ -118,8 +134,9 @@ class OnChnageService : Service() {
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
         val editor = myDownloadClass.edit()
+        editor.putString(Constants.Zip, Constants.Zip)
         editor.remove(Constants.SynC_Status)
-        editor.remove(Constants.SAVED_CN_TIME)
+       // editor.remove(Constants.SAVED_CN_TIME)
         editor.remove(Constants.textDownladByes)
         editor.remove(Constants.progressBarPref)
         editor.remove(Constants.progressBarPref)
@@ -128,6 +145,11 @@ class OnChnageService : Service() {
 
         editor.apply()
         countdownTimerServerUpdater?.cancel()
+
+      //  second_cancel_download()
+
+
+
 
 
 
@@ -142,6 +164,7 @@ class OnChnageService : Service() {
         val fileName = myDownloadClass.getString("fileName", "").toString()
         val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
 
+        handler.postDelayed(Runnable {
 
         if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty()) {
             SyncIntervalDownload()
@@ -193,7 +216,7 @@ class OnChnageService : Service() {
             showToastMessage("Invalid Path Format")
         }
 
-
+        },500)
 
         return START_STICKY
     }
@@ -217,9 +240,9 @@ class OnChnageService : Service() {
         unregisterReceiver(downloadCompleteReceiver)
         unregisterReceiver(UpdateTimmerBroad_Reciver)
         myHandler.removeCallbacksAndMessages(null)
+        handler.removeCallbacksAndMessages(null)
 
-        //    second_cancel_download()
-
+      //  second_cancel_download()
 
     }
 
@@ -287,7 +310,90 @@ class OnChnageService : Service() {
     }
 
 
+
+
+
+    @SuppressLint("SuspiciousIndentation")
+    @OptIn(DelicateCoroutinesApi::class)
     private fun download(
+        url: String,
+        getFolderClo: String,
+        getFolderSubpath: String,
+        Zip: String,
+        fileNamy: String,
+        Extracted: String,
+    ) {
+
+
+        val DeleteFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileNamy"
+
+        val directoryPath =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive$DeleteFolderPath"
+        val file = File(directoryPath)
+        delete(file)
+
+
+
+
+        val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+
+
+        val get_imagSwtichEnableSyncFromAPI = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+
+        if (get_imagSwtichEnableSyncFromAPI.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+
+            // when enable Sync Zip is  toggle On from Syn manager Page
+            if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+
+                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+
+                GlobalScope.launch {
+                    val result = checkUrlExistence(baseUrl)
+                    if (result){
+                        manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+
+                        withContext(Dispatchers.Main){
+                         //   showToastMessage("partner url On Chnage (Zip)  $baseUrl")
+                        }
+
+                    }else{
+                        withContext(Dispatchers.Main){
+                            showToastMessage("Invalid url")
+                        }
+                    }
+                }
+
+
+            } else{
+
+                // No partner url
+
+                val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+                val baseUrl = "$get_tMaster$getFolderClo/$getFolderSubpath/Zip/App.zip"
+
+                GlobalScope.launch {
+                    val result = checkUrlExistence(baseUrl)
+                    if (result){
+                        manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+                        withContext(Dispatchers.Main) {
+                         //   showToastMessage("Master url Onchnage (Zip)  $baseUrl")
+                        }
+                    }else{
+                        withContext(Dispatchers.Main) {
+                            showToastMessage("Invalid url")
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+
+    }
+
+    private fun manageDownload(
         url: String,
         getFolderClo: String,
         getFolderSubpath: String,
@@ -317,7 +423,7 @@ class OnChnageService : Service() {
             editior.putString("Zip", Zip)
             editior.putString("fileNamy", fileNamy)
             editior.putString(Constants.Extracted, Extracted)
-            editior.putString("baseUrl", url)
+            editior.putString(Constants.baseUrl, url)
             editior.apply()
 
 
@@ -362,6 +468,10 @@ class OnChnageService : Service() {
 
 
     }
+
+
+
+
 
 
     fun delete(file: File): Boolean {
@@ -913,21 +1023,6 @@ class OnChnageService : Service() {
         try {
 
             val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
-
-            val getFolderClo = myDownloadClass.getString("getFolderClo", "")
-            val getFolderSubpath = myDownloadClass.getString("getFolderSubpath", "")
-            val Zip = myDownloadClass.getString("Zip", "")
-            val fileName = myDownloadClass.getString("fileName", "")
-
-
-            val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip/$fileName"
-
-            val directoryPath =
-                Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/" + finalFolderPath
-
-            val myFile = File(directoryPath, fileName.toString())
-            delete(myFile)
-
 
             if (download_ref != -15L) {
                 val query = DownloadManager.Query()

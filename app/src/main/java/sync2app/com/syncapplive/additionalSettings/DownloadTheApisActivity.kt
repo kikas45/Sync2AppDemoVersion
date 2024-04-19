@@ -2,7 +2,6 @@ package sync2app.com.syncapplive.additionalSettings
 
 import android.annotation.SuppressLint
 import android.app.Dialog
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,7 +9,7 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
@@ -22,12 +21,20 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesApi
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel
@@ -37,7 +44,8 @@ import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DownloadHe
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.SavedDownloads
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.ZipDownloader
 import sync2app.com.syncapplive.additionalSettings.myService.CSVDownloader
-import sync2app.com.syncapplive.additionalSettings.myService.MyApiService
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync
+import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
@@ -45,17 +53,16 @@ import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityDownloadTheApisBinding
 import sync2app.com.syncapplive.databinding.LaucnOnlineDonloadPaggerBinding
 import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding
-import java.io.BufferedReader
 import java.io.File
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import java.io.FileOutputStream
+import java.io.IOException
 
 class DownloadTheApisActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDownloadTheApisBinding
     private var powerManager: PowerManager? = null
     private var wakeLock: PowerManager.WakeLock? = null
 
+    private val okClient = OkHttpClient()
 
     private var currentDownloadIndex = 0
 
@@ -102,6 +109,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
         binding = ActivityDownloadTheApisBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        MyApplication.incrementRunningActivities()
 
         powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock =
@@ -111,50 +119,54 @@ class DownloadTheApisActivity : AppCompatActivity() {
         binding.closeBs.setOnClickListener {
             val intent = Intent(applicationContext, ReSyncActivity::class.java)
             startActivity(intent)
-            finish()
+            finishAffinity()
         }
+
 
         binding.textLaunchApplication.setOnClickListener {
-
             showPopLauchOnline()
         }
+
+
 
 
         binding.textRetryBtn.setOnClickListener {
             dnViewModel.deleteAllFiles()
             mUserViewModel.deleteAllFiles()
-            val intent = Intent(applicationContext, DownloadTheApisActivity::class.java)
-            startActivity(intent)
-            finish()
+
+            handler.postDelayed(Runnable {
+                val intent = Intent(applicationContext, DownloadTheApisActivity::class.java)
+                startActivity(intent)
+                finishAffinity()
+
+            },1000)
 
         }
 
         binding.textCancelBtn.setOnClickListener {
             dnViewModel.deleteAllFiles()
             mUserViewModel.deleteAllFiles()
-            finish()
-            val intent = Intent(applicationContext, ReSyncActivity::class.java)
-            startActivity(intent)
 
+            handler.postDelayed(Runnable {
+                val intent = Intent(applicationContext, ReSyncActivity::class.java)
+                startActivity(intent)
+                finishAffinity()
+            },1000)
         }
 
 
 
-
-
-
         binding.apply {
-
-            myHandler.postDelayed(Runnable {
+            handler.postDelayed(Runnable {
                 recyclerApiDownloads.adapter = adapter
                 recyclerApiDownloads.layoutManager = LinearLayoutManager(applicationContext)
-
                 dnViewModel.readAllData.observe(this@DownloadTheApisActivity, Observer { filesApi ->
                     adapter.setDataApi(filesApi)
 
                 })
             }, 500)
         }
+
 
 
         val connectivityManager22: ConnectivityManager =
@@ -165,7 +177,10 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
             dnViewModel.deleteAllFiles()
             mUserViewModel.deleteAllFiles()
-            getDownloadMyCSV()
+
+            handler.postDelayed(Runnable {
+                getDownloadMyCSV()
+            }, 1000)
 
         } else {
             Toast.makeText(applicationContext, "No Internet Connection", Toast.LENGTH_SHORT).show()
@@ -174,24 +189,39 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
     }
 
-    override fun onBackPressed() {
-        val intent = Intent(applicationContext, ReSyncActivity::class.java)
-        startActivity(intent)
-        finish()
 
-        super.onBackPressed()
+    private val runnable: Runnable = object : Runnable {
+        @SuppressLint("SetTextI18n")
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        override fun run() {
+            dnViewModel.deleteAllFiles()
+            mUserViewModel.readAllData.observe(this@DownloadTheApisActivity, Observer { files ->
+                if (files.isNotEmpty()) {
+                    downloadSequentially(files)
+                    binding.textRemainging.text = files.size.toString() + " Files Downloaded"
+                    totalFiles = files.size.toInt()
+                    binding.textCsvStatus.visibility = View.GONE
+                    binding.textPercentageCompleted.visibility = View.VISIBLE
+                }else{
+                   // showToastMessage("No files found")
+                }
+            })
+        }
+
     }
 
+
+    @SuppressLint("SetTextI18n")
     private fun downloadSequentially(files: List<FilesApi>) {
 
         if (currentDownloadIndex < files.size) {
             val file = files[currentDownloadIndex]
+            handler.postDelayed(Runnable {
+                getZipDownloads(file.SN, file.FolderName, file.FileName)
+            }, 500)
 
-            getZipDownloads(file.SN, file.FolderName, file.FileName)
-
-        } else {
-
-
+        }else{
+          //  showToastMessage("All files Downloaded")
         }
     }
 
@@ -200,42 +230,58 @@ class DownloadTheApisActivity : AppCompatActivity() {
     private fun getDownloadMyCSV() {
 
         lifecycleScope.launch(Dispatchers.IO) {
+            val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
             val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
             val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString()
             val get_ModifiedUrl = sharedP.getString(Constants.get_ModifiedUrl, "").toString()
+            val get_getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
 
-            //  val csvData = downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath)
-            //  saveURLPairs(csvData)
 
-            val lastEnd = "Start/start1.csv";
-            val csvDownloader = CSVDownloader()
-            val csvData =
-                csvDownloader.downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath, lastEnd)
-            saveURLPairs(csvData)
+            if (imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
+                showToastMessage("Functionality/Logic in Progress!")
+                  binding.textCsvStatus.text ="Functionality/Logic in Progress!"
 
-            runOnUiThread {
+                val lastEnd = "Start/start1.csv";
+                val csvDownloader = CSVDownloader()
+                val csvData = csvDownloader.downloadCSV(get_getSavedEditTextInputSynUrlZip, "", "", "")
+                saveURLPairs(csvData)
+                showToastMessage(csvData)
+                myHandler.postDelayed(runnable, 500)
 
-                mUserViewModel.readAllData.observe(this@DownloadTheApisActivity, Observer { files ->
-                    if (files.isNotEmpty()) {
-                        downloadSequentially(files)
-                        binding.textRemainging.text = files.size.toString() + " Files Downloaded"
 
-                        totalFiles = files.size.toInt()
+            }else{
 
-                    } else {
-                        // showToastMessage("No files found to download")
-                    }
-                })
+                showToastMessage("API Content Connection Successful!")
+                  binding.textCsvStatus.text ="API Content Connection Successful!"
+
+                val lastEnd = "Start/start1.csv";
+                val csvDownloader = CSVDownloader()
+                val csvData = csvDownloader.downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath, lastEnd)
+                saveURLPairs(csvData)
+                myHandler.postDelayed(runnable, 500)
 
             }
+
+
+
         }
 
 
     }
 
+    private fun showToastMessage(s: String) {
+        runOnUiThread {
+            Toast.makeText(applicationContext, "$s", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     private fun saveURLPairs(csvData: String) {
+
+        mUserViewModel.deleteAllFiles()
+        dnViewModel.deleteAllFiles()
+
         val pairs = parseCSV(csvData)
 
         // Add files to Room Database
@@ -264,6 +310,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
                     Status = status
                 )
                 mUserViewModel.addFiles(files)
+
             }
         }
     }
@@ -282,8 +329,11 @@ class DownloadTheApisActivity : AppCompatActivity() {
     }
 
 
-    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
 
+
+
+/*
+    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
         Thread {
 
             val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
@@ -303,99 +353,328 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 dir.mkdirs()
             }
             val getFile_name = fileName.toString()
-            val getFileUrl =
-                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-            val fileDestination = File(dir.absolutePath, getFile_name)
+            val getFileUrl = "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
+            val fileDestination = File(dir.absolutePath.toString(), getFile_name)
 
 
-            //start download
-            ZipDownloader(object : DownloadHelper {
-                @SuppressLint("SetTextI18n")
-                override fun afterExecutionIsComplete() {
+                //start download
+                ZipDownloader(object : DownloadHelper {
+                    @SuppressLint("SetTextI18n")
+                    override fun afterExecutionIsComplete() {
 
-                    val dnApi =
-                        DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "")
-                    dnViewModel.addFiles(dnApi)
+                        try {
+                            Thread {
+                                val dnApi = DnApi(
+                                    SN = sN,
+                                    FolderName = folderName,
+                                    FileName = fileName,
+                                    Status = "true"
+                                )
+                                dnViewModel.addFiles(dnApi)
 
-
-                    currentDownloadIndex++
-                    downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-                    // set total download percentage
-                    val totalPercentage = ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-                    binding.textPercentageCompleted.text = "$totalPercentage% Complete"
-                    // binding.progressBarPref.progress = 100
-
-                    if (sN == totalFiles.toString()) {
-                        binding.progressBarPref.progress = 100
-                        binding.textDownloadSieze.text = "Completed"
-                        mUserViewModel.deleteAllFiles()
-                        showCustomProgressDialog("Please wait!")
-
-                        myHandler.postDelayed(Runnable {
-                            stratMyACtivity()
-                        }, 1000)
-
-                    }
+                            }.start()
 
 
-                }
 
-                override fun whenExecutionStarts() {
+                            runOnUiThread {
 
-                }
+                                currentDownloadIndex++
+                                downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
 
-                @SuppressLint("SetTextI18n")
-                override fun whileInProgress(i: Int) {
-                    //set individual progress
-                    binding.textFileCounts.text = "$sN / "
+                                // set total download percentage
+                                val totalPercentage =
+                                    ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
+                                binding.textPercentageCompleted.text = "$totalPercentage% Complete"
+                                // binding.progressBarPref.progress = 100
 
-                    binding.textRemainging.visibility = View.VISIBLE
+                                if (sN == totalFiles.toString()) {
+                                    binding.progressBarPref.progress = 100
+                                    binding.textDownloadSieze.text = "Completed"
+                                    mUserViewModel.deleteAllFiles()
+                                    showCustomProgressDialog("Please wait!")
 
-                    runOnUiThread {
-                        binding.progressBarPref.progress = i
+                                    myHandler.postDelayed(Runnable {
+                                        stratMyACtivity()
+                                    }, 1000)
 
-                        val progressPercentage = ((i.toDouble() / i.toFloat()) * 100).toInt()
+                                }
 
-                        if (i < 0) {
-                            binding.textDownloadSieze.text = "$fileName : $progressPercentage%"
-                        } else {
-                            binding.textDownloadSieze.text = "$fileName : $i%"
+                            }
+                        } catch (e: Exception) {
 
                         }
 
+                    }
+
+                    override fun whenExecutionStarts() {
 
                     }
-                }
-            }).execute(getFileUrl, fileDestination.absolutePath)
+
+                    @SuppressLint("SetTextI18n")
+                    override fun whileInProgress(i: Int) {
+                        try {
+                            runOnUiThread {
+                                //set individual progress
+                                binding.textFileCounts.text = "$sN / "
+
+                                binding.textRemainging.visibility = View.VISIBLE
+
+                                binding.progressBarPref.progress = i
+
+                                val progressPercentage = ((i.toDouble() / i.toFloat()) * 100).toInt()
+                                if (i < 0) {
+                                        binding.textDownloadSieze.text =
+                                            "$fileName : $progressPercentage%"
+                                    } else {
+                                        binding.textDownloadSieze.text = "$fileName : $i%"
+
+                                    }
+
+                                }
+
+
+                        } catch (_: Exception) {
+
+                            val dnApi = DnApi(
+                                SN = sN,
+                                FolderName = folderName,
+                                FileName = fileName,
+                                Status = "false"
+                            )
+                            dnViewModel.addFiles(dnApi)
+                        }
+                    }
+                }).execute(getFileUrl, fileDestination.absolutePath)
+
+
         }.start()
     }
-
-    override fun onStop() {
-        super.onStop()
+*/
 
 
-        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
+            Thread {
+
+            val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
+                val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString()
+                val get_ModifiedUrl = sharedP.getString(Constants.get_ModifiedUrl, "").toString()
 
 
-        if (wakeLock != null && wakeLock!!.isHeld) {
-            wakeLock!!.release()
+                val Syn2AppLive = Constants.Syn2AppLive
+                val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
+
+                // Adjusting the file path to save the downloaded file
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    saveMyFileToStorage
+                )
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
+                val getFile_name = fileName.toString()
+                val getFileUrl = "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
+                val fileDestination = File(dir.absolutePath, getFile_name)
+
+
+
+                    val request: Request = Request.Builder()
+                        .url(getFileUrl)
+                        .build()
+                    try {
+                        okClient.newCall(request).execute().use { response ->
+                            if (response.isSuccessful) {
+                                //get response body
+                                val responseBody = response.body
+                                val contentLength = responseBody!!.contentLength()
+
+                                //get source and set destination
+                                val source = responseBody.source()
+                                val outputStream =
+                                    FileOutputStream(fileDestination.absolutePath)
+
+                                //set file name
+                                //  activity.setIndividualFileName(theFile.getFile_name());
+
+                                //run pull algorithm
+                                val buffer = ByteArray(4096)
+                                var totalBytesRead: Long = 0
+                                var bytesRead: Int
+                                while (source.read(buffer).also { bytesRead = it } != -1) {
+                                    outputStream.write(buffer, 0, bytesRead)
+                                    totalBytesRead += bytesRead.toLong()
+
+                                    runOnUiThread {
+                                        try {
+
+                                          ///  binding.textFileCounts.text = "$sN / "
+
+                                            binding.textRemainging.visibility = View.VISIBLE
+
+                                            val i = (totalBytesRead * 100 / contentLength).toInt()
+
+                                            binding.progressBarPref.progress = i
+
+                                            binding.textDownloadSieze.text = "$fileName : $i%"
+
+
+
+                                        }catch (_:Exception){}
+                                    }
+                                }
+
+
+                                //close IO stream
+                                outputStream.flush()
+                                outputStream.close()
+
+
+                                runOnUiThread {
+                                    try {
+
+                                        // update the UI
+
+                                        binding.textFileCounts.text = "$sN / "
+
+                                        Thread{
+                                            val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "true")
+                                            dnViewModel.addFiles(dnApi)
+
+                                        }.start()
+
+                                     //   adapter.notifyDataSetChanged()
+
+                                            // set total download percentage
+                                            val totalPercentage =
+                                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
+                                            binding.textPercentageCompleted.text = "$totalPercentage% Complete"
+
+
+
+                                        if (sN == totalFiles.toString()) {
+                                            binding.progressBarPref.progress = 100
+                                            binding.textDownloadSieze.text = "Completed"
+                                            mUserViewModel.deleteAllFiles()
+                                            showCustomProgressDialog("Please wait!")
+
+                                            myHandler.postDelayed(Runnable {
+                                                stratMyACtivity()
+                                            }, 1000)
+
+                                        }
+
+
+
+                                        /// call the next download
+                                        currentDownloadIndex++
+                                        downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
+
+
+
+                                    } catch (e: Exception) {
+
+                                    }
+                                }
+
+
+                            }else{
+
+                                // bad url or failed download
+                                runOnUiThread {
+                                    Thread{
+                                        val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "false")
+                                        dnViewModel.addFiles(dnApi)
+
+                                    }.start()
+
+                                }
+
+                            }
+                        }
+                    } catch (e: IOException) {
+                        // Handle exception in download
+
+                         Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
+
+                        // bad url or failed download
+                        runOnUiThread {
+                            Thread{
+                                val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "false")
+                                dnViewModel.addFiles(dnApi)
+
+                            }.start()
+
+                            if (sN == totalFiles.toString()) {
+                                binding.progressBarPref.progress = 100
+                                binding.textDownloadSieze.text = "Completed"
+                                mUserViewModel.deleteAllFiles()
+                                showCustomProgressDialog("Please wait!")
+
+                                myHandler.postDelayed(Runnable {
+                                    stratMyACtivity()
+                                }, 1000)
+
+                            }
+
+                            showToastMessage(e.message.toString())
+                        }
+
+                    }
+
+
+            }.start()
         }
-    }
+
+
+
 
     override fun onDestroy() {
         super.onDestroy()
-        if (wakeLock != null && wakeLock!!.isHeld) {
-            wakeLock!!.release()
-        }
+        try {
 
+            MyApplication.decrementRunningActivities()
+
+            if (wakeLock != null && wakeLock!!.isHeld) {
+                wakeLock!!.release()
+            }
+
+        } catch (ignored: java.lang.Exception) {
+        }
     }
+
+
+    override fun onBackPressed() {
+        val intent = Intent(applicationContext, ReSyncActivity::class.java)
+        startActivity(intent)
+        finish()
+
+        super.onBackPressed()
+    }
+
 
     @SuppressLint("WakelockTimeout")
     override fun onResume() {
         super.onResume()
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        try {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (ignored: java.lang.Exception) {
+        }
+
     }
+
+    override fun onStop() {
+        super.onStop()
+        try {
+
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            if (wakeLock != null && wakeLock!!.isHeld) {
+                wakeLock!!.release()
+            }
+
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
+
 
     private fun stratMyACtivity() {
         try {
@@ -410,15 +689,28 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 intent.putExtra("getUnzipFileFrom", getUnzipFileFrom)
 
                 startActivity(intent)
-                finish()
+                finishAffinity()
 
 
+                val get_intervals =
+                    sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
 
-                stopService(Intent(applicationContext, MyApiService::class.java))
-                stopService(Intent(applicationContext, SyncInterval::class.java))
-                stopService(Intent(applicationContext, OnChnageService::class.java))
-                if (!ServiceUtils.foregroundServiceMyAPi(applicationContext)) {
-                    startService(Intent(applicationContext, MyApiService::class.java))
+                if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+                    stopService(Intent(applicationContext, OnChnageService::class.java))
+                    stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, SyncInterval::class.java))
+                    if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(applicationContext)) {
+                        startService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                    }
+                } else {
+                    stopService(Intent(applicationContext, SyncInterval::class.java))
+                    stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                    stopService(Intent(applicationContext, OnChnageService::class.java))
+                    if (!ServiceUtils.foregroundServiceMyAPiSyncOnChange(applicationContext)) {
+                        startService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                    }
                 }
 
 
@@ -467,8 +759,51 @@ class DownloadTheApisActivity : AppCompatActivity() {
     }
 
 
+    private fun showCustomProgressDialog(message: String) {
+        try {
+            val customProgressDialog = Dialog(this)
+            val binding = ProgressDialogLayoutBinding.inflate(LayoutInflater.from(this))
+            customProgressDialog.setContentView(binding.root)
+            customProgressDialog.setCancelable(true)
+            customProgressDialog.setCanceledOnTouchOutside(false)
+            customProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            binding.textLoading.text = "$message"
+
+            binding.imgCloseDialog.visibility = View.GONE
+
+            customProgressDialog.show()
+        } catch (_: Exception) {
+        }
+    }
+
+
     private fun stratLauncOnline() {
         try {
+
+            dnViewModel.deleteAllFiles()
+            mUserViewModel.deleteAllFiles()
+
+
+            val get_intervals =
+                sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "")
+
+            if (get_intervals != null && get_intervals == Constants.imagSwtichEnableSyncOnFilecahnge) {
+                stopService(Intent(applicationContext, OnChnageService::class.java))
+                stopService(Intent(applicationContext, SyncInterval::class.java))
+                stopService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(applicationContext)) {
+                    startService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                }
+            } else {
+                stopService(Intent(applicationContext, SyncInterval::class.java))
+                stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+                stopService(Intent(applicationContext, OnChnageService::class.java))
+                if (!ServiceUtils.foregroundServiceMyAPiSyncOnChange(applicationContext)) {
+                    //  startService(Intent(applicationContext, OnChangeApiServiceSync::class.java))
+                }
+            }
+
 
             val getFolderClo = sharedP.getString("getFolderClo", "")
             val getFolderSubpath = sharedP.getString("getFolderSubpath", "")
@@ -490,25 +825,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
 
-        } catch (_: Exception) {
-        }
-    }
 
-
-    private fun showCustomProgressDialog(message: String) {
-        try {
-            val customProgressDialog = Dialog(this)
-            val binding = ProgressDialogLayoutBinding.inflate(LayoutInflater.from(this))
-            customProgressDialog.setContentView(binding.root)
-            customProgressDialog.setCancelable(true)
-            customProgressDialog.setCanceledOnTouchOutside(false)
-            customProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-            binding.textLoading.text = "$message"
-
-            binding.imgCloseDialog.visibility = View.GONE
-
-            customProgressDialog.show()
         } catch (_: Exception) {
         }
     }

@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,6 +45,8 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+
+import java.io.File;
 
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -158,6 +161,11 @@ public class WelcomeSlider extends AppCompatActivity {
                 if (current < layouts.length) {
                     // move to next screen
                     viewPager.setCurrentItem(current);
+
+                    String directoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/Syn2AppLive/";
+                    File file = new File(directoryPath);
+                    delete(file);
+
                 } else {
                     launchHomeScreen();
                 }
@@ -441,4 +449,23 @@ public class WelcomeSlider extends AppCompatActivity {
 
         }
     }
+
+    public boolean delete(File file) {
+        if (file.isFile()) {
+            return file.delete();
+        } else if (file.isDirectory()) {
+            File[] subFiles = file.listFiles();
+            if (subFiles != null) {
+                for (File subFile : subFiles) {
+                    if (!delete(subFile)) {
+                        return false;
+                    }
+                }
+            }
+            return file.delete();
+        }
+        return false;
+    }
+
+
 }

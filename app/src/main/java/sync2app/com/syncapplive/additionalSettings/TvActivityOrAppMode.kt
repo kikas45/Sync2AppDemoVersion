@@ -133,7 +133,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
         // SIMPLE PASSWORD
 
-
         val CheckForPassword = simpleSavedPassword.getString(Constants.onCreatePasswordSaved, "")
 
         if (CheckForPassword!!.isEmpty()) {
@@ -141,9 +140,13 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             editor.putString(Constants.onCreatePasswordSaved, "onCreatePasswordSaved")
             editor.putString(Constants.simpleSavedPassword, "00000")
             editor.apply()
+
+            val directoryPath = Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
+            val file = File(directoryPath)
+            delete(file)
+
         }
 
-        // SIMPLE PASSWORD
 
 
         val sharedBiometric: SharedPreferences =
@@ -399,11 +402,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
             if (navigateAppMolde == true) {
 
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
-
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
@@ -417,11 +415,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
             if (navigateTVMode == true) {
-
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
 
                 //  startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
@@ -525,6 +518,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
             showToastMessage("Permission Denied!")
         }
         builder.show()
+
     }
 
     private fun openAppSettings() {
@@ -553,6 +547,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         val first_time_app_start = sharedBiometric.getString(Constants.FIRST_TIME_APP_START, "")
 
         if (first_time_app_start.equals(Constants.FIRST_TIME_APP_START)) {
+
             startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
             finish()
         }
@@ -578,11 +573,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
             if (navigateAppMolde == true && isReady == true) {
 
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
-
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
@@ -596,11 +586,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
             if (navigateTVMode == true && isReady == true) {
-
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
 
                 //  startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
@@ -627,10 +612,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
             if (navigateAppMolde == true ) {
 
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
 
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
@@ -645,11 +626,6 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
             if (navigateTVMode == true ) {
-
-                val directoryPath =
-                    Environment.getExternalStorageDirectory().absolutePath + "/Download/Syn2AppLive/"
-                val file = File(directoryPath)
-                delete(file)
 
                 //  startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))

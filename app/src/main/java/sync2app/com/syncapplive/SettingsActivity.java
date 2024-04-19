@@ -2,9 +2,11 @@ package sync2app.com.syncapplive;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
@@ -48,6 +50,8 @@ import sync2app.com.syncapplive.additionalSettings.MyTestDownloadAPI;
 import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
 import sync2app.com.syncapplive.additionalSettings.TvActivityOrAppMode;
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
+import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -490,9 +494,13 @@ public class SettingsActivity extends AppCompatActivity {
 
                 stopService(new Intent(SettingsActivity.this, SyncInterval.class));
                 stopService(new Intent(SettingsActivity.this, OnChnageService.class));
+                stopService(new Intent(SettingsActivity.this, OnChangeApiServiceSync.class));
+                stopService(new Intent(SettingsActivity.this, IntervalApiServiceSync.class));
                 finish();
                // finishAffinity();
               //  finishAndRemoveTask();
+
+                second_cancel_download();
 
                 android.os.Process.killProcess(android.os.Process.myPid());
                 System.exit(1);
@@ -534,6 +542,8 @@ public class SettingsActivity extends AppCompatActivity {
 
                 stopService(new Intent(SettingsActivity.this, SyncInterval.class));
                 stopService(new Intent(SettingsActivity.this, OnChnageService.class));
+                stopService(new Intent(SettingsActivity.this, OnChangeApiServiceSync.class));
+                stopService(new Intent(SettingsActivity.this, IntervalApiServiceSync.class));
 
                 Handler handler1 = new Handler(Looper.getMainLooper());
 
@@ -544,9 +554,7 @@ public class SettingsActivity extends AppCompatActivity {
                         Intent myactivity = new Intent(SettingsActivity.this, TvActivityOrAppMode.class);
                         startActivity(myactivity);
                         finish();
-
-
-                        finish();
+                        second_cancel_download();
 
                     }
                 },200 );
@@ -813,6 +821,31 @@ public class SettingsActivity extends AppCompatActivity {
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+
+
+
+    private void second_cancel_download() {
+        try {
+            SharedPreferences myDownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE);
+            long download_ref = myDownloadClass.getLong(Constants.downloadKey, -15);
+
+
+            if (download_ref != -15) {
+                DownloadManager.Query query = new DownloadManager.Query();
+                query.setFilterById(download_ref);
+                Cursor c = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).query(query);
+                if (c.moveToFirst()) {
+                    DownloadManager manager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                    manager.remove(download_ref);
+                    SharedPreferences.Editor editor = myDownloadClass.edit();
+                    editor.remove(Constants.downloadKey);
+                    editor.apply();
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
 
 
     @SuppressLint("MissingInflatedId")

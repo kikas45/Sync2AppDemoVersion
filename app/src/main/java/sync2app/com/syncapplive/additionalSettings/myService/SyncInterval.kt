@@ -31,6 +31,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sync2app.com.syncapplive.R
+import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import java.io.File
 import java.io.FileInputStream
@@ -82,6 +83,20 @@ class SyncInterval : Service() {
     override fun onCreate() {
         super.onCreate()
 
+
+        val editorDN = myDownloadClass.edit()
+        editorDN.remove(Constants.SynC_Status)
+     //   editorDN.remove(Constants.SAVED_CN_TIME)
+        editorDN.remove(Constants.textDownladByes)
+        editorDN.remove(Constants.progressBarPref)
+        editorDN.remove(Constants.progressBarPref)
+        editorDN.remove(Constants.filesChange)
+        editorDN.remove(Constants.numberOfFiles)
+
+        editorDN.apply()
+
+
+
         manager = getApplicationContext().getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
         registerReceiver(downloadCompleteReceiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
@@ -106,8 +121,8 @@ class SyncInterval : Service() {
 
         val editor = myDownloadClass.edit()
         editor.remove(Constants.SynC_Status)
-        editor.remove(Constants.SAVED_CN_TIME)
         editor.remove(Constants.textDownladByes)
+      //  editor.remove(Constants.SAVED_CN_TIME)
         editor.remove(Constants.progressBarPref)
         editor.remove(Constants.progressBarPref)
         editor.remove(Constants.filesChange)
@@ -115,7 +130,7 @@ class SyncInterval : Service() {
 
         editor.apply()
         countdownTimer?.cancel()
-
+      //  second_cancel_download();
 
         showToastMessage("Sync On Interval Activated")
 
@@ -141,7 +156,7 @@ class SyncInterval : Service() {
             }
 
 
-        }, 200)
+        }, 500)
 
 
 
@@ -167,7 +182,7 @@ class SyncInterval : Service() {
         myHandler.removeCallbacksAndMessages(null)
 
         // can cell the download
-  //      second_cancel_download();
+     // second_cancel_download();
 
 
     }
@@ -246,9 +261,9 @@ class SyncInterval : Service() {
             val Zip = myDownloadClass.getString("Zip", "").toString()
             val fileName = myDownloadClass.getString("fileName", "").toString()
             val Extracted = myDownloadClass.getString(Constants.Extracted, "").toString()
-            val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
+           // val baseUrl = myDownloadClass.getString("baseUrl", "").toString()
 
-            download(baseUrl, getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
+            download( getFolderClo, getFolderSubpath, Zip, fileName, Extracted)
 
         }else{
             showToastMessage("No Internet Connection")
@@ -256,8 +271,9 @@ class SyncInterval : Service() {
     }
 
 
+    @SuppressLint("SuspiciousIndentation")
+    @OptIn(DelicateCoroutinesApi::class)
     private fun download(
-        url: String,
         getFolderClo: String,
         getFolderSubpath: String,
         Zip: String,
@@ -275,6 +291,72 @@ class SyncInterval : Service() {
 
 
 
+
+        val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+        val get_imagSwtichEnableSyncFromAPI = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+
+        if (get_imagSwtichEnableSyncFromAPI.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+
+            // when enable Sync Zip is  toggle On from Syn manager Page
+        if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+
+            val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+
+                GlobalScope.launch {
+                    val result = checkUrlExistence(baseUrl)
+                    if (result){
+                        manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+
+                        withContext(Dispatchers.Main) {
+                         //   showToastMessage("Pathrner (Zip) Sync interval $baseUrl")
+                        }
+
+                    }else{
+                        withContext(Dispatchers.Main){
+                        showToastMessage("Invalid url")
+                        }
+                    }
+                }
+
+
+            } else{
+
+            // No partner url
+
+            val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+            val baseUrl = "$get_tMaster$getFolderClo/$getFolderSubpath/Zip/App.zip"
+
+            GlobalScope.launch {
+                val result = checkUrlExistence(baseUrl)
+                if (result){
+                    manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+                    withContext(Dispatchers.Main) {
+                       // showToastMessage("Master (Zip)  Sync interval $baseUrl")
+                    }
+                }else{
+                    withContext(Dispatchers.Main) {
+                        showToastMessage("Invalid url")
+                    }
+                }
+            }
+
+            }
+        }
+
+
+
+    }
+
+    private fun manageDownload(
+        url: String,
+        getFolderClo: String,
+        getFolderSubpath: String,
+        Zip: String,
+        fileNamy: String,
+        Extracted: String,
+    ) {
+
         myHandler.postDelayed(Runnable {
 
             val finalFolderPath = "/$getFolderClo/$getFolderSubpath/$Zip"
@@ -286,7 +368,7 @@ class SyncInterval : Service() {
             editior.putString("Zip", Zip)
             editior.putString("fileNamy", fileNamy)
             editior.putString(Constants.Extracted, Extracted)
-            editior.putString("baseUrl", url)
+            editior.putString(Constants.baseUrl, url)
             editior.apply()
 
 
@@ -302,7 +384,7 @@ class SyncInterval : Service() {
             }
 
             val request = DownloadManager.Request(Uri.parse(url))
-           // request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            // request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             request.setTitle(fileNamy)
             request.allowScanningByMediaScanner()
             request.setDestinationInExternalPublicDir(
@@ -327,10 +409,14 @@ class SyncInterval : Service() {
         }, 1000)
 
 
+
     }
 
 
-    fun delete(file: File): Boolean {
+
+
+
+        fun delete(file: File): Boolean {
         if (file.isFile) {
             return file.delete()
         } else if (file.isDirectory) {
@@ -348,7 +434,6 @@ class SyncInterval : Service() {
 
         val connectivityManager22: ConnectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
-
 
 
         if (getTimeDefined != 0L) {
@@ -680,6 +765,34 @@ class SyncInterval : Service() {
         }
 
     }
+
+
+    private fun second_cancel_download() {
+        try {
+
+            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+            if (download_ref != -15L) {
+                val query = DownloadManager.Query()
+                query.setFilterById(download_ref)
+                val c =
+                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                        query
+                    )
+                if (c.moveToFirst()) {
+                    manager!!.remove(download_ref)
+                    val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                    editor.remove(Constants.downloadKey)
+                    editor.apply()
+                }
+
+            }
+
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
+
+
 
 }
 

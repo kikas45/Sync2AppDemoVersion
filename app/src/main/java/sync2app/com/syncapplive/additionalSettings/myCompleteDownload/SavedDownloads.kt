@@ -3,6 +3,7 @@ package sync2app.com.syncapplive.additionalSettings.myCompleteDownload
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.databinding.ItemSavedDownloadRowsBinding
@@ -24,6 +25,7 @@ class SavedDownloads(): RecyclerView.Adapter<SavedDownloads.MyViewHolder>() {
         RecyclerView.ViewHolder(binding.root) {
         val fileName = binding.fileName
         val filePath = binding.filePath
+        val divider = binding.divider
 
 
     }
@@ -39,11 +41,22 @@ class SavedDownloads(): RecyclerView.Adapter<SavedDownloads.MyViewHolder>() {
 
         val filename = currentItem.FileName
         val folderName  = currentItem.FolderName
-        val Sn  = currentItem.SN
+       // val Sn  = currentItem.SN
+        val get_status  = currentItem.Status
 
         val title = "$folderName/ $filename"
-        holder.fileName.text = " $Sn: $filename"
+       // holder.fileName.text = " $Sn: $filename"
+        holder.fileName.text = filename
         holder.filePath.text = title
+
+        if (get_status.equals("true")) {
+            // Set back color for the divider to be green
+            holder.divider.setBackgroundColor(ContextCompat.getColor(holder.divider.context, R.color.logo_green))
+        } else {
+            // Set back color for the divider to be red
+            holder.divider.setBackgroundColor(ContextCompat.getColor(holder.divider.context, R.color.red))
+        }
+
 
         }
 

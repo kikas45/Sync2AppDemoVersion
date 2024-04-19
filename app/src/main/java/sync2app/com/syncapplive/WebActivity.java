@@ -192,8 +192,9 @@ import java.util.Objects;
 
 import sync2app.com.syncapplive.QrPages.QRSanActivity;
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel;
-import sync2app.com.syncapplive.additionalSettings.myService.MyApiService;
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
+import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
@@ -1789,6 +1790,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
+            // set up for Zip download
             if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
 
                 if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
@@ -1800,12 +1802,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
                         if (!ServiceUtils.foregroundServiceRunning(getApplicationContext())) {
                             stopService(new Intent(getApplicationContext(), OnChnageService.class));
+                            stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
+                            stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
                             startService(new Intent(getApplicationContext(), SyncInterval.class));
 
                             /*textFilecount.setText("NF: 1");
                             textFileChange.setText("CF: 1");*/
 
-                            // showToast(mContext, "Sync On Interval Activated");
+                          //   showToast(mContext, "SyncInterval");
 
                         }
 
@@ -1813,9 +1817,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     } else {
                         if (!ServiceUtils.foregroundServiceRunningOnChange(getApplicationContext())) {
                             stopService(new Intent(getApplicationContext(), SyncInterval.class));
+                            stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
+                            stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
                             startService(new Intent(getApplicationContext(), OnChnageService.class));
 
-                            // showToast(mContext, "Sync On Change Activated");
+                         //   showToast(mContext, "OnChnageService");
 
                         }
 
@@ -1824,27 +1830,56 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                 }
 
-            }else {
+            }
 
 
+            //  Set up for Api , if allowed to use Api
+            //  Set up for Api , if allowed to use Api
+            //  Set up for Api , if allowed to use Api
+
+            if (!get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
 
                 if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
-                    textFilecount.setVisibility(View.VISIBLE);
-                    textFileChange.setVisibility(View.VISIBLE);
+                    if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
 
-                    if (!ServiceUtils.foregroundServiceMyAPi(getApplicationContext())) {
-                        stopService(new Intent(getApplicationContext(), SyncInterval.class));
-                        stopService(new Intent(getApplicationContext(), OnChnageService.class));
-                        startService(new Intent(getApplicationContext(), MyApiService.class));
+                        if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
+
+                            textFilecount.setVisibility(View.VISIBLE);
+                            textFileChange.setVisibility(View.VISIBLE);
+
+                            if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(getApplicationContext())) {
+                                stopService(new Intent(getApplicationContext(), SyncInterval.class));
+                                stopService(new Intent(getApplicationContext(), OnChnageService.class));
+                                stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
+                                startService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
+
+                              //  showToast(mContext, "IntervalApiServiceSync");
+
+                            }
+                        }
+
+
+                    } else {
+
+
+                        if (!ServiceUtils.foregroundServiceMyAPiSyncOnChange(getApplicationContext())) {
+                            stopService(new Intent(getApplicationContext(), SyncInterval.class));
+                            stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
+                            stopService(new Intent(getApplicationContext(), OnChnageService.class));
+                            startService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
+
+                           //  showToast(mContext, "Sync On Change Activated");
+
+                        }
+
 
                     }
 
                 }
 
-
-
             }
+
 
 
 
@@ -3680,7 +3715,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         remainingSeconds = 59;
                     }
 
-                    String displayText = String.format("CD: %d:%02d", minutesUntilFinished, remainingSeconds);
+                    @SuppressLint("DefaultLocale") String displayText = String.format("CD: %d:%02d", minutesUntilFinished, remainingSeconds);
                     countDownTime.setText(displayText);
 
 

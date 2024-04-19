@@ -10,8 +10,10 @@ import androidx.multidex.MultiDexApplication;
 import com.onesignal.OSNotificationOpenedResult;
 import com.onesignal.OneSignal;
 
-import io.paperdb.Paper;
+
 import sync2app.com.syncapplive.additionalSettings.CrashReportDB.CrashHandler;
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
+import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 
@@ -30,7 +32,6 @@ public class MyApplication extends MultiDexApplication {
 
         instance = this;
 
-        Paper.init(this);
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -80,6 +81,8 @@ public class MyApplication extends MultiDexApplication {
             // Stop the service
             instance.stopService(new Intent(instance.getApplicationContext(), SyncInterval.class));
             instance.stopService(new Intent(instance.getApplicationContext(), OnChnageService.class));
+            instance.stopService(new Intent(instance.getApplicationContext(), OnChangeApiServiceSync.class));
+            instance.stopService(new Intent(instance.getApplicationContext(), IntervalApiServiceSync.class));
         }
     }
 

@@ -14,9 +14,7 @@ class RestarterBootReceiver : BroadcastReceiver() {
         if (intent!!.action.equals("RestarterBootReceiver")) {
             if (!ServiceUtils.foregroundServiceRunning(context)) {
                 context.applicationContext.startService(
-                    Intent(
-                        context.applicationContext, SyncInterval::class.java
-                    )
+                    Intent(context.applicationContext, SyncInterval::class.java)
                 )
             }
 
@@ -29,6 +27,21 @@ class RestarterBootReceiver : BroadcastReceiver() {
             }
 
 
+            if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(context)) {
+                context.applicationContext.startService(
+                    Intent(
+                        context.applicationContext, IntervalApiServiceSync::class.java
+                    )
+                )
+            }
+
+            if (!ServiceUtils.foregroundServiceMyAPiSyncOnChange(context)) {
+                context.applicationContext.startService(
+                    Intent(
+                        context.applicationContext, OnChangeApiServiceSync::class.java
+                    )
+                )
+            }
 
         }
 

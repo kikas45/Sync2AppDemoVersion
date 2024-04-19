@@ -2,21 +2,16 @@ package sync2app.com.syncapplive.additionalSettings
 
 
 import android.annotation.SuppressLint
-import android.app.DownloadManager
 import android.content.*
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -30,7 +25,7 @@ import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DnViewMode
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DownloadHelper
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.SavedDownloads
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.ZipDownloader
-import sync2app.com.syncapplive.additionalSettings.myService.MyApiService
+import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityTestScreenBinding
 import java.io.BufferedReader
@@ -75,9 +70,9 @@ class TestScreenActivity : AppCompatActivity() {
 
 
         binding.textDsiplayDownloadSieze.setOnClickListener {
-            stopService(Intent(applicationContext, MyApiService::class.java))
-            if (!ServiceUtils.foregroundServiceMyAPi(applicationContext)) {
-                startService(Intent(applicationContext, MyApiService::class.java))
+            stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
+            if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(applicationContext)) {
+                startService(Intent(applicationContext, IntervalApiServiceSync::class.java))
                 showToastMessage("Calling Servuice")
                 getDownloadMyCSV()
                 mUserViewModel.deleteAllFiles()
@@ -125,7 +120,7 @@ class TestScreenActivity : AppCompatActivity() {
             dnViewModel.deleteAllFiles()
             mUserViewModel.deleteAllFiles()
             adapter.notifyDataSetChanged()
-            stopService(Intent(applicationContext, MyApiService::class.java))
+            stopService(Intent(applicationContext, IntervalApiServiceSync::class.java))
             currentDownloadIndex  = 0
             myHandler.postDelayed(Runnable {
                 getDownloadMyCSV()

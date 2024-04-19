@@ -59,6 +59,8 @@ class Constants {
         const val RECIVER_PROGRESS = "RECIVER_PROGRESS"
         const val SAVED_CN_TIME = "SAVED_CN_TIME"
 
+        const val baseUrl = "baseUrl"
+
         const val compleConfiguration = "You are yet to complete your App configuration"
         const val UnableToFindIndex = "Launch file Not Found"
         const val badRequest = "Check Inter Connectivity"
@@ -161,6 +163,8 @@ class Constants {
         const val downloadKey = "downloadKey"
         const val Extracted = "Extracted"
         const val App = "App"
+        const val Zip = "Zip"
+        const val fileNmae_App_Zip = "App.zip"
 
 
         const val PR_running = "PR: Running"
@@ -175,6 +179,8 @@ class Constants {
 
 
         const val Launching_Content = "Launching Content"
+
+        const val log_out_keep_folders = "log_out_keep_folders"
 
 
         const val t_1min = 1L
