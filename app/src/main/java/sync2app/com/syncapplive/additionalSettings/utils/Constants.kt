@@ -166,6 +166,8 @@ class Constants {
         const val Zip = "Zip"
         const val fileNmae_App_Zip = "App.zip"
 
+        const val Error_CSv_Message = "Api not readable from location"
+
 
         const val PR_running = "PR: Running"
         const val PR_Refresh = "PR: Refresh"

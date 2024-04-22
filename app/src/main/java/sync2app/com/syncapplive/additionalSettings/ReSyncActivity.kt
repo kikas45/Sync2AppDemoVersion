@@ -232,9 +232,13 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                 editTextSubPathFolder.setText(getSaveSubFolderInPutFiled)
             }
 
+            //val urkl = "https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021000/Start/start1.csv";
+           // val urkl ="https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021001/Zip/App.zip"
+           // val urkl ="https://cloudappserver.co.uk/cp/app_base/public/CLO/DE_MO_2021001/Start/start1.csv"
+          //  editTextInputSynUrlZip.setText(urkl)
 
             if (!getSavedEditTextInputSynUrlZip.isNullOrEmpty()) {
-                editTextInputSynUrlZip.setText(getSavedEditTextInputSynUrlZip)
+             editTextInputSynUrlZip.setText(getSavedEditTextInputSynUrlZip)
             }
 
             if (!getSaved_manaul_index_edit_url_Input.isNullOrEmpty()) {
@@ -3350,8 +3354,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                     callApiClassActivity(
                         baseUrl,
-                        "MANUAL",
-                        "DEMO",
+                        "CLO",
+                        "MANUAL/DEMO",
                         Zip,
                         fileNamy,
                         Extracted,
@@ -3363,8 +3367,8 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
 
                 /// similar but used on under second cancel downoad in danwload pager
                 val editor = myDownloadClass.edit()
-                editor.putString(Constants.getFolderClo, "MANUAL")
-                editor.putString(Constants.getFolderSubpath, "DEMO")
+                editor.putString(Constants.getFolderClo, "CLO")
+                editor.putString(Constants.getFolderSubpath, "MANUAL/DEMO")
                 editor.putString("Zip", Zip)
                 editor.putString("fileName", fileNamy)
                 editor.putString(Constants.Extracted, Extracted)

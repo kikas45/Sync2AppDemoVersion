@@ -51,6 +51,7 @@ import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils
 import sync2app.com.syncapplive.databinding.ActivityDownloadTheApisBinding
+import sync2app.com.syncapplive.databinding.ErroMessageDialogLayoutBinding
 import sync2app.com.syncapplive.databinding.LaucnOnlineDonloadPaggerBinding
 import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding
 import java.io.File
@@ -139,7 +140,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 startActivity(intent)
                 finishAffinity()
 
-            },1000)
+            }, 1000)
 
         }
 
@@ -151,7 +152,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 val intent = Intent(applicationContext, ReSyncActivity::class.java)
                 startActivity(intent)
                 finishAffinity()
-            },1000)
+            }, 1000)
         }
 
 
@@ -168,7 +169,6 @@ class DownloadTheApisActivity : AppCompatActivity() {
         }
 
 
-
         val connectivityManager22: ConnectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
@@ -178,9 +178,36 @@ class DownloadTheApisActivity : AppCompatActivity() {
             dnViewModel.deleteAllFiles()
             mUserViewModel.deleteAllFiles()
 
-            handler.postDelayed(Runnable {
-                getDownloadMyCSV()
-            }, 1000)
+            val imagUsemanualOrnotuseManual =
+                sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
+
+            if (imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
+                handler.postDelayed(Runnable {
+
+                    val getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+
+                    if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
+                        getDownloadMyCSVManual()
+                    } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
+                        getDownloadMyCSVManual()
+                    }else{
+                       // showToastMessage("Something went wrong, System Could not locate CSV from this Location")
+                        binding.textCsvStatus.text = Constants.Error_CSv_Message
+
+                        showCustomError(Constants.Error_CSv_Message)
+
+                    }
+
+                }, 1000)
+
+            } else {
+
+                handler.postDelayed(Runnable {
+                    getDownloadMyCSV()
+                    showToastMessage("getDownloadMyCSV")
+                }, 1000)
+            }
+
 
         } else {
             Toast.makeText(applicationContext, "No Internet Connection", Toast.LENGTH_SHORT).show()
@@ -202,8 +229,29 @@ class DownloadTheApisActivity : AppCompatActivity() {
                     totalFiles = files.size.toInt()
                     binding.textCsvStatus.visibility = View.GONE
                     binding.textPercentageCompleted.visibility = View.VISIBLE
-                }else{
-                   // showToastMessage("No files found")
+                } else {
+                    // showToastMessage("No files found")
+                }
+            })
+        }
+
+    }
+
+
+    private val runnableManual: Runnable = object : Runnable {
+        @SuppressLint("SetTextI18n")
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        override fun run() {
+            dnViewModel.deleteAllFiles()
+            mUserViewModel.readAllData.observe(this@DownloadTheApisActivity, Observer { files ->
+                if (files.isNotEmpty()) {
+                    downloadSequentiallyManuall(files)
+                    binding.textRemainging.text = files.size.toString() + " Files Downloaded"
+                    totalFiles = files.size.toInt()
+                    binding.textCsvStatus.visibility = View.GONE
+                    binding.textPercentageCompleted.visibility = View.VISIBLE
+                } else {
+                    // showToastMessage("No files found")
                 }
             })
         }
@@ -220,8 +268,23 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 getZipDownloads(file.SN, file.FolderName, file.FileName)
             }, 500)
 
-        }else{
-          //  showToastMessage("All files Downloaded")
+        } else {
+            //  showToastMessage("All files Downloaded")
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun downloadSequentiallyManuall(files: List<FilesApi>) {
+
+        if (currentDownloadIndex < files.size) {
+            val file = files[currentDownloadIndex]
+            handler.postDelayed(Runnable {
+                getZipDownloadsManually(file.SN, file.FolderName, file.FileName)
+
+            }, 500)
+
+        } else {
+            //  showToastMessage("All files Downloaded")
         }
     }
 
@@ -230,45 +293,56 @@ class DownloadTheApisActivity : AppCompatActivity() {
     private fun getDownloadMyCSV() {
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val imagUsemanualOrnotuseManual = sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
+            val imagUsemanualOrnotuseManual =
+                sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
             val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
             val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString()
             val get_ModifiedUrl = sharedP.getString(Constants.get_ModifiedUrl, "").toString()
-            val get_getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+            val get_getSavedEditTextInputSynUrlZip =
+                sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
 
 
-            if (imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
-                showToastMessage("Functionality/Logic in Progress!")
-                  binding.textCsvStatus.text ="Functionality/Logic in Progress!"
+            showToastMessage("API Content Connection Successful!")
+            binding.textCsvStatus.text = "API Content Connection Successful!"
 
-                val lastEnd = "Start/start1.csv";
-                val csvDownloader = CSVDownloader()
-                val csvData = csvDownloader.downloadCSV(get_getSavedEditTextInputSynUrlZip, "", "", "")
-                saveURLPairs(csvData)
-                showToastMessage(csvData)
-                myHandler.postDelayed(runnable, 500)
-
-
-            }else{
-
-                showToastMessage("API Content Connection Successful!")
-                  binding.textCsvStatus.text ="API Content Connection Successful!"
-
-                val lastEnd = "Start/start1.csv";
-                val csvDownloader = CSVDownloader()
-                val csvData = csvDownloader.downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath, lastEnd)
-                saveURLPairs(csvData)
-                myHandler.postDelayed(runnable, 500)
-
-            }
-
+            val lastEnd = "Start/start1.csv";
+            val csvDownloader = CSVDownloader()
+            val csvData =
+                csvDownloader.downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath, lastEnd)
+            saveURLPairs(csvData)
+            myHandler.postDelayed(runnable, 500)
 
 
         }
 
 
     }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun getDownloadMyCSVManual() {
+
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            val get_getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+
+
+            showToastMessage("API Content Connection Successful!")
+            binding.textCsvStatus.text =  "API Content Connection Successful!"
+
+            val csvDownloader = CSVDownloader()
+            val csvData = csvDownloader.downloadCSV(get_getSavedEditTextInputSynUrlZip, "", "", "")
+            saveURLPairs(csvData)
+
+            myHandler.postDelayed(runnableManual, 500)
+
+
+        }
+
+
+    }
+
 
     private fun showToastMessage(s: String) {
         runOnUiThread {
@@ -329,10 +403,6 @@ class DownloadTheApisActivity : AppCompatActivity() {
     }
 
 
-
-
-
-/*
     private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
         Thread {
 
@@ -353,39 +423,88 @@ class DownloadTheApisActivity : AppCompatActivity() {
                 dir.mkdirs()
             }
             val getFile_name = fileName.toString()
-            val getFileUrl = "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-            val fileDestination = File(dir.absolutePath.toString(), getFile_name)
+            val getFileUrl =
+                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
+            val fileDestination = File(dir.absolutePath, getFile_name)
 
 
-                //start download
-                ZipDownloader(object : DownloadHelper {
-                    @SuppressLint("SetTextI18n")
-                    override fun afterExecutionIsComplete() {
+            val request: Request = Request.Builder()
+                .url(getFileUrl)
+                .build()
+            try {
+                okClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        //get response body
+                        val responseBody = response.body
+                        val contentLength = responseBody!!.contentLength()
 
-                        try {
-                            Thread {
-                                val dnApi = DnApi(
-                                    SN = sN,
-                                    FolderName = folderName,
-                                    FileName = fileName,
-                                    Status = "true"
-                                )
-                                dnViewModel.addFiles(dnApi)
+                        //get source and set destination
+                        val source = responseBody.source()
+                        val outputStream =
+                            FileOutputStream(fileDestination.absolutePath)
 
-                            }.start()
+                        //set file name
+                        //  activity.setIndividualFileName(theFile.getFile_name());
 
-
+                        //run pull algorithm
+                        val buffer = ByteArray(4096)
+                        var totalBytesRead: Long = 0
+                        var bytesRead: Int
+                        while (source.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead.toLong()
 
                             runOnUiThread {
+                                try {
 
-                                currentDownloadIndex++
-                                downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
+                                    ///  binding.textFileCounts.text = "$sN / "
+
+                                    binding.textRemainging.visibility = View.VISIBLE
+
+                                    val i = (totalBytesRead * 100 / contentLength).toInt()
+
+                                    binding.progressBarPref.progress = i
+
+                                    binding.textDownloadSieze.text = "$fileName : $i%"
+
+
+                                } catch (_: Exception) {
+                                }
+                            }
+                        }
+
+
+                        //close IO stream
+                        outputStream.flush()
+                        outputStream.close()
+
+
+                        runOnUiThread {
+                            try {
+
+                                // update the UI
+
+                                binding.textFileCounts.text = "$sN / "
+
+                                Thread {
+                                    val dnApi = DnApi(
+                                        SN = sN,
+                                        FolderName = folderName,
+                                        FileName = fileName,
+                                        Status = "true"
+                                    )
+                                    dnViewModel.addFiles(dnApi)
+
+                                }.start()
+
+                                //   adapter.notifyDataSetChanged()
 
                                 // set total download percentage
                                 val totalPercentage =
                                     ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
                                 binding.textPercentageCompleted.text = "$totalPercentage% Complete"
-                                // binding.progressBarPref.progress = 100
+
+
 
                                 if (sN == totalFiles.toString()) {
                                     binding.progressBarPref.progress = 100
@@ -399,232 +518,282 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
                                 }
 
-                            }
-                        } catch (e: Exception) {
 
-                        }
-
-                    }
-
-                    override fun whenExecutionStarts() {
-
-                    }
-
-                    @SuppressLint("SetTextI18n")
-                    override fun whileInProgress(i: Int) {
-                        try {
-                            runOnUiThread {
-                                //set individual progress
-                                binding.textFileCounts.text = "$sN / "
-
-                                binding.textRemainging.visibility = View.VISIBLE
-
-                                binding.progressBarPref.progress = i
-
-                                val progressPercentage = ((i.toDouble() / i.toFloat()) * 100).toInt()
-                                if (i < 0) {
-                                        binding.textDownloadSieze.text =
-                                            "$fileName : $progressPercentage%"
-                                    } else {
-                                        binding.textDownloadSieze.text = "$fileName : $i%"
-
-                                    }
-
-                                }
+                                /// call the next download
+                                currentDownloadIndex++
+                                downloadSequentially(
+                                    mUserViewModel.readAllData.value ?: emptyList()
+                                )
 
 
-                        } catch (_: Exception) {
-
-                            val dnApi = DnApi(
-                                SN = sN,
-                                FolderName = folderName,
-                                FileName = fileName,
-                                Status = "false"
-                            )
-                            dnViewModel.addFiles(dnApi)
-                        }
-                    }
-                }).execute(getFileUrl, fileDestination.absolutePath)
-
-
-        }.start()
-    }
-*/
-
-
-    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
-            Thread {
-
-            val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
-                val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString()
-                val get_ModifiedUrl = sharedP.getString(Constants.get_ModifiedUrl, "").toString()
-
-
-                val Syn2AppLive = Constants.Syn2AppLive
-                val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
-
-                // Adjusting the file path to save the downloaded file
-                val dir = File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    saveMyFileToStorage
-                )
-                if (!dir.exists()) {
-                    dir.mkdirs()
-                }
-                val getFile_name = fileName.toString()
-                val getFileUrl = "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-                val fileDestination = File(dir.absolutePath, getFile_name)
-
-
-
-                    val request: Request = Request.Builder()
-                        .url(getFileUrl)
-                        .build()
-                    try {
-                        okClient.newCall(request).execute().use { response ->
-                            if (response.isSuccessful) {
-                                //get response body
-                                val responseBody = response.body
-                                val contentLength = responseBody!!.contentLength()
-
-                                //get source and set destination
-                                val source = responseBody.source()
-                                val outputStream =
-                                    FileOutputStream(fileDestination.absolutePath)
-
-                                //set file name
-                                //  activity.setIndividualFileName(theFile.getFile_name());
-
-                                //run pull algorithm
-                                val buffer = ByteArray(4096)
-                                var totalBytesRead: Long = 0
-                                var bytesRead: Int
-                                while (source.read(buffer).also { bytesRead = it } != -1) {
-                                    outputStream.write(buffer, 0, bytesRead)
-                                    totalBytesRead += bytesRead.toLong()
-
-                                    runOnUiThread {
-                                        try {
-
-                                          ///  binding.textFileCounts.text = "$sN / "
-
-                                            binding.textRemainging.visibility = View.VISIBLE
-
-                                            val i = (totalBytesRead * 100 / contentLength).toInt()
-
-                                            binding.progressBarPref.progress = i
-
-                                            binding.textDownloadSieze.text = "$fileName : $i%"
-
-
-
-                                        }catch (_:Exception){}
-                                    }
-                                }
-
-
-                                //close IO stream
-                                outputStream.flush()
-                                outputStream.close()
-
-
-                                runOnUiThread {
-                                    try {
-
-                                        // update the UI
-
-                                        binding.textFileCounts.text = "$sN / "
-
-                                        Thread{
-                                            val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "true")
-                                            dnViewModel.addFiles(dnApi)
-
-                                        }.start()
-
-                                     //   adapter.notifyDataSetChanged()
-
-                                            // set total download percentage
-                                            val totalPercentage =
-                                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-                                            binding.textPercentageCompleted.text = "$totalPercentage% Complete"
-
-
-
-                                        if (sN == totalFiles.toString()) {
-                                            binding.progressBarPref.progress = 100
-                                            binding.textDownloadSieze.text = "Completed"
-                                            mUserViewModel.deleteAllFiles()
-                                            showCustomProgressDialog("Please wait!")
-
-                                            myHandler.postDelayed(Runnable {
-                                                stratMyACtivity()
-                                            }, 1000)
-
-                                        }
-
-
-
-                                        /// call the next download
-                                        currentDownloadIndex++
-                                        downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-
-
-                                    } catch (e: Exception) {
-
-                                    }
-                                }
-
-
-                            }else{
-
-                                // bad url or failed download
-                                runOnUiThread {
-                                    Thread{
-                                        val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "false")
-                                        dnViewModel.addFiles(dnApi)
-
-                                    }.start()
-
-                                }
+                            } catch (e: Exception) {
 
                             }
                         }
-                    } catch (e: IOException) {
-                        // Handle exception in download
 
-                         Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
+
+                    } else {
 
                         // bad url or failed download
                         runOnUiThread {
-                            Thread{
-                                val dnApi = DnApi(SN = sN, FolderName = folderName, FileName = fileName, Status = "false")
+                            Thread {
+                                val dnApi = DnApi(
+                                    SN = sN,
+                                    FolderName = folderName,
+                                    FileName = fileName,
+                                    Status = "false"
+                                )
                                 dnViewModel.addFiles(dnApi)
 
                             }.start()
 
-                            if (sN == totalFiles.toString()) {
-                                binding.progressBarPref.progress = 100
-                                binding.textDownloadSieze.text = "Completed"
-                                mUserViewModel.deleteAllFiles()
-                                showCustomProgressDialog("Please wait!")
-
-                                myHandler.postDelayed(Runnable {
-                                    stratMyACtivity()
-                                }, 1000)
-
-                            }
-
-                            showToastMessage(e.message.toString())
                         }
 
                     }
+                }
+            } catch (e: IOException) {
+                // Handle exception in download
+
+                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
+
+                // bad url or failed download
+                runOnUiThread {
+                    Thread {
+                        val dnApi = DnApi(
+                            SN = sN,
+                            FolderName = folderName,
+                            FileName = fileName,
+                            Status = "false"
+                        )
+                        dnViewModel.addFiles(dnApi)
+
+                    }.start()
+
+                    if (sN == totalFiles.toString()) {
+                        binding.progressBarPref.progress = 100
+                        binding.textDownloadSieze.text = "Completed"
+                        mUserViewModel.deleteAllFiles()
+                        showCustomProgressDialog("Please wait!")
+
+                        myHandler.postDelayed(Runnable {
+                            stratMyACtivity()
+                        }, 1000)
+
+                    }
+
+                    showToastMessage(e.message.toString())
+                }
+
+            }
 
 
-            }.start()
-        }
+        }.start()
+    }
+
+    private fun getZipDownloadsManually(sN: String, folderName: String, fileName: String) {
+        Thread {
+
+            val Syn2AppLive = Constants.Syn2AppLive
+            val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
+
+            val getSavedEditTextInputSynUrlZip = sharedP.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+
+            var replacedUrl = getSavedEditTextInputSynUrlZip // Initialize it with original value
 
 
+            if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
+                 replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Start/start1.csv", "/$folderName/$fileName")
+
+            } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
+                 replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Api/update1.csv", "/$folderName/$fileName"
+                )
+            }else{
+
+                Log.d("getZipDownloadsManually", "Unable to replace this url")
+            }
+
+
+            // Adjusting the file path to save the downloaded file
+            val dir = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                saveMyFileToStorage
+            )
+            if (!dir.exists()) {
+                dir.mkdirs()
+            }
+
+            val getFile_name = fileName.toString()
+            val fileDestination = File(dir.absolutePath, getFile_name)
+
+
+            val request: Request = Request.Builder()
+                .url(replacedUrl)
+                .build()
+            try {
+                okClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        //get response body
+
+                        Log.d("getZipDownloadsManually", replacedUrl)
+                        Log.d("getZipDownloadsManually", saveMyFileToStorage)
+
+
+                        val responseBody = response.body
+                        val contentLength = responseBody!!.contentLength()
+
+                        //get source and set destination
+                        val source = responseBody.source()
+                        val outputStream =
+                            FileOutputStream(fileDestination.absolutePath)
+
+                        //set file name
+                        //  activity.setIndividualFileName(theFile.getFile_name());
+
+                        //run pull algorithm
+                        val buffer = ByteArray(4096)
+                        var totalBytesRead: Long = 0
+                        var bytesRead: Int
+                        while (source.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                            totalBytesRead += bytesRead.toLong()
+
+                            runOnUiThread {
+                                try {
+
+                                    ///  binding.textFileCounts.text = "$sN / "
+
+                                    binding.textRemainging.visibility = View.VISIBLE
+
+                                    val i = (totalBytesRead * 100 / contentLength).toInt()
+
+                                    binding.progressBarPref.progress = i
+
+                                    binding.textDownloadSieze.text = "$fileName : $i%"
+
+
+                                } catch (_: Exception) {
+                                }
+                            }
+                        }
+
+
+                        //close IO stream
+                        outputStream.flush()
+                        outputStream.close()
+
+
+                        runOnUiThread {
+                            try {
+
+                                // update the UI
+
+                                binding.textFileCounts.text = "$sN / "
+
+                                Thread {
+                                    val dnApi = DnApi(
+                                        SN = sN,
+                                        FolderName = folderName,
+                                        FileName = fileName,
+                                        Status = "true"
+                                    )
+                                    dnViewModel.addFiles(dnApi)
+
+                                }.start()
+
+                                //   adapter.notifyDataSetChanged()
+
+                                // set total download percentage
+                                val totalPercentage =
+                                    ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
+                                binding.textPercentageCompleted.text = "$totalPercentage% Complete"
+
+
+
+                                if (sN == totalFiles.toString()) {
+                                    binding.progressBarPref.progress = 100
+                                    binding.textDownloadSieze.text = "Completed"
+                                    mUserViewModel.deleteAllFiles()
+                                    showCustomProgressDialog("Please wait!")
+
+                                    myHandler.postDelayed(Runnable {
+                                        stratMyACtivity()
+                                    }, 1000)
+
+                                }
+
+
+                                /// call the next download
+                                currentDownloadIndex++
+                                downloadSequentiallyManuall(
+                                    mUserViewModel.readAllData.value ?: emptyList()
+                                )
+
+
+                            } catch (e: Exception) {
+
+                            }
+                        }
+
+
+                    } else {
+
+                        // bad url or failed download
+                        runOnUiThread {
+                            Thread {
+                                val dnApi = DnApi(
+                                    SN = sN,
+                                    FolderName = folderName,
+                                    FileName = fileName,
+                                    Status = "false"
+                                )
+                                dnViewModel.addFiles(dnApi)
+
+                            }.start()
+
+                        }
+
+                    }
+                }
+            } catch (e: IOException) {
+                // Handle exception in download
+
+                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
+
+                // bad url or failed download
+                runOnUiThread {
+                    Thread {
+                        val dnApi = DnApi(
+                            SN = sN,
+                            FolderName = folderName,
+                            FileName = fileName,
+                            Status = "false"
+                        )
+                        dnViewModel.addFiles(dnApi)
+
+                    }.start()
+
+                    if (sN == totalFiles.toString()) {
+                        binding.progressBarPref.progress = 100
+                        binding.textDownloadSieze.text = "Completed"
+                        mUserViewModel.deleteAllFiles()
+                        showCustomProgressDialog("Please wait!")
+
+                        myHandler.postDelayed(Runnable {
+                            stratMyACtivity()
+                        }, 1000)
+
+                    }
+
+                    showToastMessage(e.message.toString())
+                }
+
+            }
+
+
+        }.start()
+
+
+    }
 
 
     override fun onDestroy() {
@@ -772,6 +941,34 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
             binding.imgCloseDialog.visibility = View.GONE
 
+            if (message.equals(Constants.Error_CSv_Message)){
+
+            }
+
+
+            customProgressDialog.show()
+        } catch (_: Exception) {
+        }
+    }
+    private fun showCustomError(message: String) {
+        try {
+            val customProgressDialog = Dialog(this)
+            val bindingErr = ErroMessageDialogLayoutBinding.inflate(LayoutInflater.from(this))
+            customProgressDialog.setContentView(bindingErr.root)
+            customProgressDialog.setCancelable(true)
+            customProgressDialog.setCanceledOnTouchOutside(false)
+            customProgressDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+            bindingErr.textLoading.text = "$message"
+
+            bindingErr.textCancel.setOnClickListener {
+                val intent = Intent(applicationContext, ReSyncActivity::class.java)
+                startActivity(intent)
+                finishAffinity()
+                customProgressDialog.dismiss()
+            }
+
+
             customProgressDialog.show()
         } catch (_: Exception) {
         }
@@ -805,8 +1002,8 @@ class DownloadTheApisActivity : AppCompatActivity() {
             }
 
 
-            val getFolderClo = sharedP.getString("getFolderClo", "")
-            val getFolderSubpath = sharedP.getString("getFolderSubpath", "")
+            val getFolderClo = sharedP.getString(Constants.getFolderClo, "")
+            val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "")
 
             val editor = sharedP.edit()
 
