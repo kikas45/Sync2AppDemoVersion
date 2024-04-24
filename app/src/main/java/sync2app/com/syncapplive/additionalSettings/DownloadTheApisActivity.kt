@@ -204,7 +204,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
                 handler.postDelayed(Runnable {
                     getDownloadMyCSV()
-                    showToastMessage("getDownloadMyCSV")
+                   // showToastMessage("getDownloadMyCSV")
                 }, 1000)
             }
 
@@ -784,7 +784,7 @@ class DownloadTheApisActivity : AppCompatActivity() {
 
                     }
 
-                    showToastMessage(e.message.toString())
+                  //  showToastMessage(e.message.toString())
                 }
 
             }

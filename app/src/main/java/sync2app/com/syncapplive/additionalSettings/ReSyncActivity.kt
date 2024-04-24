@@ -1058,12 +1058,7 @@ class ReSyncActivity : AppCompatActivity(), SavedHistoryListAdapter.OnItemClickL
                                 getFolderClo, getFolderSubpath, "Successful"
                             )
 
-                            val user = User(
-                                CLO = getFolderClo,
-                                DEMO = getFolderSubpath,
-                                EditUrl = "",
-                                EditUrlIndex = ""
-                            )
+                            val user = User(CLO = getFolderClo, DEMO = getFolderSubpath, EditUrl = "", EditUrlIndex = "")
                             mUserViewModel.addUser(user)
                             customProgressDialog.dismiss()
 
