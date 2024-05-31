@@ -152,13 +152,15 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         Methods.addExceptionHandler(this)
 
 
+        /// allow app to draw over other apps permission
+        checkOverlayBackground()
 
-        window.decorView.systemUiVisibility =
-            (View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        /// Hide window top and bottom bar
+        hideStyembars()
 
-
+        // prefill paths,  this will be removed later
+        binding.editTextUserID.setText("CLO");
+        binding.editTextLicenseKey.setText("DE_MO_2021001");
 
 
         val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
@@ -300,12 +302,10 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
 
 
+    }
 
-        //add exception
-        Methods.addExceptionHandler(this)
-
-        /// allow app to draw over other apps permission
-        checkOverlayBackground()
+    private fun hideStyembars() {
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
 
     }
