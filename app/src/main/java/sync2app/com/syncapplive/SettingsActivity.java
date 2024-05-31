@@ -14,6 +14,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -23,14 +24,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
@@ -39,38 +37,16 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-
-import sync2app.com.syncapplive.additionalSettings.AdditionalSettingsActivity;
-import sync2app.com.syncapplive.additionalSettings.MainHelpers.GMailSender;
-import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
-import sync2app.com.syncapplive.additionalSettings.MyTestDownloadAPI;
-import sync2app.com.syncapplive.additionalSettings.PasswordActivity;
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
-import sync2app.com.syncapplive.additionalSettings.TvActivityOrAppMode;
-import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
-import sync2app.com.syncapplive.additionalSettings.myService.OnChangeApiServiceSync;
-import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
-import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
-import sync2app.com.syncapplive.databinding.CustomConfirmExitDialogBinding;
-import sync2app.com.syncapplive.databinding.CustomEmailSucessLayoutBinding;
-import sync2app.com.syncapplive.databinding.CustomForgetPasswordEmailLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomSettingsPageBinding;
-import sync2app.com.syncapplive.databinding.ProgressDialogLayoutBinding;
+
 
 public class SettingsActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
-
-    String Admin_Password = "1234";
-    Handler handler = new Handler();
-
-    private Dialog customProgressDialog;
-
-
+    ImageView close_bs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,33 +57,26 @@ public class SettingsActivity extends AppCompatActivity {
         }
         setContentView(R.layout.settings_activity);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         MyApplication.incrementRunningActivities();
 
+        Methods.addExceptionHandler(this);
 
 
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
-        String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
+        close_bs = findViewById(R.id.close_bs);
 
-    /*    if (!did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord) || imgEnablePassword.equals(Constants.imgEnablePassword)) {
-            showExitConfirmationDialog();
-        } else {
-            //do nothing
-        }*/
+        close_bs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), WebActivity.class));
+                finish();
+            }
+        });
 
 
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.settings, new SettingsFragment())
                 .commit();
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-
-        showExitConfirmationDialog();
-
 
     }
 
@@ -120,683 +89,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         startActivity(new Intent(getApplicationContext(), WebActivity.class));
         finish();
-
-
-    }
-    private boolean isConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = null;
-
-        if (connectivityManager != null) {
-            networkInfo = connectivityManager.getActiveNetworkInfo();
-        }
-        return networkInfo != null && networkInfo.isConnected();
-    }
-
-
-    private void sendMessage(final String reciverEmail, final String myMessage) {
-
-
-        showCustomProgressDialog("Sending Email");
-
-        Thread sender = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    GMailSender sender = new GMailSender(Constants.Sender_email_Address, Constants.Sender_email_Password);
-                    sender.sendMail(Constants.Subject, "Your Password is\n" + myMessage, Constants.Sender_name, reciverEmail);
-                    Log.d("mylog", "Email Sent Successfully");
-
-                    // Show toast message on UI thread
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            show_Pop_Up_Email_Sent_Sucessful("Email sent", "Kindly check email to view password");
-                            customProgressDialog.dismiss();
-                        }
-                    });
-
-
-                } catch (Exception e) {
-                    Log.e("mylog", "Error: " + e.getMessage());
-
-                    // Show toast message on UI thread
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            show_Pop_Up_Email_Sent_Sucessful("Failed!", "Unable to send email");
-                            customProgressDialog.dismiss();
-                        }
-                    });
-                }
-            }
-        });
-        sender.start();
-    }
-
-
-
-
-    @SuppressLint("UseCompatLoadingForDrawables")
-    private void showCustomProgressDialog(String message) {
-        try {
-            customProgressDialog = new Dialog(this);
-            ProgressDialogLayoutBinding binding = ProgressDialogLayoutBinding.inflate(LayoutInflater.from(this));
-            customProgressDialog.setContentView(binding.getRoot());
-            customProgressDialog.setCancelable(false);
-            customProgressDialog.setCanceledOnTouchOutside(false);
-            customProgressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-            binding.textLoading.setText(message);
-
-            binding.imgCloseDialog.setVisibility(View.GONE);
-            binding.imagSucessful.setBackground(getApplicationContext().getDrawable(R.drawable.ic_email_read_24));
-
-            customProgressDialog.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    @SuppressLint("InflateParams")
-    private void showExitConfirmationDialog() {
-
-        CustomConfirmExitDialogBinding binding = CustomConfirmExitDialogBinding.inflate(getLayoutInflater());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setView(binding.getRoot());
-
-        final AlertDialog alertDialog = builder.create();
-
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-
-        // Set the background of the AlertDialog to be transparent
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        @SuppressLint("CommitPrefEdits")
-        SharedPreferences simpleSavedPassword = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
-
-
-        EditText editTextText2 = binding.editTextText2;
-
-        TextView textHome = binding.textHome;
-        TextView textLoginAdmin2 = binding.textLoginAdmin2;
-        TextView textLogoutButton = binding.textLogoutButton;
-        TextView textExit = binding.textExit;
-        TextView textSettings = binding.textAppSettings;
-        TextView textAppAdmin = binding.textAppAdmin;
-        TextView textReSync = binding.textReSync;
-        TextView textLaunchOnline = binding.textLaunchOnline;
-        TextView textLaunchOffline = binding.textLaunchOffline;
-        TextView textForgetPassword = binding.textForgetPasswordHome;
-        TextView textCanCellDialog = binding.textCanCellDialog;
-        ImageView imagePassowrdSettings = binding.imagePassowrdSettings;
-        ImageView imgClearCatch = binding.imgClearCatch;
-        ImageView imgWifi = binding.imgWifi;
-        ImageView imgMaintainace = binding.imgMaintainace;
-
-
-        ImageView imgToggle = binding.imgToggle;
-        ImageView imgToggleNzotVisible = binding.imgToggleNzotVisible;
-
-
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = sharedBiometric.edit();
-
-        String imgLaunch = sharedBiometric.getString(Constants.imgAllowLunchFromOnline, "");
-
-        String imgEnablePassword = sharedBiometric.getString(Constants.imgEnablePassword, "");
-        String did_user_input_passowrd = sharedBiometric.getString(Constants.Did_User_Input_PassWord, "");
-        String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-
-        imgToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                imgToggle.setVisibility(View.INVISIBLE);
-                imgToggleNzotVisible.setVisibility(View.VISIBLE);
-                editTextText2.setTransformationMethod(null);
-                editTextText2.setSelection(editTextText2.length());
-            }
-        });
-
-        imgToggleNzotVisible.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                imgToggle.setVisibility(View.VISIBLE);
-                imgToggleNzotVisible.setVisibility(View.INVISIBLE);
-                editTextText2.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                editTextText2.setSelection(editTextText2.length());
-            }
-        });
-
-
-        textCanCellDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences sharedBiometric = getApplicationContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                String getTvMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
-
-                startActivity(new Intent(getApplicationContext(), WebActivity.class));
-                finish();
-
-
-            }
-        });
-
-
-        if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
-            editTextText2.setText(simpleAdminPassword);
-            editTextText2.setEnabled(false);
-        } else if (did_user_input_passowrd.equals(Constants.Did_User_Input_PassWord)) {
-            editTextText2.setEnabled(true);
-            editTextText2.setText(simpleAdminPassword);
-        } else {
-            editTextText2.setEnabled(true);
-        }
-
-
-        textReSync.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    hideKeyBoard(editTextText2);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                    editor.putString(Constants.SAVE_NAVIGATION, Constants.SettingsPage);
-                    editor.apply();
-
-                    startActivity(new Intent(getApplicationContext(), ReSyncActivity.class));
-                    finish();
-                    alertDialog.dismiss();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        imagePassowrdSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    hideKeyBoard(editTextText2);
-                    startActivity(new Intent(getApplicationContext(), PasswordActivity.class));
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-                    alertDialog.dismiss();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        imgWifi.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    hideKeyBoard(editTextText2);
-                    Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(intent);
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-                    alertDialog.dismiss();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        imgClearCatch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    hideKeyBoard(editTextText2);
-                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                    Uri uri = Uri.fromParts("package", getPackageName(), null);
-                    intent.setData(uri);
-                    startActivity(intent);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-                    alertDialog.dismiss();
-                } else {
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        textSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-                String editTextText = editTextText2.getText().toString().trim();
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-                    alertDialog.dismiss();
-                } else {
-                    editTextText2.setError("Wrong password");
-                }
-
-
-            }
-        });
-
-
-        textAppAdmin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-                String editTextText = editTextText2.getText().toString().trim();
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-
-
-                    hideKeyBoard(editTextText2);
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                    editor.putString(Constants.SAVE_NAVIGATION, Constants.SettingsPage);
-                    editor.apply();
-
-                    Intent myactivity = new Intent(SettingsActivity.this, AdditionalSettingsActivity.class);
-                    startActivity(myactivity);
-                    finish();
-
-                    alertDialog.dismiss();
-
-
-                } else {
-
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        imgMaintainace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-                String editTextText = editTextText2.getText().toString().trim();
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-
-
-                    hideKeyBoard(editTextText2);
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                    editor.putString(Constants.SAVE_NAVIGATION, Constants.SettingsPage);
-                    editor.apply();
-
-                    Intent myactivity = new Intent(SettingsActivity.this, MaintenanceActivity.class);
-                    startActivity(myactivity);
-                    finish();
-
-                    alertDialog.dismiss();
-
-
-                } else {
-
-                    hideKeyBoard(editTextText2);
-                    showToastMessage("Wrong password");
-                    editTextText2.setError("Wrong password");
-                }
-            }
-        });
-
-
-        textExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                stopService(new Intent(SettingsActivity.this, SyncInterval.class));
-                stopService(new Intent(SettingsActivity.this, OnChnageService.class));
-                stopService(new Intent(SettingsActivity.this, OnChangeApiServiceSync.class));
-                stopService(new Intent(SettingsActivity.this, IntervalApiServiceSync.class));
-                finish();
-               // finishAffinity();
-              //  finishAndRemoveTask();
-
-                second_cancel_download();
-
-                android.os.Process.killProcess(android.os.Process.myPid());
-                System.exit(1);
-
-            }
-        });
-
-
-        textForgetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPopChangePassowrdDialog();
-                alertDialog.dismiss();
-            }
-        });
-
-        SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editorED = mydownloadClass.edit();
-
-        textLogoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-/*                SharedPreferences mydownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editorED = mydownloadClass.edit();
-                editorED.clear();
-                editorED.apply();
-
-                SharedPreferences SIMPLE_SAVED_PASSWORD = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editorEDSIMPLE_SAVED_PASSWORD = SIMPLE_SAVED_PASSWORD.edit();
-                editorEDSIMPLE_SAVED_PASSWORD.clear();
-                editorEDSIMPLE_SAVED_PASSWORD.apply();*/
-
-                SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor_sharedBiometric= sharedBiometric.edit();
-                editor_sharedBiometric.remove(Constants.MY_TV_OR_APP_MODE);
-                editor_sharedBiometric.remove(Constants.FIRST_TIME_APP_START);
-                editor_sharedBiometric.apply();
-
-                stopService(new Intent(SettingsActivity.this, SyncInterval.class));
-                stopService(new Intent(SettingsActivity.this, OnChnageService.class));
-                stopService(new Intent(SettingsActivity.this, OnChangeApiServiceSync.class));
-                stopService(new Intent(SettingsActivity.this, IntervalApiServiceSync.class));
-
-                Handler handler1 = new Handler(Looper.getMainLooper());
-
-                handler1.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Intent myactivity = new Intent(SettingsActivity.this, TvActivityOrAppMode.class);
-                        startActivity(myactivity);
-                        finish();
-                        second_cancel_download();
-
-                    }
-                },200 );
-
-
-            }
-        });
-
-
-        textLaunchOnline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-
-                SharedPreferences sharedBiometric = getApplicationContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                String getTvMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
-
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-
-                    if (getTvMode.equals(Constants.TV_Mode)) {
-
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                        editorED.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOnline);
-                        //  editorED.remove(Constants.getFolderClo);
-                        // editorED.remove(Constants.getFolderSubpath);
-                        //   editorED.remove(Constants.syncUrl);
-                        editorED.apply();
-
-
-                        editor.putString(Constants.imgAllowLunchFromOnline, "imgAllowLunchFromOnline");
-                        editor.apply();
-
-
-
-
-                        Intent intent = new Intent(getApplicationContext(), WebActivity.class);
-                        startActivity(intent);
-                        finish();
-
-                        alertDialog.dismiss();
-
-                    } else {
-
-
-                        editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                        editor.remove(Constants.imgAllowLunchFromOnline);
-                        editor.apply();
-
-                        editorED.remove(Constants.Tapped_OnlineORoffline);
-                        //  editorED.remove(Constants.getFolderClo);
-                        // editorED.remove(Constants.getFolderSubpath);
-                        //   editorED.remove(Constants.syncUrl);
-                        editorED.apply();
-
-                        Intent intent = new Intent(getApplicationContext(), Splash.class);
-                        startActivity(intent);
-                        finish();
-
-                        alertDialog.dismiss();
-
-
-                    }
-
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                    showToastMessage("Wrong password");
-                }
-
-            }
-        });
-
-        textLaunchOffline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-                String editTextText = editTextText2.getText().toString().trim();
-
-                if (imgEnablePassword.equals(Constants.imgEnablePassword) || editTextText.equals(simpleAdminPassword)) {
-
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-
-                    editorED.putString(Constants.Tapped_OnlineORoffline, Constants.tapped_launchOffline);
-                    //  editorED.remove(Constants.getFolderClo);
-                    // editorED.remove(Constants.getFolderSubpath);
-                    //   editorED.remove(Constants.syncUrl);
-                    editorED.apply();
-
-                    editor.remove(Constants.imgAllowLunchFromOnline);
-                    editor.apply();
-
-                    Intent intent = new Intent(getApplicationContext(), WebActivity.class);
-                    startActivity(intent);
-                    finish();
-
-                    alertDialog.dismiss();
-
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                    showToastMessage("Wrong password");
-                }
-
-            }
-        });
-
-
-        String get_AppMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
-
-
-        textHome.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideKeyBoard(editTextText2);
-                moveTaskToBack(true);
-
-            }
-        });
-
-
-        textLoginAdmin2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-                String editTextText = editTextText2.getText().toString().trim();
-
-
-                if (editTextText.equals(simpleAdminPassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-
-                } else if (imgEnablePassword.equals(Constants.imgEnablePassword)) {
-                    alertDialog.dismiss();
-                    hideKeyBoard(editTextText2);
-
-                    editor.putString(Constants.Did_User_Input_PassWord, Constants.Did_User_Input_PassWord);
-                    editor.apply();
-
-                } else {
-                    hideKeyBoard(editTextText2);
-                    editTextText2.setError("Wrong password");
-                }
-
-
-            }
-        });
-
-
-        alertDialog.show();
-    }
-
-
-    @SuppressLint("MissingInflatedId")
-    private void showPopChangePassowrdDialog() {
-
-        CustomForgetPasswordEmailLayoutBinding binding = CustomForgetPasswordEmailLayoutBinding.inflate(getLayoutInflater());
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(binding.getRoot());
-        final AlertDialog alertDialog = builder.create();
-
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-
-
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-
-        final TextView editTextInputUrl = binding.eitTextEnterPassword;
-        final TextView textContinuPassword = binding.textContinuPassword;
-        final ImageView imgCloseDialog2 = binding.imgCloseDialogForegetPassword;
-        final TextView textForGetPassword = binding.textForGetPassword;
-        final View divider2 = binding.divider2;
-
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        String imgIsemailVisbile = sharedBiometric.getString(Constants.imagEnableEmailVisisbility, "");
-
-        SharedPreferences simpleSavedPassword = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
-        String isSavedEmail = simpleSavedPassword.getString(Constants.isSavedEmail, "");
-
-
-        if (imgIsemailVisbile.equals(Constants.imagEnableEmailVisisbility)) {
-            if (!isSavedEmail.isEmpty()) {
-                editTextInputUrl.setText(isSavedEmail + "");
-               // textForGetPassword.setText("Default Email");
-                divider2.setVisibility(View.VISIBLE);
-                editTextInputUrl.setVisibility(View.VISIBLE);
-            }
-        } else {
-            editTextInputUrl.setEnabled(true);
-         //   textForGetPassword.setText("Default Email");
-            divider2.setVisibility(View.GONE);
-            editTextInputUrl.setVisibility(View.GONE);
-        }
-
-
-        String simpleAdminPassword = simpleSavedPassword.getString(Constants.simpleSavedPassword, "");
-
-        textContinuPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isSavedEmail.isEmpty() && isValidEmail(isSavedEmail)) {
-                    if (isConnected()) {
-                        sendMessage(isSavedEmail, simpleAdminPassword);
-                        alertDialog.dismiss();
-
-                    }else {
-                        showToastMessage("No internet Connection");
-                    }
-
-                } else {
-                    showToastMessage("Default Email Reminder not found");
-                }
-            }
-        });
-
-
-        imgCloseDialog2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                alertDialog.dismiss();
-                showExitConfirmationDialog();
-               // hideKeyBoard(editTextInputUrl);
-            }
-        });
-
-        alertDialog.show();
     }
 
 
@@ -815,90 +109,6 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    private boolean isValidEmail(String email) {
-        String emailPattern = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(\\.[a-zA-Z]{2,})?";
-        Pattern pattern = Pattern.compile(emailPattern);
-        Matcher matcher = pattern.matcher(email);
-        return matcher.matches();
-    }
-
-
-
-    private void second_cancel_download() {
-        try {
-            SharedPreferences myDownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE);
-            long download_ref = myDownloadClass.getLong(Constants.downloadKey, -15);
-
-
-            if (download_ref != -15) {
-                DownloadManager.Query query = new DownloadManager.Query();
-                query.setFilterById(download_ref);
-                Cursor c = ((DownloadManager) getSystemService(DOWNLOAD_SERVICE)).query(query);
-                if (c.moveToFirst()) {
-                    DownloadManager manager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                    manager.remove(download_ref);
-                    SharedPreferences.Editor editor = myDownloadClass.edit();
-                    editor.remove(Constants.downloadKey);
-                    editor.apply();
-                }
-            }
-        } catch (Exception ignored) {
-        }
-    }
-
-
-
-    @SuppressLint("MissingInflatedId")
-    private void show_Pop_Up_Email_Sent_Sucessful(String title, String body) {
-        // Inflate the custom layout
-        CustomEmailSucessLayoutBinding binding = CustomEmailSucessLayoutBinding.inflate(getLayoutInflater());
-
-        // Create AlertDialog Builder
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setView(binding.getRoot());
-        alertDialogBuilder.setCancelable(false);
-
-        // Create the AlertDialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // Set background drawable to be transparent
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        // Apply actions to views in the binding
-        binding.textEmailSendOkayBtn.setOnClickListener(view -> {
-
-            alertDialog.dismiss();
-            showExitConfirmationDialog();
-        });
-
-        binding.textSucessful.setText(title);
-        binding.textBodyMessage.setText(body);
-
-        // Show the AlertDialog
-        alertDialog.show();
-    }
-
-
-
-
-
-    private void showToastMessage(String messages) {
-        try {
-            Toast.makeText(getApplicationContext(), messages, Toast.LENGTH_SHORT).show();
-        } catch ( Exception ignored ) {
-        }
-    }
-
-    private void hideKeyBoard(EditText editText) {
-        try {
-            editText.clearFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-        } catch ( Exception ignored ) {
-        }
-    }
 
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -941,8 +151,6 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.preferences, rootKey);
 
 
-            Preference powell_settings = findPreference("powell_settings");
-
 
 
             SwitchPreference swipe_switch = findPreference("swiperefresh");
@@ -969,7 +177,7 @@ public class SettingsActivity extends AppCompatActivity {
             SwitchPreference enableCacheMode = findPreference("enableCacheMode");
 
 
-            Preference additionalSettingsPreference = findPreference("additional_settings_key");
+            Preference go_to_sync_page = findPreference("go_to_sync_page");
 
 
             SharedPreferences sharedBiometric = getContext().getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
@@ -1084,6 +292,7 @@ public class SettingsActivity extends AppCompatActivity {
                             WebActivity.ChangeListener = true;
                             appModeOrTvMode.setTitle("TV App Mode");
 
+                            editor.putString(Constants.imgStartAppRestartOnTvMode, Constants.imgStartAppRestartOnTvMode);
                             editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.TV_Mode);
                             editor.apply();
 
@@ -1096,6 +305,7 @@ public class SettingsActivity extends AppCompatActivity {
                             WebActivity.ChangeListener = true;
 
                             editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode);
+                            editor.remove(Constants.imgStartAppRestartOnTvMode);
                             editor.apply();
 
                         }
@@ -1106,12 +316,12 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
 
-            if (additionalSettingsPreference != null) {
-                additionalSettingsPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            if (go_to_sync_page != null) {
+                go_to_sync_page.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                     @Override
                     public boolean onPreferenceClick(Preference preference) {
 
-                        Intent intent = new Intent(getActivity(), AdditionalSettingsActivity.class);
+                        Intent intent = new Intent(getActivity(), ReSyncActivity.class);
                         startActivity(intent);
                         getActivity().finish();
 
@@ -1123,25 +333,6 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
             }
-
-
-
-
-
-
-            if (powell_settings != null) {
-                powell_settings.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                    @Override
-                    public boolean onPreferenceClick(Preference preference) {
-
-                        Intent intent = new Intent(getActivity(), MyTestDownloadAPI.class);
-                        startActivity(intent);
-
-                        return true;
-                    }
-                });
-            }
-
 
 
 

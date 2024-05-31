@@ -41,6 +41,7 @@ import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DownloadHe
 import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.ZipDownloader
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
+import sync2app.com.syncapplive.additionalSettings.utils.IndexFileChecker
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -173,7 +174,7 @@ class OnChangeApiServiceSync : Service() {
         countRefresh?.cancel()
 
 
-     //   second_cancel_download()
+        //   second_cancel_download()
 
 
         showToastMessage("Sync On Change Activated")
@@ -196,42 +197,17 @@ class OnChangeApiServiceSync : Service() {
                 refeshingTimmer(1)
 
                 if (networkInfo != null && networkInfo!!.isConnected) {
+                    val get_imagSwtichUseIndexCahngeOrTimeStamp =
+                        sharedBiometric.getString(Constants.imagSwtichUseIndexCahngeOrTimeStamp, "")
 
-                    if (currentTime.isEmpty() || severTime.isEmpty()) {
+                    if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
 
-                        val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-                        val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
-                        val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+                        fetchIndexChangeTime()
 
-                        val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
-
-                        if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
-                            val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
-                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                            getServerTimeFromJson(un_dynaic_path, dynamicPart)
-
-                            Log.d("OnChnageService"," $un_dynaic_path$dynamicPart")
-
-                        } else {
-
-                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                            getServerTimeFromJson(get_tMaster, dynamicPart)
-
-                            Log.d("OnChnageService","$get_tMaster$dynamicPart")
-
-                        }
-
-
-
-
-
-
-                        editor.putString(Constants.SynC_Status, Constants.PR_running)
-                        editor.apply()
-
-                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        sendBroadcast(intent22)
+                    } else {
+                        fecthPtTime()
                     }
+
 
                 } else {
                     showToastMessage("No internet Connection")
@@ -245,6 +221,104 @@ class OnChangeApiServiceSync : Service() {
 
         return START_STICKY
     }
+
+
+    private fun fetchIndexChangeTime() {
+
+        val currentTime =
+            myDownloadClass.getString(Constants.CurrentServerTime_for_IndexChange, "") + ""
+        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved_For_IndexChange, "") + ""
+
+        if (currentTime.isEmpty() || severTime.isEmpty()) {
+
+            val get_tMaster: String =
+                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+            val get_UserID: String =
+                myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+            val get_LicenseKey: String =
+                myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+
+            val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+            if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+
+                val urlPath =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$get_UserID/$get_LicenseKey/App/index.html"
+                checkIndexFileChange(urlPath)
+
+            } else {
+
+                val urlPath = "$get_tMaster$get_UserID/$get_LicenseKey/App/index.html"
+                checkIndexFileChange(urlPath)
+            }
+
+
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SynC_Status, Constants.PR_running)
+            editor.apply()
+
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+        }
+
+
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun checkIndexFileChange(url: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val checker = IndexFileChecker(url)
+            val result = checker.checkIndexFileChange()
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SeverTimeSaved, result)
+            editor.putString(Constants.CurrentServerTime, result)
+            editor.apply()
+        }
+    }
+
+
+
+    private fun fecthPtTime() {
+        val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+
+        if (currentTime.isEmpty() || severTime.isEmpty()) {
+
+            val get_tMaster: String =
+                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+            val get_UserID: String =
+                myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+            val get_LicenseKey: String =
+                myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+
+            val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+            if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+                val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
+                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                getServerTimeFromJson(un_dynaic_path, dynamicPart)
+
+                Log.d("OnChnageService", " $un_dynaic_path$dynamicPart")
+
+            } else {
+
+                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                getServerTimeFromJson(get_tMaster, dynamicPart)
+
+                Log.d("OnChnageService", "$get_tMaster$dynamicPart")
+
+            }
+
+
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SynC_Status, Constants.PR_running)
+            editor.apply()
+
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+        }
+    }
+
 
 
     override fun onBind(intent: Intent): IBinder? {
@@ -267,7 +341,7 @@ class OnChangeApiServiceSync : Service() {
         handler.removeCallbacksAndMessages(null)
         countRefresh?.cancel()
 
-      //  second_cancel_download()
+        //  second_cancel_download()
 
     }
 
@@ -382,11 +456,6 @@ class OnChangeApiServiceSync : Service() {
                     val result = checkUrlExistence(baseUrl)
                     if (result) {
                         manageDownload(get_ModifiedUrl, getFolderClo, getFolderSubpath)
-
-                        withContext(Dispatchers.Main) {
-                            //  showToastMessage("Partner (On change API) interval $baseUrl")
-                        }
-
                     } else {
                         withContext(Dispatchers.Main) {
                             showToastMessage("Invalid url")
@@ -407,9 +476,6 @@ class OnChangeApiServiceSync : Service() {
                     val result = checkUrlExistence(baseUrl)
                     if (result) {
                         manageDownload(get_tMaster, getFolderClo, getFolderSubpath)
-                        withContext(Dispatchers.Main) {
-                         //   showToastMessage("Master (On change API)   interval $baseUrl")
-                        }
 
                     } else {
                         withContext(Dispatchers.Main) {
@@ -430,7 +496,7 @@ class OnChangeApiServiceSync : Service() {
     private fun manageDownload_for_Manual(get_getSavedEditTextInputSynUrlZip:String ) {
 
         val intent22 = Intent(Constants.RECIVER_PROGRESS)
-        intent22.putExtra(Constants.SynC_Status, Constants.PR_running)
+        intent22.putExtra(Constants.SynC_Status, Constants.PR_checking)
         sendBroadcast(intent22)
 
         GlobalScope.launch(Dispatchers.IO) {
@@ -453,7 +519,7 @@ class OnChangeApiServiceSync : Service() {
     private fun manageDownload(get_ModifiedUrl:String, getFolderClo:String, getFolderSubpath:String, ) {
 
         val intent22 = Intent(Constants.RECIVER_PROGRESS)
-        intent22.putExtra(Constants.SynC_Status, Constants.PR_running)
+        intent22.putExtra(Constants.SynC_Status, Constants.PR_checking)
         sendBroadcast(intent22)
 
         GlobalScope.launch(Dispatchers.IO) {
@@ -486,7 +552,7 @@ class OnChangeApiServiceSync : Service() {
                     val editor = myDownloadClass.edit()
                     editor.putString(Constants.numberOfFiles, numberOfFiles)
                     editor.putString(Constants.filesChange, "CF: 0")
-                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                    editor.putString(Constants.SynC_Status, Constants.PR_running)
                     editor.apply()
 
                     val intent22 = Intent(Constants.RECIVER_PROGRESS)
@@ -518,7 +584,7 @@ class OnChangeApiServiceSync : Service() {
                     val editor = myDownloadClass.edit()
                     editor.putString(Constants.numberOfFiles, numberOfFiles)
                     editor.putString(Constants.filesChange, "CF: 0")
-                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                    editor.putString(Constants.SynC_Status, Constants.PR_running)
                     editor.apply()
 
                     val intent22 = Intent(Constants.RECIVER_PROGRESS)
@@ -537,7 +603,6 @@ class OnChangeApiServiceSync : Service() {
 
 
 
-/*
     private fun getZipDownloads_Manual(sN: String, folderName: String, fileName: String) {
 
         Thread {
@@ -592,7 +657,7 @@ class OnChangeApiServiceSync : Service() {
                     val editor = myDownloadClass.edit()
                     editor.putString(Constants.textDownladByes, "$totalPercentage%")
                     editor.putString(Constants.progressBarPref, "$totalPercentage")
-                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
                     editor.apply()
 
                     if (sN == totalFiles.toString()) {
@@ -619,7 +684,7 @@ class OnChangeApiServiceSync : Service() {
 
 
 
-              }
+                }
 
 
                 override fun whenExecutionStarts() {
@@ -641,76 +706,334 @@ class OnChangeApiServiceSync : Service() {
         }.start()
     }
 
-*/
 
 
-    @SuppressLint("SuspiciousIndentation")
-    private fun getZipDownloads_Manual(sN: String, folderName: String, fileName: String) {
+    /*
+        @SuppressLint("SuspiciousIndentation")
+        private fun getZipDownloads_Manual(sN: String, folderName: String, fileName: String) {
+            Thread {
+
+                val Syn2AppLive = Constants.Syn2AppLive
+                val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
+
+                val getSavedEditTextInputSynUrlZip = myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+
+                var replacedUrl = getSavedEditTextInputSynUrlZip // Initialize it with original value
+
+
+                if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
+                    replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Start/start1.csv", "/$folderName/$fileName")
+
+                } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
+                    replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Api/update1.csv", "/$folderName/$fileName"
+                    )
+                }else{
+
+                    Log.d("getZipDownloadsManually", "Unable to replace this url")
+                }
+
+
+                // Adjusting the file path to save the downloaded file
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    saveMyFileToStorage
+                )
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
+
+                val getFile_name = fileName.toString()
+                val fileDestination = File(dir.absolutePath, getFile_name)
+
+
+                val request: Request = Request.Builder()
+                    .url(replacedUrl)
+                    .build()
+                try {
+                    okClient.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            //get response body
+
+                            Log.d("getZipDownloadsManually", replacedUrl)
+                            Log.d("getZipDownloadsManually", saveMyFileToStorage)
+
+
+                            val responseBody = response.body
+                            val contentLength = responseBody!!.contentLength()
+
+                            //get source and set destination
+                            val source = responseBody.source()
+                            val outputStream =
+                                FileOutputStream(fileDestination.absolutePath)
+
+                            //set file name
+                            //  activity.setIndividualFileName(theFile.getFile_name());
+
+                            //run pull algorithm
+                            val buffer = ByteArray(4096)
+                            var totalBytesRead: Long = 0
+                            var bytesRead: Int
+                            while (source.read(buffer).also { bytesRead = it } != -1) {
+                                outputStream.write(buffer, 0, bytesRead)
+                                totalBytesRead += bytesRead.toLong()
+
+
+                                    try {
+
+
+                                        val filesCounts = "CF : $sN"
+                                        val editor = myDownloadClass.edit()
+                                        editor.putString(Constants.filesChange, filesCounts)
+                                        editor.apply()
+
+
+                                    } catch (_: Exception) {
+                                    }
+                                }
+
+
+
+                            //close IO stream
+                            outputStream.flush()
+                            outputStream.close()
+
+
+
+                                try {
+
+                                    currentDownloadIndex++
+                                    downloadSequentiallyManually(mUserViewModel.readAllData.value ?: emptyList())
+
+
+                                    val totalPercentage =
+                                        ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
+
+                                    ///   showToastMessage(totalPercentage.toString())
+                                    val editor = myDownloadClass.edit()
+                                    editor.putString(Constants.textDownladByes, "$totalPercentage%")
+                                    editor.putString(Constants.progressBarPref, "$totalPercentage")
+                                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                    editor.apply()
+
+                                    if (sN == totalFiles.toString()) {
+
+                                        val editor22 = myDownloadClass.edit()
+
+                                        editor22.remove(Constants.textDownladByes)
+                                        editor22.remove(Constants.progressBarPref)
+
+                                        editor22.putString(Constants.SynC_Status, Constants.PR_Refresh)
+                                        editor22.putString(Constants.numberOfFiles, "NF: 0")
+                                        editor22.putString(Constants.filesChange, "CF: 0")
+                                        editor22.apply()
+
+
+                                        isExecutionCompleted = true
+                                        mUserViewModel.deleteAllFiles()
+
+                                        myHandler.postDelayed(Runnable {
+                                            stratMyACtivity()
+                                        }, 1000)
+
+                                    }
+
+
+                                } catch (e: Exception) {
+                                    stratMyACtivity()
+
+                                }
+
+
+
+                        } else {
+
+                            stratMyACtivity()
+
+                        }
+                    }
+                } catch (e: IOException) {
+                    // Handle exception in download
+
+                    Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
+
+                    try {
+                        stratMyACtivity()
+
+                    }catch (_:Exception){
+
+                    }
+
+
+
+
+                    }
+
+
+
+            }.start()
+
+
+        }
+
+
+    */
+
+
+    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
+
         Thread {
 
+            isDownloading = true
+
+            val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+            val getFolderSubpath =
+                myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+            val get_ModifiedUrl =
+                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+
+
             val Syn2AppLive = Constants.Syn2AppLive
-            val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
-
-            val getSavedEditTextInputSynUrlZip = myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
-
-            var replacedUrl = getSavedEditTextInputSynUrlZip // Initialize it with original value
-
-
-            if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
-                replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Start/start1.csv", "/$folderName/$fileName")
-
-            } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
-                replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Api/update1.csv", "/$folderName/$fileName"
-                )
-            }else{
-
-                Log.d("getZipDownloadsManually", "Unable to replace this url")
-            }
-
+            val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
 
             // Adjusting the file path to save the downloaded file
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            val dir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 saveMyFileToStorage
             )
             if (!dir.exists()) {
                 dir.mkdirs()
             }
-
             val getFile_name = fileName.toString()
+            val getFileUrl =
+                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
             val fileDestination = File(dir.absolutePath, getFile_name)
 
 
-            val request: Request = Request.Builder()
-                .url(replacedUrl)
-                .build()
-            try {
-                okClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        //get response body
-
-                        Log.d("getZipDownloadsManually", replacedUrl)
-                        Log.d("getZipDownloadsManually", saveMyFileToStorage)
+            //start download
+            ZipDownloader(object : DownloadHelper {
+                @SuppressLint("SetTextI18n")
+                override fun afterExecutionIsComplete() {
 
 
-                        val responseBody = response.body
-                        val contentLength = responseBody!!.contentLength()
+                    currentDownloadIndex++
+                    downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
 
-                        //get source and set destination
-                        val source = responseBody.source()
-                        val outputStream =
-                            FileOutputStream(fileDestination.absolutePath)
 
-                        //set file name
-                        //  activity.setIndividualFileName(theFile.getFile_name());
+                    val totalPercentage = ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
 
-                        //run pull algorithm
-                        val buffer = ByteArray(4096)
-                        var totalBytesRead: Long = 0
-                        var bytesRead: Int
-                        while (source.read(buffer).also { bytesRead = it } != -1) {
-                            outputStream.write(buffer, 0, bytesRead)
-                            totalBytesRead += bytesRead.toLong()
+                    ///   showToastMessage(totalPercentage.toString())
+                    val editor = myDownloadClass.edit()
+                    editor.putString(Constants.textDownladByes, "$totalPercentage%")
+                    editor.putString(Constants.progressBarPref, "$totalPercentage")
+                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                    editor.apply()
+
+                    if (sN == totalFiles.toString()) {
+
+                        val editor22 = myDownloadClass.edit()
+
+                        editor22.remove(Constants.textDownladByes)
+                        editor22.remove(Constants.progressBarPref)
+
+                        editor22.putString(Constants.SynC_Status, "Completed")
+                        editor22.putString(Constants.numberOfFiles, "NF: 0")
+                        editor22.putString(Constants.filesChange, "CF: 0")
+                        editor22.apply()
+
+
+                        isExecutionCompleted = true
+                        mUserViewModel.deleteAllFiles()
+
+                        myHandler.postDelayed(Runnable {
+                            stratMyACtivity()
+                        }, 1000)
+
+                    }
+                }
+
+
+                override fun whenExecutionStarts() {
+
+
+                }
+
+                @SuppressLint("SetTextI18n")
+                override fun whileInProgress(i: Int) {
+
+                    val filesCounts = "CF : $sN"
+                    val editor = myDownloadClass.edit()
+                    editor.putString(Constants.filesChange, filesCounts)
+                    editor.apply()
+
+
+                }
+            }).execute(getFileUrl, fileDestination.absolutePath)
+        }.start()
+    }
+
+
+
+
+    /*
+        private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
+
+            Thread {
+
+                isDownloading = true
+
+                val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+                val getFolderSubpath =
+                    myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+                val get_ModifiedUrl =
+                    myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+
+
+                val Syn2AppLive = Constants.Syn2AppLive
+                val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
+
+                // Adjusting the file path to save the downloaded file
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    saveMyFileToStorage
+                )
+                if (!dir.exists()) {
+                    dir.mkdirs()
+                }
+                val getFile_name = fileName.toString()
+                val getFileUrl =
+                    "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
+                val fileDestination = File(dir.absolutePath, getFile_name)
+
+
+                val request: Request = Request.Builder()
+                    .url(getFileUrl)
+                    .build()
+                try {
+                    okClient.newCall(request).execute().use { response ->
+                        if (response.isSuccessful) {
+                            //get response body
+
+                            Log.d("getZipDownloadsManually", getFileUrl)
+                            Log.d("getZipDownloadsManually", saveMyFileToStorage)
+
+
+                            val responseBody = response.body
+                            val contentLength = responseBody!!.contentLength()
+
+                            //get source and set destination
+                            val source = responseBody.source()
+                            val outputStream =
+                                FileOutputStream(fileDestination.absolutePath)
+
+                            //set file name
+                            //  activity.setIndividualFileName(theFile.getFile_name());
+
+                            //run pull algorithm
+                            val buffer = ByteArray(4096)
+                            var totalBytesRead: Long = 0
+                            var bytesRead: Int
+                            while (source.read(buffer).also { bytesRead = it } != -1) {
+                                outputStream.write(buffer, 0, bytesRead)
+                                totalBytesRead += bytesRead.toLong()
 
 
                                 try {
@@ -728,9 +1051,9 @@ class OnChangeApiServiceSync : Service() {
 
 
 
-                        //close IO stream
-                        outputStream.flush()
-                        outputStream.close()
+                            //close IO stream
+                            outputStream.flush()
+                            outputStream.close()
 
 
 
@@ -780,291 +1103,32 @@ class OnChangeApiServiceSync : Service() {
 
 
 
-                    } else {
+                        } else {
 
-                        stratMyACtivity()
-
-                    }
-                }
-            } catch (e: IOException) {
-                // Handle exception in download
-
-                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
-
-                try {
-                    stratMyACtivity()
-
-                }catch (_:Exception){
-
-                }
-
-
-
-
-                }
-
-
-
-        }.start()
-
-
-    }
-
-
-
-
-/*
-    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
-
-        Thread {
-
-            isDownloading = true
-
-            val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-            val getFolderSubpath =
-                myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
-            val get_ModifiedUrl =
-                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-
-
-            val Syn2AppLive = Constants.Syn2AppLive
-            val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
-
-            // Adjusting the file path to save the downloaded file
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                saveMyFileToStorage
-            )
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            val getFile_name = fileName.toString()
-            val getFileUrl =
-                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-            val fileDestination = File(dir.absolutePath, getFile_name)
-
-
-            //start download
-            ZipDownloader(object : DownloadHelper {
-                @SuppressLint("SetTextI18n")
-                override fun afterExecutionIsComplete() {
-
-
-                    currentDownloadIndex++
-                    downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-
-                    val totalPercentage =
-                        ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                    ///   showToastMessage(totalPercentage.toString())
-                    val editor = myDownloadClass.edit()
-                    editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                    editor.putString(Constants.progressBarPref, "$totalPercentage")
-                    editor.putString(Constants.SynC_Status, Constants.PR_running)
-                    editor.apply()
-
-                    if (sN == totalFiles.toString()) {
-
-                        val editor22 = myDownloadClass.edit()
-
-                        editor22.remove(Constants.textDownladByes)
-                        editor22.remove(Constants.progressBarPref)
-
-                        editor22.putString(Constants.SynC_Status, "Completed")
-                        editor22.putString(Constants.numberOfFiles, "NF: 0")
-                        editor22.putString(Constants.filesChange, "CF: 0")
-                        editor22.apply()
-
-
-                        isExecutionCompleted = true
-                        mUserViewModel.deleteAllFiles()
-
-                        myHandler.postDelayed(Runnable {
-                            stratMyACtivity()
-                        }, 1000)
-
-                    }
-                }
-
-
-                override fun whenExecutionStarts() {
-
-
-                }
-
-                @SuppressLint("SetTextI18n")
-                override fun whileInProgress(i: Int) {
-
-                    val filesCounts = "CF : $sN"
-                    val editor = myDownloadClass.edit()
-                    editor.putString(Constants.filesChange, filesCounts)
-                    editor.apply()
-
-
-                }
-            }).execute(getFileUrl, fileDestination.absolutePath)
-        }.start()
-    }
-*/
-
-
-
-
-    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
-
-        Thread {
-
-            isDownloading = true
-
-            val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-            val getFolderSubpath =
-                myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
-            val get_ModifiedUrl =
-                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-
-
-            val Syn2AppLive = Constants.Syn2AppLive
-            val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
-
-            // Adjusting the file path to save the downloaded file
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                saveMyFileToStorage
-            )
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            val getFile_name = fileName.toString()
-            val getFileUrl =
-                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-            val fileDestination = File(dir.absolutePath, getFile_name)
-
-
-            val request: Request = Request.Builder()
-                .url(getFileUrl)
-                .build()
-            try {
-                okClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        //get response body
-
-                        Log.d("getZipDownloadsManually", getFileUrl)
-                        Log.d("getZipDownloadsManually", saveMyFileToStorage)
-
-
-                        val responseBody = response.body
-                        val contentLength = responseBody!!.contentLength()
-
-                        //get source and set destination
-                        val source = responseBody.source()
-                        val outputStream =
-                            FileOutputStream(fileDestination.absolutePath)
-
-                        //set file name
-                        //  activity.setIndividualFileName(theFile.getFile_name());
-
-                        //run pull algorithm
-                        val buffer = ByteArray(4096)
-                        var totalBytesRead: Long = 0
-                        var bytesRead: Int
-                        while (source.read(buffer).also { bytesRead = it } != -1) {
-                            outputStream.write(buffer, 0, bytesRead)
-                            totalBytesRead += bytesRead.toLong()
-
-
-                            try {
-
-
-                                val filesCounts = "CF : $sN"
-                                val editor = myDownloadClass.edit()
-                                editor.putString(Constants.filesChange, filesCounts)
-                                editor.apply()
-
-
-                            } catch (_: Exception) {
-                            }
-                        }
-
-
-
-                        //close IO stream
-                        outputStream.flush()
-                        outputStream.close()
-
-
-
-                        try {
-
-                            currentDownloadIndex++
-                            downloadSequentiallyManually(mUserViewModel.readAllData.value ?: emptyList())
-
-
-                            val totalPercentage =
-                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                            ///   showToastMessage(totalPercentage.toString())
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                            editor.putString(Constants.progressBarPref, "$totalPercentage")
-                            editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                            editor.apply()
-
-                            if (sN == totalFiles.toString()) {
-
-                                val editor22 = myDownloadClass.edit()
-
-                                editor22.remove(Constants.textDownladByes)
-                                editor22.remove(Constants.progressBarPref)
-
-                                editor22.putString(Constants.SynC_Status, Constants.PR_Refresh)
-                                editor22.putString(Constants.numberOfFiles, "NF: 0")
-                                editor22.putString(Constants.filesChange, "CF: 0")
-                                editor22.apply()
-
-
-                                isExecutionCompleted = true
-                                mUserViewModel.deleteAllFiles()
-
-                                myHandler.postDelayed(Runnable {
-                                    stratMyACtivity()
-                                }, 1000)
-
-                            }
-
-
-                        } catch (e: Exception) {
                             stratMyACtivity()
 
                         }
+                    }
+                } catch (e: IOException) {
+                    // Handle exception in download
 
+                    Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
 
-
-                    } else {
-
+                    try {
                         stratMyACtivity()
 
+                    }catch (_:Exception){
+
                     }
-                }
-            } catch (e: IOException) {
-                // Handle exception in download
 
-                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
 
-                try {
-                    stratMyACtivity()
 
-                }catch (_:Exception){
 
                 }
+            }.start()
+        }
 
-
-
-
-            }
-        }.start()
-    }
-
+    */
 
     private fun saveURLPairs(csvData: String) {
         val pairs = parseCSV(csvData)
@@ -1087,8 +1151,9 @@ class OnChangeApiServiceSync : Service() {
                 val fileName =
                     folderAndFile.lastOrNull() ?: continue // Skip lines with missing file name
                 val status = "" // Set your status here
-
+                val id =   System.currentTimeMillis()
                 val files = FilesApi(
+                    id,
                     SN = sn.toString(),
                     FolderName = folderName,
                     FileName = fileName,
@@ -1138,11 +1203,8 @@ class OnChangeApiServiceSync : Service() {
                     if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv") || getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
                         replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Start/start1.csv", "/Api/update1.csv")
                         ManageGetDownloadMyCSVManual(replacedUrl)
-                      //  showToastMessage("OnChange Api $replacedUrl")
-
                     }else{
                         Log.d("getZipDownloadsManually", "Unable to replace this url for update.csv")
-                       // showToastMessage("Unable to read CSV file from locatio
                     }
 
 
@@ -1151,11 +1213,11 @@ class OnChangeApiServiceSync : Service() {
 
             }else {
 
-            handler.postDelayed(Runnable {
-                ManageGetDownloadMyCSV()
-            }, 1000)
+                handler.postDelayed(Runnable {
+                    ManageGetDownloadMyCSV()
+                }, 1000)
 
-        }
+            }
 
 
         } else {
@@ -1172,7 +1234,7 @@ class OnChangeApiServiceSync : Service() {
 
 
             val editor = myDownloadClass.edit()
-         //   editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
+            //   editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
             editor.putString(Constants.numberOfFiles, "NF: 0")
             editor.putString(Constants.filesChange, "CF: 0")
 
@@ -1234,6 +1296,12 @@ class OnChangeApiServiceSync : Service() {
                         if (currentTime == severTime) {
 
 
+                            val editor = myDownloadClass.edit()
+                            editor.putString(Constants.numberOfFiles, "NF: 0")
+                            editor.putString(Constants.filesChange, "CF: 0")
+                            editor.remove(Constants.textDownladByes)
+                            editor.remove(Constants.progressBarPref)
+
                             editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
                             editor.apply()
 
@@ -1252,24 +1320,16 @@ class OnChangeApiServiceSync : Service() {
                                 } else {
                                     val intent22111 = Intent(Constants.RECIVER_PROGRESS)
                                     sendBroadcast(intent22111)
-
                                     showToastMessage("Sync Already in Progress")
-
 
                                     if (isRxtracting == true) {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Extracting
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
                                         editor.apply()
 
                                     } else {
                                         //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Downloading
-                                        )
+                                        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
                                         editor.apply()
 
                                     }
@@ -1431,16 +1491,39 @@ class OnChangeApiServiceSync : Service() {
 
                         val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
 
+                        val get_imagSwtichUseIndexCahngeOrTimeStamp = sharedBiometric.getString(Constants.imagSwtichUseIndexCahngeOrTimeStamp, "")
+
+
                         if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
-                            val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
-                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                            fetchData(un_dynaic_path, dynamicPart)
-                            Log.d("OnChnageService","Img  $un_dynaic_path$dynamicPart")
+
+                            if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
+                                val urlPath = "https://cp.cloudappserver.co.uk/app_base/public/$get_UserID/$get_LicenseKey/App/index.html"
+                                fetch_Data_Index_OnChange(urlPath)
+
+                            } else {
+                                val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
+                                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                                fetchData(un_dynaic_path, dynamicPart)
+                                Log.d("OnChnageService","Img  $un_dynaic_path$dynamicPart")
+
+                            }
+
+
                         } else {
 
-                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                            fetchData(get_tMaster, dynamicPart)
-                            Log.d("OnChnageService","$get_tMaster$dynamicPart")
+
+                            if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
+
+                                val urlPath = "$get_tMaster/$get_UserID/$get_LicenseKey/App/index.html"
+                                fetch_Data_Index_OnChange(urlPath)
+
+                            }else{
+                                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                                fetchData(get_tMaster, dynamicPart)
+                                Log.d("OnChnageService","$get_tMaster$dynamicPart")
+
+                            }
+
                         }
 
 
@@ -1455,7 +1538,6 @@ class OnChangeApiServiceSync : Service() {
 
                     } else {
                         showToastMessage("No internet Connection")
-
 
                         //  editor.putString(Constants.SynC_Status, "Error Network")
                         //   editor.apply()
@@ -1497,6 +1579,144 @@ class OnChangeApiServiceSync : Service() {
             }
         }
         countdownTimerServerUpdater?.start()
+    }
+
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun fetch_Data_Index_OnChange(urlPath: String) {
+
+
+        val editor = myDownloadClass.edit()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+
+
+                val checker = IndexFileChecker(urlPath)
+                val getvalue = checker.checkIndexFileChange()
+
+                editor.putString(Constants.CurrentServerTime, getvalue)
+                editor.apply()
+
+                val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+                val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+
+                if (currentTime == severTime) {
+
+
+                    val editor = myDownloadClass.edit()
+                    editor.putString(Constants.numberOfFiles, "NF: 0")
+                    editor.putString(Constants.filesChange, "CF: 0")
+                    editor.remove(Constants.textDownladByes)
+                    editor.remove(Constants.progressBarPref)
+
+                    editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
+                    editor.apply()
+
+
+                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                    sendBroadcast(intent22)
+
+                    myHandler.postDelayed(Runnable {
+
+                        if (isDownloading == false) {
+                            editor.putString(Constants.SynC_Status, Constants.PR_running)
+                            editor.apply()
+                            val intent2244 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent2244)
+
+                        } else {
+                            val intent22111 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22111)
+                            showToastMessage("Sync Already in Progress")
+
+                            if (isRxtracting == true) {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
+                                editor.apply()
+
+                            } else {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.apply()
+
+                            }
+
+                        }
+
+
+                    }, 1300)
+
+
+                } else {
+
+                    if (isDownloading == false) {
+                        makeAPIRequest()
+
+                        checkIndexFileChange(urlPath)
+
+                        editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
+                        editor.apply()
+
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        sendBroadcast(intent22)
+
+
+                    } else {
+                        showToastMessage("Sync Already in Progress")
+
+                        myHandler.postDelayed(Runnable {
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22)
+
+                            if (isRxtracting == true) {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(
+                                    Constants.SynC_Status,
+                                    Constants.PR_Extracting
+                                )
+                                editor.apply()
+
+                            } else {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(
+                                    Constants.SynC_Status,
+                                    Constants.PR_Downloading
+                                )
+                                editor.apply()
+
+                            }
+
+
+                        }, 1300)
+
+                    }
+
+                }
+
+
+
+            } catch (e: HttpException) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("HTTP Exception: ${e.message()}")
+
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    showToastMessage("Error: ${e.message}")
+
+                    showToastMessage("No internet Connection")
+
+
+                }
+            }
+        }
+
+
+
+
+
     }
 
 

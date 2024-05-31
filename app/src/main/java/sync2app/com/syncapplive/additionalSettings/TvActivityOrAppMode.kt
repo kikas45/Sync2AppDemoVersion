@@ -14,7 +14,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
@@ -27,12 +30,15 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import kotlinx.coroutines.launch
+import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.ApiUrlViewModel
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.DomainUrl
 import sync2app.com.syncapplive.additionalSettings.ApiUrls.SavedApiAdapter
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
 import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.UserViewModel
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkStoragePermission
@@ -49,6 +55,7 @@ import sync2app.com.syncapplive.databinding.ProgressValidateUserDialogLayoutBind
 import java.io.File
 import java.util.Objects
 
+
 class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickListener {
     private lateinit var binding: ActivityTvOrAppModePageBinding
     private var hasPermission = false
@@ -63,9 +70,16 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
     private val mUserViewModel by viewModels<UserViewModel>()
 
 
+    private  val DRAW_OVER_OTHER_APP_PERMISSION = 2011
+
     private val adapterApi by lazy {
         SavedApiAdapter(this)
     }
+    private val handler: Handler by lazy {
+        Handler(Looper.getMainLooper())
+    }
+
+
     private lateinit var custom_ApI_Dialog: Dialog
 
     private lateinit var customProgressDialog: Dialog
@@ -131,7 +145,32 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         binding = ActivityTvOrAppModePageBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // SIMPLE PASSWORD
+        MyApplication.incrementRunningActivities()
+
+
+        //add exception
+        Methods.addExceptionHandler(this)
+
+
+
+        window.decorView.systemUiVisibility =
+            (View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
+
+
+
+        val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
+        val get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "")
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage()
+        }
+
+        if (get_imageUseBranding == Constants.imageUseBranding) {
+            loadImage()
+        }
+
 
         val CheckForPassword = simpleSavedPassword.getString(Constants.onCreatePasswordSaved, "")
 
@@ -169,25 +208,46 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         }
 
 
-        val editoreee = simpleSavedPassword.edit()
+        val editoreedde = simpleSavedPassword.edit()
         getUrlBasedOnSpinnerText = ""
-        editoreee.remove(Constants.Saved_Domains_Name)
-        editoreee.remove(Constants.Saved_Domains_Urls)
-        editoreee.apply()
+        editoreedde.remove(Constants.Saved_Domains_Name)
+        editoreedde.remove(Constants.Saved_Domains_Urls)
+        editoreedde.apply()
 
+
+        handler.postDelayed(Runnable {
+            val editoreee = simpleSavedPassword.edit()
+            binding.texturlsSavedDownload.text = "Select Partner Url"
+            binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.light_gray_wash))
+            binding.textPartnerUrlLunch.text = "Select Partner Url"
+
+            editoreee.remove(Constants.Saved_Domains_Name)
+            editoreee.remove(Constants.Saved_Domains_Urls)
+
+            editoreee.putString(Constants.imagSwtichPartnerUrl, "imagSwtichPartnerUrl")
+            editoreee.apply()
+
+            binding.imgUserMasterDomainORCustom.isChecked = true
+
+        }, 300)
 
         binding.imgUserMasterDomainORCustom.setOnCheckedChangeListener { compoundButton, isValued ->
 
             hideKeyBoard(binding.editTextUserID)
             if (compoundButton.isChecked) {
-
+                val editoreee = simpleSavedPassword.edit()
                 binding.texturlsSavedDownload.text = "Select Partner Url"
                 binding.texturlsSavedDownload.setTextColor(ContextCompat.getColor(applicationContext, R.color.light_gray_wash))
                 binding.textPartnerUrlLunch.text = "Select Partner Url"
 
                 editoreee.remove(Constants.Saved_Domains_Name)
                 editoreee.remove(Constants.Saved_Domains_Urls)
+
+                editoreee.putString(Constants.imagSwtichPartnerUrl, "imagSwtichPartnerUrl")
+
                 editoreee.apply()
+
+
 
             } else {
 
@@ -198,6 +258,9 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
                 getUrlBasedOnSpinnerText = ""
 
+                val editoreee = simpleSavedPassword.edit()
+                editoreee.putString(Constants.imagSwtichPartnerUrl, "imagSwtichPartnerUrl")
+                editoreee.apply()
             }
         }
 
@@ -228,6 +291,21 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 navigateAppMolde = false
             }
         }
+
+
+        binding.textView2.setOnClickListener(View.OnClickListener {
+           throw RuntimeException("Intentional crash for testing purposes")
+
+        })
+
+
+
+
+        //add exception
+        Methods.addExceptionHandler(this)
+
+        /// allow app to draw over other apps permission
+        checkOverlayBackground()
 
 
     }
@@ -346,10 +424,16 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                             }
 
 
-                            if (!binding.imgUserMasterDomainORCustom.isChecked) {
+                            // check if Api or Custom server
+                            if (binding.imgUserMasterDomainORCustom.isChecked) {
                                 // save the modified url
                                 val editorDownload = myDownloadClass.edit()
                                 editorDownload.putString(Constants.get_ModifiedUrl, get_editTextMaster)
+                                editorDownload.apply()
+                            }else{
+                                // save the custom url
+                                val editorDownload = myDownloadClass.edit()
+                                editorDownload.putString(Constants.get_ModifiedUrl, Constants.customDomainUrl)
                                 editorDownload.apply()
                             }
 
@@ -405,6 +489,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.App_Mode)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
+                editor.remove(Constants.imgStartAppRestartOnTvMode)
                 editor.apply()
                 finish()
 
@@ -419,6 +504,7 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
                 //  startActivity(Intent(applicationContext, ReSyncActivity::class.java))
                 startActivity(Intent(applicationContext, RequiredBioActivity::class.java))
                 editor.putString(Constants.MY_TV_OR_APP_MODE, Constants.TV_Mode)
+                editor.putString(Constants.imgStartAppRestartOnTvMode, Constants.imgStartAppRestartOnTvMode)
                 editor.putString(Constants.CALL_RE_SYNC_MANGER, Constants.CALL_RE_SYNC_MANGER)
                 editor.putString(Constants.FIRST_TIME_APP_START, Constants.FIRST_TIME_APP_START)
                 editor.apply()
@@ -717,10 +803,15 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
         alertDialog.setCanceledOnTouchOutside(true)
         alertDialog.setCancelable(true)
 
+
         // Set the background of the AlertDialog to be transparent
         if (alertDialog.window != null) {
             alertDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+
         }
+
+
 
         bindingCm.apply {
 
@@ -879,6 +970,71 @@ class TvActivityOrAppMode : AppCompatActivity(), SavedApiAdapter.OnItemClickList
 
         custom_ApI_Dialog.dismiss()
     }
+
+
+    private fun checkOverlayBackground() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+            // Request permission to draw overlays
+            val intent = Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:${packageName}")
+            )
+            startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == DRAW_OVER_OTHER_APP_PERMISSION) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                // Check if permission is granted after the user interaction
+                if (Settings.canDrawOverlays(this)) {
+                    // Permission granted, you can now display over other apps
+                    // Here you can initiate the action to display your app over other apps
+                } else {
+                    // Permission not granted, recheck or handle accordingly
+                    checkOverlayBackground()
+                }
+            }
+        }
+    }
+
+
+    private fun loadImage() {
+
+        val sharedP = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE)
+        val getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString()
+        val pathFolder =
+            "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/" + Constants.Syn2AppLive + "/" + pathFolder
+        val fileTypes = "app_logo.png"
+        val file = File(folder, fileTypes)
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.imageView2)
+        }
+    }
+
+
+    private fun loadBackGroundImage() {
+
+        val fileTypes = "app_background.png"
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+        val pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/${Constants.Syn2AppLive}/" + pathFolder
+        val file = File(folder, fileTypes)
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.backgroundImage)
+
+        }
+    }
+
+
 
 
 }

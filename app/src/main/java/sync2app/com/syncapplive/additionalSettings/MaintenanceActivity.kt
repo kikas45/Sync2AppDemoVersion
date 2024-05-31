@@ -1,25 +1,17 @@
 package sync2app.com.syncapplive.additionalSettings
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import sync2app.com.syncapplive.MyApplication
-import sync2app.com.syncapplive.SettingsActivity
+import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityMaintenanceBinding
-import sync2app.com.syncapplive.databinding.CustomCrashReportBinding
+
 
 class MaintenanceActivity : AppCompatActivity() {
 
@@ -34,20 +26,19 @@ class MaintenanceActivity : AppCompatActivity() {
         )
     }
 
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
+            Context.MODE_PRIVATE
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMaintenanceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        MyApplication.incrementRunningActivities()
         val editor = sharedBiometric.edit()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            getCarshReports()
-        }, 700)
-
-
 
 
 
@@ -151,100 +142,69 @@ class MaintenanceActivity : AppCompatActivity() {
 
             closeBs.setOnClickListener {
 
-                val get_navigationS2222 = sharedBiometric.getString(Constants.SAVE_NAVIGATION, "")
-
-                if (get_navigationS2222.equals(Constants.SettingsPage)) {
-                    val intent = Intent(applicationContext, SettingsActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else if (get_navigationS2222.equals(Constants.AdditionNalPage)) {
-                    val intent =
-                        Intent(applicationContext, AdditionalSettingsActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
-
-
-            }
-
-
-            textHardwarePage.setOnClickListener {
-                val intent = Intent(applicationContext, SystemInfoActivity::class.java)
-                startActivity(intent)
-
-
+                startActivity(Intent(applicationContext, WebActivity::class.java))
+                finish()
             }
 
 
 
 
-            textFileManger.setOnClickListener {
-                startActivity(Intent(applicationContext, FileExplorerActivity::class.java))
-            }
+        }
+
+        binding.apply {
 
 
+            // Restart app on Tv or Mobile mode
+            imgStartAppRestartOnTvMode.setOnCheckedChangeListener { compoundButton, isValued -> // we are putting the values into SHARED PREFERENCE
+                if (compoundButton.isChecked) {
 
-            textCrashPage.setOnClickListener {
+                    editor.putString(Constants.imgStartAppRestartOnTvMode, Constants.imgStartAppRestartOnTvMode)
+                    editor.apply()
+                    binding.textShowAppRestartTvMode.text = "Auto Restart When Crashed"
 
-                val sharedCrashReport =
-                    getSharedPreferences(Constants.SHARED_SAVED_CRASH_REPORT, MODE_PRIVATE)
-                val crashInfo = sharedCrashReport.getString(Constants.crashInfo, "")
-                if (!crashInfo.isNullOrEmpty()) {
-                    showPopCrashReport(crashInfo.toString())
                 } else {
-                    showToastMessage("No crash report yet")
+                    editor.remove(Constants.imgStartAppRestartOnTvMode)
+                    editor.apply()
+                    binding.textShowAppRestartTvMode.text = "Auto Restart When Crashed"
                 }
+            }
+
+
+            val get_imgStartAppRestartOnTvMode = sharedBiometric.getString(Constants.imgStartAppRestartOnTvMode, "")
+
+
+            imgStartAppRestartOnTvMode.isChecked = get_imgStartAppRestartOnTvMode.equals(Constants.imgStartAppRestartOnTvMode)
+
+            if (get_imgStartAppRestartOnTvMode.equals(Constants.imgStartAppRestartOnTvMode)) {
+
+                binding.textShowAppRestartTvMode.text = "Auto Restart When Crashed"
+
+            } else {
+
+                binding.textShowAppRestartTvMode.text = "Auto Restart When Crashed"
+
+            }
+
+
+
+
+            closeBs.setOnClickListener {
 
 
             }
 
+
+
+
         }
 
 
     }
 
-    private fun getCarshReports() {
-        val sharedCrashReport =
-            getSharedPreferences(Constants.SHARED_SAVED_CRASH_REPORT, MODE_PRIVATE)
-        val crashInfo = sharedCrashReport.getString(Constants.crashInfo, "")
-        val crashCalled = sharedCrashReport.getString(Constants.crashCalled, "")
-        if (!crashCalled.isNullOrEmpty()) {
-            showPopCrashReport(crashInfo + "")
-        }
+    override fun onBackPressed() {
+        startActivity(Intent(applicationContext, WebActivity::class.java))
+        finish()
     }
-
-
-    @SuppressLint("MissingInflatedId")
-    private fun showPopCrashReport(message: String) {
-        val binding: CustomCrashReportBinding =
-            CustomCrashReportBinding.inflate(LayoutInflater.from(this))
-        val alertDialogBuilder = AlertDialog.Builder(this)
-        alertDialogBuilder.setView(binding.getRoot())
-
-        val alertDialog = alertDialogBuilder.create()
-        if (alertDialog.window != null) {
-            alertDialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }
-        alertDialog.setCanceledOnTouchOutside(true)
-
-        binding.textDisplayResults.setText(message)
-        binding.textContinuPassword2.setOnClickListener { view ->
-            val sharedCrashReport = getSharedPreferences(
-                Constants.SHARED_SAVED_CRASH_REPORT,
-                MODE_PRIVATE
-            )
-            val editor = sharedCrashReport.edit()
-            editor.remove(Constants.crashCalled)
-            editor.apply()
-            sendCrashReport(message)
-            alertDialog.dismiss()
-        }
-
-        // Show the AlertDialog
-        alertDialog.show()
-    }
-
-
     private fun showToastMessage(messages: String) {
 
         try {
@@ -287,29 +247,6 @@ class MaintenanceActivity : AppCompatActivity() {
     }
 
 
-    override fun onDestroy() {
-        super.onDestroy()
-        try {
-            MyApplication.decrementRunningActivities()
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
-
-
-    override fun onBackPressed() {
-        val get_navigationS2222 = sharedBiometric.getString(Constants.SAVE_NAVIGATION, "")
-
-        if (get_navigationS2222.equals(Constants.SettingsPage)) {
-            val intent = Intent(applicationContext, SettingsActivity::class.java)
-            startActivity(intent)
-            finish()
-        } else if (get_navigationS2222.equals(Constants.AdditionNalPage)) {
-            val intent =
-                Intent(applicationContext, AdditionalSettingsActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
 
 
 }

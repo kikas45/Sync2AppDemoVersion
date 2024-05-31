@@ -3,6 +3,7 @@
     <style name="Theme.RemoteWebViewLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryDark">@color/app_color_primary</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:ignore="NewApi">@android:color/transparent</item>
 
         <item name="colorAccent">#000000</item>
         <item name="android:itemBackground">@color/app_color_primary</item>

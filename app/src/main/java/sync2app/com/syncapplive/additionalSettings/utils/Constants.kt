@@ -70,23 +70,28 @@ class Constants {
         const val Config = "Config.zip"
         const val AppConfigFolder = "AppConfig"
         const val Syn2AppLive = "Syn2AppLive"
+        const val TempFolder = "TempFolder"
         const val Invalid_Config_Url = "Invalid Config Url"
 
         // for sync Api
         const val numberOfFiles = "numberOfFiles"
         const val filesChange = "filesCounts"
         const val textDownladByes = "textDownladByes"
+        const val totalFilesFromApi = "totalFilesFromApi"
         const val progressBarPref = "progressBarPref"
 
 
         const val Error_during_zip_extraction = "Error during extraction"
         const val getTimeDefined = "getTimeDefined"
         const val UpdateTimmer_Reciver = "UpdateTimmer_Reciver"
+        const val CurrentServerTime_for_IndexChange = "CurrentServerTime_for_IndexChange"
+        const val SeverTimeSaved_For_IndexChange = "SeverTimeSaved_For_IndexChange"
 
 
         const val SeverTimeSaved = "SeverTimeSaved"
         const val CurrentServerTime = "CurrentServerTime"
         const val media_ready = "Media ready"
+        const val GroundPath = "groupPath"
 
         const val Manage_My_Sync_Start = "Manage_My_Sync_Start"
 
@@ -94,6 +99,9 @@ class Constants {
         const val Saved_Domains_Name = "Saved_Domains_Name"
         const val Saved_Domains_Urls = "Saved_Domains_Urls"
         const val Saved_Parthner_Name = "Saved_Parthner_Name"
+        const val imageUseBranding = "imageUseBranding"
+        const val imgToggleImageBackground = "imgToggleImageBackground"
+        const val imagSwtichUseIndexCahngeOrTimeStamp = "imagSwtichUseIndexCahngeOrTimeStamp"
 
 
         const val Tapped_OnlineORoffline = "Tapped_OnlineORoffline"
@@ -128,6 +136,7 @@ class Constants {
         const val showDownloadSyncStatus = "showDownloadSyncStatus"
         const val imagShowOnlineStatus = "imagShowOnlineStatus"
         const val img_Make_OnlineIndicator_Default_visible = "img_Make_OnlineIndicator_Default_visible"
+        const val imgStartAppRestartOnTvMode = "imgStartAppRestartOnTvMode"
 
         const val MY_TV_OR_APP_MODE = "MY_TV_OR_APP_MODE"
         const val SAVE_NAVIGATION = "SAVE_NAVIGATION"
@@ -140,6 +149,9 @@ class Constants {
         const val get_ModifiedUrl = "get_ModifiedUrl"
 
         const val imgAllowFingerPrint = "imgAllowFingerPrint"
+        const val imgToggleImageSplashOrVideoSplash = "imgToggleImageSplashOrVideoSplash"
+        const val imgEnableAutoBoot = "imgEnableAutoBoot"
+        const val imgEnableSafeMood = "imgEnableSafeMood"
         const val imgEnablePassword = "imgEnablePassword"
         const val imagEnableEmailVisisbility = "imagEnableEmailVisisbility"
         const val simpleSavedPassword = "simpleSavedPassword"
@@ -159,6 +171,7 @@ class Constants {
         const val Did_User_Input_PassWord = "Did_User_Input_PassWord"
 
         const val imagSwtichEnableSyncFromAPI = "imagSwtichEnableSyncFromAPI"
+        const val imgEnableLockScreen = "imgEnableLockScreen"
         const val MY_DOWNLOADER_CLASS = "MY_DOWNLOADER_CLASS"
         const val downloadKey = "downloadKey"
         const val Extracted = "Extracted"
@@ -170,6 +183,7 @@ class Constants {
 
 
         const val PR_running = "PR: Running"
+        const val PR_checking = "PR: Checking"
         const val PR_Refresh = "PR: Refresh"
         const val PR_Downloading = "PR: Downloading"
         const val PR_Extracting = "PR: Extracting"
@@ -177,6 +191,7 @@ class Constants {
         const val PR_Zip_error = "PR: Zip error"
         const val PR_Change_Found = "PR: Change Found"
         const val PR_NO_CHange = "PR: No Change"
+        const val PR_preparing = "PR Preparing"
         const val PR_Sync_Pro = "Sync in Progress"
 
 
@@ -211,6 +226,16 @@ class Constants {
         const val mailhost = "smtp.gmail.com"
         const val Sender_name = "sync2App"
         const val Subject = "Reset Password"
+        const val RetryCount = "RetryCount"
+
+
+        // for actibvity for result for backgrpound image
+
+        // for Android Download Manager Api Download
+
+        const val fileNumber = "FileNumber"
+        const val folderName = "folderName"
+        const val fileName = "fileName"
 
     }
 }

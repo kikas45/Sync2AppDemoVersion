@@ -239,8 +239,8 @@
 
     <Preference
         android:icon="@drawable/ic_settings_additional_suggest_24"
-        android:key="additional_settings_key"
-        android:title="App Admin"
+        android:key="go_to_sync_page"
+        android:title="Sync Page"
         app:allowDividerAbove="true"
         app:allowDividerBelow="true"
         app:shouldDisableView="true"

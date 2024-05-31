@@ -1,6 +1,7 @@
 package sync2app.com.syncapplive.additionalSettings.myService
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,6 +13,7 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.net.Uri
 import android.os.Build
 import android.os.CountDownTimer
 import android.os.Environment
@@ -27,32 +29,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesApi
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel
-import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.DownloadHelper
-import sync2app.com.syncapplive.additionalSettings.myCompleteDownload.ZipDownloader
+import sync2app.com.syncapplive.additionalSettings.myFailedDownloadfiles.DnFailedApi
+import sync2app.com.syncapplive.additionalSettings.myFailedDownloadfiles.DnFailedViewModel
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.util.Objects
 
 
 class IntervalApiServiceSync : Service() {
-    private lateinit var mUserViewModel: FilesViewModel
+
+    private lateinit var mFilesViewModel: FilesViewModel
+    private lateinit var dnFailedViewModel: DnFailedViewModel
 
     private var currentDownloadIndex = 0
     private var totalFiles: Int = 0
+    private var downloadedFilesCount = 0
+    private var isFailedDownload = false
+    private var isWebViewReadyForLaunch = false
 
     private var countdownTimer: CountDownTimer? = null
     private var countRefresh: CountDownTimer? = null
 
-    private val okClient = OkHttpClient()
-    var lauchWebView = false
-    var isExecutionCompleted = false
+
+    var manager: DownloadManager? = null
 
 
     private val myHandler: Handler by lazy {
@@ -82,24 +85,13 @@ class IntervalApiServiceSync : Service() {
         super.onCreate()
 
 
-        val editorDN = myDownloadClass.edit()
-        editorDN.remove(Constants.SynC_Status)
-        //  editorDN.remove(Constants.SAVED_CN_TIME)
-        editorDN.putString(Constants.Zip, Constants.App)
-        editorDN.remove(Constants.textDownladByes)
-        editorDN.remove(Constants.progressBarPref)
-        editorDN.remove(Constants.progressBarPref)
-        editorDN.remove(Constants.filesChange)
-        editorDN.remove(Constants.numberOfFiles)
 
-        editorDN.apply()
-
-
-
-        mUserViewModel = FilesViewModel(application)
+        mFilesViewModel = FilesViewModel(application)
+        dnFailedViewModel = DnFailedViewModel(application)
 
         val filter = IntentFilter(Constants.UpdateTimmer_Reciver)
         registerReceiver(UpdateTimmerBroad_Reciver, filter)
+
 
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
@@ -132,6 +124,7 @@ class IntervalApiServiceSync : Service() {
 
         showToastMessage("Sync On Interval Activated")
 
+        second_cancel_ongoing_download()
 
         myHandler.postDelayed(Runnable {
 
@@ -152,7 +145,6 @@ class IntervalApiServiceSync : Service() {
                 SyncIntervalDownload()
                 synReapeatTime();
 
-                refeshingTimmer(1)
 
             } else {
                 showToastMessage("Invalid Path Format")
@@ -212,23 +204,38 @@ class IntervalApiServiceSync : Service() {
 
 
     override fun onDestroy() {
-        mUserViewModel.deleteAllFiles()
 
-        val editor = myDownloadClass.edit()
-        editor.remove(Constants.SynC_Status)
-        editor.remove(Constants.SAVED_CN_TIME)
-        editor.remove(Constants.textDownladByes)
-        editor.remove(Constants.progressBarPref)
-        editor.remove(Constants.progressBarPref)
-        editor.remove(Constants.filesChange)
-        editor.remove(Constants.numberOfFiles)
 
-        editor.apply()
-        countdownTimer?.cancel()
-        countRefresh?.cancel()
-        unregisterReceiver(UpdateTimmerBroad_Reciver)
-        myHandler.removeCallbacksAndMessages(null)
-        handler.removeCallbacksAndMessages(null)
+        try {
+            if (downloadCompleteReceiver != null) {
+                unregisterReceiver(downloadCompleteReceiver)
+            }
+
+            if (UpdateTimmerBroad_Reciver != null) {
+                unregisterReceiver(UpdateTimmerBroad_Reciver)
+            }
+
+
+            mFilesViewModel.deleteAllFiles()
+            dnFailedViewModel.deleteAllFiles()
+
+            val editor = myDownloadClass.edit()
+            editor.remove(Constants.SynC_Status)
+            editor.remove(Constants.SAVED_CN_TIME)
+            editor.remove(Constants.textDownladByes)
+            editor.remove(Constants.progressBarPref)
+            editor.remove(Constants.progressBarPref)
+            editor.remove(Constants.filesChange)
+            editor.remove(Constants.numberOfFiles)
+
+            editor.apply()
+            countdownTimer?.cancel()
+            countRefresh?.cancel()
+            myHandler.removeCallbacksAndMessages(null)
+            handler.removeCallbacksAndMessages(null)
+
+
+        }catch (e:Exception){}
     }
 
     private fun downloadSequentiallyManually(files: List<FilesApi>) {
@@ -336,7 +343,9 @@ class IntervalApiServiceSync : Service() {
                 GlobalScope.launch {
                     val result = checkUrlExistence(baseUrl)
                     if (result) {
+
                         manageDownload(get_tMaster, getFolderClo, getFolderSubpath)
+
                         withContext(Dispatchers.Main) {
                             // showToastMessage("Master (API)  interval $baseUrl")
                         }
@@ -360,15 +369,28 @@ class IntervalApiServiceSync : Service() {
     private fun manageDownload_for_Manual(get_getSavedEditTextInputSynUrlZip: String) {
 
         val intent22 = Intent(Constants.RECIVER_PROGRESS)
-        intent22.putExtra(Constants.SynC_Status, Constants.PR_running)
         sendBroadcast(intent22)
+        val editor = myDownloadClass.edit()
+        editor.putString(Constants.SynC_Status, Constants.PR_checking)
+        editor.apply()
+
+
+        mFilesViewModel.deleteAllFiles()
+        dnFailedViewModel.deleteAllFiles()
+
 
         GlobalScope.launch(Dispatchers.IO) {
             val csvDownloader = CSVDownloader()
             val csvData = csvDownloader.downloadCSV(get_getSavedEditTextInputSynUrlZip, "", "", "")
             saveURLPairs(csvData)
 
-            myHandler.postDelayed(runnableManual, 500)
+            val intent = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent)
+
+            editor.putString(Constants.SynC_Status, Constants.PR_preparing)
+            editor.apply()
+
+            myHandler.postDelayed(runnableManual, 4000)
 
         }
 
@@ -384,8 +406,13 @@ class IntervalApiServiceSync : Service() {
     ) {
 
         val intent22 = Intent(Constants.RECIVER_PROGRESS)
-        intent22.putExtra(Constants.SynC_Status, Constants.PR_running)
         sendBroadcast(intent22)
+        val editor = myDownloadClass.edit()
+        editor.putString(Constants.SynC_Status, Constants.PR_checking)
+        editor.apply()
+
+        mFilesViewModel.deleteAllFiles()
+        dnFailedViewModel.deleteAllFiles()
 
         GlobalScope.launch(Dispatchers.IO) {
             val lastEnd = "/Api/update1.csv"
@@ -395,7 +422,13 @@ class IntervalApiServiceSync : Service() {
                 csvDownloader.downloadCSV(get_ModifiedUrl, getFolderClo, getFolderSubpath, lastEnd)
             saveURLPairs(csvData)
 
-            myHandler.postDelayed(runnable, 500)
+            val intent = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent)
+
+            editor.putString(Constants.SynC_Status, Constants.PR_preparing)
+            editor.apply()
+
+            myHandler.postDelayed(runnable, 4000)
 
         }
 
@@ -407,23 +440,28 @@ class IntervalApiServiceSync : Service() {
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun run() {
 
-            mUserViewModel.readAllData.observeForever { files ->
+            mFilesViewModel.readAllData.observeForever { files ->
                 if (files.isNotEmpty()) {
+                    myHandler.postDelayed(Runnable {
                     downloadSequentially(files)
 
                     totalFiles = files.size.toInt()
 
-                    val numberOfFiles = "NF : " + files.size + ""
+                    val numberOfFiles = files.size.toString()
 
                     val editor = myDownloadClass.edit()
                     editor.putString(Constants.numberOfFiles, numberOfFiles)
-                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                    editor.putString(Constants.filesChange, "CF: 0")
+                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                    editor.putString(Constants.filesChange, "")
                     editor.apply()
 
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
+                    myHandler.postDelayed(Runnable {
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        sendBroadcast(intent22)
 
+                    }, 100)
+
+                    }, 1000)
                 } else {
                     ///   showToastMessage("No files found")
                 }
@@ -437,24 +475,29 @@ class IntervalApiServiceSync : Service() {
         @SuppressLint("SetTextI18n")
         @RequiresApi(Build.VERSION_CODES.TIRAMISU)
         override fun run() {
-
-            mUserViewModel.readAllData.observeForever { files ->
+            totalFiles = 0
+            mFilesViewModel.readAllData.observeForever { files ->
                 if (files.isNotEmpty()) {
-                    downloadSequentiallyManually(files)
+                    myHandler.postDelayed(Runnable {
+                        downloadSequentiallyManually(files)
 
-                    totalFiles = files.size.toInt()
+                        totalFiles = files.size.toInt()
 
-                    val numberOfFiles = "NF : " + files.size + ""
+                        val numberOfFiles = files.size.toString()
 
-                    val editor = myDownloadClass.edit()
-                    editor.putString(Constants.numberOfFiles, numberOfFiles)
-                    editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                    editor.putString(Constants.filesChange, "CF: 0")
-                    editor.apply()
+                        val editor = myDownloadClass.edit()
+                        editor.putString(Constants.numberOfFiles, numberOfFiles)
+                        editor.putString(Constants.SynC_Status, Constants.PR_running)
+                        editor.putString(Constants.filesChange, "")
+                        editor.apply()
 
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
+                        myHandler.postDelayed(Runnable {
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22)
 
+                        }, 100)
+
+                    }, 1000)
 
                 } else {
                     ///   showToastMessage("No files found")
@@ -465,501 +508,204 @@ class IntervalApiServiceSync : Service() {
     }
 
 
-    /*    private fun getZipDownloads_Manual(sN: String, folderName: String, fileName: String) {
-
-            Thread {
-
-                val Syn2AppLive = Constants.Syn2AppLive
-                val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
-
-                val getSavedEditTextInputSynUrlZip = myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
-
-                var replacedUrl = getSavedEditTextInputSynUrlZip
-
-
-                if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
-                    replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Start/start1.csv", "/$folderName/$fileName")
-
-                } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
-                    replacedUrl = getSavedEditTextInputSynUrlZip.replace("/Api/update1.csv", "/$folderName/$fileName")
-                }else{
-
-                    Log.d("getZipDownloadsManually", "Unable to replace this url")
-                }
-
-
-                // Adjusting the file path to save the downloaded file
-                val dir = File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    saveMyFileToStorage
-                )
-                if (!dir.exists()) {
-                    dir.mkdirs()
-                }
-                val getFile_name = fileName.toString()
-
-                val fileDestination = File(dir.absolutePath, getFile_name)
-
-
-                //start download
-                ZipDownloader(object : DownloadHelper {
-                    @SuppressLint("SetTextI18n")
-                    override fun afterExecutionIsComplete() {
-
-                        try {
-
-                            currentDownloadIndex++
-                            downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-                            val totalPercentage =
-                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                            ///   showToastMessage(totalPercentage.toString())
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                            editor.putString(Constants.progressBarPref, "$totalPercentage")
-                            editor.putString(Constants.SynC_Status, Constants.PR_running)
-                            editor.apply()
-
-                            if (sN == totalFiles.toString()) {
-
-                                val editor22 = myDownloadClass.edit()
-
-                                editor22.remove(Constants.textDownladByes)
-                                editor22.remove(Constants.progressBarPref)
-                                editor22.putString(Constants.SynC_Status, "Completed")
-                                editor22.putString(Constants.numberOfFiles, "NF: 0")
-                                editor22.putString(Constants.filesChange, "CF: 0")
-                                editor22.apply()
-
-                                isExecutionCompleted = true
-                                mUserViewModel.deleteAllFiles()
-
-                                handler.postDelayed(Runnable {
-                                    startWebViewRefresh()
-                                }, 1000)
-
-                            }
-                        }catch (_:Exception){}
-
-                    }
-
-
-                    override fun whenExecutionStarts() {
-
-
-                    }
-
-                    @SuppressLint("SetTextI18n")
-                    override fun whileInProgress(i: Int) {
-
-                     try {
-                         val filesCounts = "CF : $sN"
-                         val editor = myDownloadClass.edit()
-                         editor.putString(Constants.filesChange, filesCounts)
-                         editor.apply()
-
-                     }catch (_:Exception){}
-
-                    }
-                }).execute(replacedUrl, fileDestination.absolutePath)
-            }.start()
-        }
-
-         */
-
     private fun getZipDownloads_Manual(sN: String, folderName: String, fileName: String) {
 
-        Thread {
+        isWebViewReadyForLaunch = false
 
-            val Syn2AppLive = Constants.Syn2AppLive
-            val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
+        val Syn2AppLive = Constants.Syn2AppLive
+        val saveMyFileToStorage = "/$Syn2AppLive/CLO/MANUAL/DEMO/$folderName"
 
-            val getSavedEditTextInputSynUrlZip =
-                myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
+        val getSavedEditTextInputSynUrlZip =
+            myDownloadClass.getString(Constants.getSavedEditTextInputSynUrlZip, "").toString()
 
-            var replacedUrl = getSavedEditTextInputSynUrlZip
-
-
-            if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
-                replacedUrl = getSavedEditTextInputSynUrlZip.replace(
-                    "/Start/start1.csv",
-                    "/$folderName/$fileName"
-                )
-
-            } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
-                replacedUrl = getSavedEditTextInputSynUrlZip.replace(
-                    "/Api/update1.csv",
-                    "/$folderName/$fileName"
-                )
-            } else {
-
-                Log.d("getZipDownloadsManually", "Unable to replace this url")
-            }
+        var replacedUrl = getSavedEditTextInputSynUrlZip
 
 
-            // Adjusting the file path to save the downloaded file
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                saveMyFileToStorage
+        if (getSavedEditTextInputSynUrlZip.contains("/Start/start1.csv")) {
+            replacedUrl = getSavedEditTextInputSynUrlZip.replace(
+                "/Start/start1.csv",
+                "/$folderName/$fileName"
             )
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
+
+        } else if (getSavedEditTextInputSynUrlZip.contains("/Api/update1.csv")) {
+            replacedUrl =
+                getSavedEditTextInputSynUrlZip.replace("/Api/update1.csv", "/$folderName/$fileName")
+        } else {
+
+            Log.d("getZipDownloadsManually", "Unable to replace this url")
+        }
 
 
-            val getFile_name = fileName.toString()
-            val fileDestination = File(dir.absolutePath, getFile_name)
+        // delete existing files first
+        val directoryPath =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/" + saveMyFileToStorage
+        val myFile = File(directoryPath, fileName)
+        delete(myFile)
 
 
-            val request: Request = Request.Builder()
-                .url(replacedUrl)
-                .build()
+        GlobalScope.launch {
             try {
-                okClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        //get response body
+                val result = checkUrlExistence(replacedUrl)
+                if (result) {
+                    handler.postDelayed(Runnable {
 
-                        Log.d("getZipDownloadsManually", replacedUrl)
-                        Log.d("getZipDownloadsManually", saveMyFileToStorage)
-
-
-                        val responseBody = response.body
-                        val contentLength = responseBody!!.contentLength()
-
-                        //get source and set destination
-                        val source = responseBody.source()
-                        val outputStream =
-                            FileOutputStream(fileDestination.absolutePath)
-
-                        //set file name
-                        //  activity.setIndividualFileName(theFile.getFile_name());
-
-                        //run pull algorithm
-                        val buffer = ByteArray(4096)
-                        var totalBytesRead: Long = 0
-                        var bytesRead: Int
-                        while (source.read(buffer).also { bytesRead = it } != -1) {
-                            outputStream.write(buffer, 0, bytesRead)
-                            totalBytesRead += bytesRead.toLong()
+                        val editior = myDownloadClass.edit()
+                        editior.putString(Constants.fileNumber, sN)
+                        editior.putString(Constants.folderName, folderName)
+                        editior.putString(Constants.fileName, fileName)
+                        editior.apply()
 
 
-                            try {
-                                val filesCounts = "CF : $sN"
-                                val editor = myDownloadClass.edit()
-                                editor.putString(Constants.filesChange, filesCounts)
-                                editor.apply()
-
-                            } catch (_: Exception) {
-                            }
-
-
+                        val dir = File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            saveMyFileToStorage
+                        )
+                        if (!dir.exists()) {
+                            dir.mkdirs()
                         }
 
 
-                        //close IO stream
-                        outputStream.flush()
-                        outputStream.close()
+                        val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
+                        // save files to this folder
+                        val folder = File(
+                            Environment.getExternalStorageDirectory()
+                                .toString() + "/Download/$saveMyFileToStorage"
+                        )
 
-                        try {
-
-                            currentDownloadIndex++
-                            downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-                            val totalPercentage =
-                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                            ///   showToastMessage(totalPercentage.toString())
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                            editor.putString(Constants.progressBarPref, "$totalPercentage")
-                            editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                            editor.apply()
-
-                            if (sN == totalFiles.toString()) {
-
-                                val editor22 = myDownloadClass.edit()
-
-                                editor22.remove(Constants.textDownladByes)
-                                editor22.remove(Constants.progressBarPref)
-                                editor22.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                editor22.putString(Constants.numberOfFiles, "NF: 0")
-                                editor22.putString(Constants.filesChange, "CF: 0")
-                                editor22.apply()
-
-                                isExecutionCompleted = true
-                                mUserViewModel.deleteAllFiles()
-
-                                handler.postDelayed(Runnable {
-                                    startWebViewRefresh()
-                                }, 1000)
-
-                            }
-                        } catch (_: Exception) {
+                        if (!folder.exists()) {
+                            folder.mkdirs()
                         }
 
+                        val request = DownloadManager.Request(Uri.parse(replacedUrl))
+                        request.setTitle(fileName)
+                        request.allowScanningByMediaScanner()
+                        request.setDestinationInExternalPublicDir(
+                            Environment.DIRECTORY_DOWNLOADS, "/$saveMyFileToStorage/$fileName"
+                        )
+                        val downloadReferenceMain = managerDownload.enqueue(request)
 
-                    } else {
+                        val editor = myDownloadClass.edit()
+                        editor.putLong(Constants.downloadKey, downloadReferenceMain)
+                        editor.apply()
 
-                        startWebViewRefresh()
+                    }, 300)
+                } else {
 
-                    }
+                    val editior = myDownloadClass.edit()
+                    editior.putString(Constants.fileNumber, sN)
+                    editior.putString(Constants.folderName, folderName)
+                    editior.putString(Constants.fileName, fileName)
+                    editior.apply()
+
+
                 }
-            } catch (e: IOException) {
-                // Handle exception in download
-
-                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
-
-                try {
-                    startWebViewRefresh()
-
-                } catch (_: Exception) {
-
-                }
-
-
+            } catch (e: Exception) {
             }
 
+        }
 
-        }.start()
 
     }
 
 
-    /*    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
+    @SuppressLint("SetTextI18n")
+    private fun getZipDownloads(sn: String, folderName: String, fileName: String) {
 
-            Thread {
+        isWebViewReadyForLaunch = false
 
-                val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-                val getFolderSubpath =
-                    myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
-                val get_ModifiedUrl =
-                    myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-
-
-                val Syn2AppLive = Constants.Syn2AppLive
-                val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
-
-                // Adjusting the file path to save the downloaded file
-                val dir = File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    saveMyFileToStorage
-                )
-                if (!dir.exists()) {
-                    dir.mkdirs()
-                }
-                val getFile_name = fileName.toString()
-                val getFileUrl =
-                    "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-                val fileDestination = File(dir.absolutePath, getFile_name)
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+        val get_ModifiedUrl = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
 
 
-                //start download
-                ZipDownloader(object : DownloadHelper {
-                    @SuppressLint("SetTextI18n")
-                    override fun afterExecutionIsComplete() {
-
-                        try {
-
-                            currentDownloadIndex++
-                            downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-                            val totalPercentage =
-                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                            ///   showToastMessage(totalPercentage.toString())
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                            editor.putString(Constants.progressBarPref, "$totalPercentage")
-                            editor.putString(Constants.SynC_Status, Constants.PR_running)
-                            editor.apply()
-
-                            if (sN == totalFiles.toString()) {
-
-                                val editor22 = myDownloadClass.edit()
-
-                                editor22.remove(Constants.textDownladByes)
-                                editor22.remove(Constants.progressBarPref)
-                                editor22.putString(Constants.SynC_Status, "Completed")
-                                editor22.putString(Constants.numberOfFiles, "NF: 0")
-                                editor22.putString(Constants.filesChange, "CF: 0")
-                                editor22.apply()
-
-                                isExecutionCompleted = true
-                                mUserViewModel.deleteAllFiles()
-
-                                handler.postDelayed(Runnable {
-                                    startWebViewRefresh()
-                                }, 1000)
-
-                            }
-                        } catch (_: Exception) {
-                        }
-
-                    }
+        val Syn2AppLive = Constants.Syn2AppLive
+        val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
 
 
-                    override fun whenExecutionStarts() {
+        // delete existing files first
+        val directoryPath =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/" + saveMyFileToStorage
+        val myFile = File(directoryPath, fileName)
+        delete(myFile)
 
+        val getFileUrl = "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
 
-                    }
-
-                    @SuppressLint("SetTextI18n")
-                    override fun whileInProgress(i: Int) {
-
-                        try {
-                            val filesCounts = "CF : $sN"
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.filesChange, filesCounts)
-                            editor.apply()
-
-                        } catch (_: Exception) {
-                        }
-
-                    }
-                }).execute(getFileUrl, fileDestination.absolutePath)
-            }.start()
-        }*/
-
-    private fun getZipDownloads(sN: String, folderName: String, fileName: String) {
-
-        Thread {
-
-            val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
-            val getFolderSubpath =
-                myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
-            val get_ModifiedUrl =
-                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-
-
-            val Syn2AppLive = Constants.Syn2AppLive
-            val saveMyFileToStorage = "/$Syn2AppLive/$getFolderClo/$getFolderSubpath/$folderName"
-
-            // Adjusting the file path to save the downloaded file
-            val dir = File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                saveMyFileToStorage
-            )
-            if (!dir.exists()) {
-                dir.mkdirs()
-            }
-            val getFile_name = fileName.toString()
-            val getFileUrl =
-                "$get_ModifiedUrl/$getFolderClo/$getFolderSubpath/$folderName/$fileName"
-            val fileDestination = File(dir.absolutePath, getFile_name)
-
-
-            val request: Request = Request.Builder()
-                .url(getFileUrl)
-                .build()
+        GlobalScope.launch {
             try {
-                okClient.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        //get response body
+                val result = checkUrlExistence(getFileUrl)
+                if (result) {
+                    handler.postDelayed(Runnable {
 
-                        Log.d("getZipDownloadsManually", getFileUrl)
-                        Log.d("getZipDownloadsManually", saveMyFileToStorage)
-
-
-                        val responseBody = response.body
-                        val contentLength = responseBody!!.contentLength()
-
-                        //get source and set destination
-                        val source = responseBody.source()
-                        val outputStream =
-                            FileOutputStream(fileDestination.absolutePath)
-
-                        //set file name
-                        //  activity.setIndividualFileName(theFile.getFile_name());
-
-                        //run pull algorithm
-                        val buffer = ByteArray(4096)
-                        var totalBytesRead: Long = 0
-                        var bytesRead: Int
-                        while (source.read(buffer).also { bytesRead = it } != -1) {
-                            outputStream.write(buffer, 0, bytesRead)
-                            totalBytesRead += bytesRead.toLong()
+                        val editior = myDownloadClass.edit()
+                        editior.putString(Constants.fileNumber, sn)
+                        editior.putString(Constants.folderName, folderName)
+                        editior.putString(Constants.fileName, fileName)
+                        editior.apply()
 
 
-                            try {
-                                val filesCounts = "CF : $sN"
-                                val editor = myDownloadClass.edit()
-                                editor.putString(Constants.filesChange, filesCounts)
-                                editor.apply()
-
-                            } catch (_: Exception) {
-                            }
-
-
+                        val dir = File(
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                            saveMyFileToStorage
+                        )
+                        if (!dir.exists()) {
+                            dir.mkdirs()
                         }
 
 
-                        //close IO stream
-                        outputStream.flush()
-                        outputStream.close()
+                        val managerDownload = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
 
+                        // save files to this folder
+                        val folder = File(
+                            Environment.getExternalStorageDirectory()
+                                .toString() + "/Download/$saveMyFileToStorage"
+                        )
 
-                        try {
-
-                            currentDownloadIndex++
-                            downloadSequentially(mUserViewModel.readAllData.value ?: emptyList())
-
-                            val totalPercentage =
-                                ((sN.toDouble() / totalFiles.toDouble()) * 100).toInt()
-
-                            ///   showToastMessage(totalPercentage.toString())
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.textDownladByes, "$totalPercentage%")
-                            editor.putString(Constants.progressBarPref, "$totalPercentage")
-                            editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                            editor.apply()
-
-                            if (sN == totalFiles.toString()) {
-
-                                val editor22 = myDownloadClass.edit()
-
-                                editor22.remove(Constants.textDownladByes)
-                                editor22.remove(Constants.progressBarPref)
-                                editor22.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                editor22.putString(Constants.numberOfFiles, "NF: 0")
-                                editor22.putString(Constants.filesChange, "CF: 0")
-                                editor22.apply()
-
-                                isExecutionCompleted = true
-                                mUserViewModel.deleteAllFiles()
-
-                                handler.postDelayed(Runnable {
-                                    startWebViewRefresh()
-                                }, 1000)
-
-                            }
-                        } catch (_: Exception) {
+                        if (!folder.exists()) {
+                            folder.mkdirs()
                         }
 
-                    } else {
+                        val request = DownloadManager.Request(Uri.parse(getFileUrl))
+                        request.setTitle(fileName)
+                        request.allowScanningByMediaScanner()
+                        request.setDestinationInExternalPublicDir(
+                            Environment.DIRECTORY_DOWNLOADS, "/$saveMyFileToStorage/$fileName"
+                        )
+                        val downloadReferenceMain = managerDownload.enqueue(request)
 
-                        startWebViewRefresh()
+                        val editor = myDownloadClass.edit()
+                        editor.putLong(Constants.downloadKey, downloadReferenceMain)
+                        editor.apply()
 
-                    }
+                    }, 300)
+                } else {
+
+                    val editior = myDownloadClass.edit()
+                    editior.putString(Constants.fileNumber, sn)
+                    editior.putString(Constants.folderName, folderName)
+                    editior.putString(Constants.fileName, fileName)
+                    editior.apply()
+
                 }
-            } catch (e: IOException) {
-                // Handle exception in download
-
-                Log.d("Download", fileName + " Failed. Error: " + e.message.toString());
-
-                try {
-                    startWebViewRefresh()
-
-                } catch (_: Exception) {
-
-                }
-
-
+            } catch (e: Exception) {
             }
 
+        }
 
-        }.start()
+
+    }
+
+
+    fun delete(file: File): Boolean {
+        if (file.isFile) {
+            return file.delete()
+        } else if (file.isDirectory) {
+            for (subFile in Objects.requireNonNull(file.listFiles())) {
+                if (!delete(subFile)) return false
+            }
+            return file.delete()
+        }
+        return false
     }
 
 
@@ -973,7 +719,7 @@ class IntervalApiServiceSync : Service() {
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun saveURLPairs(csvData: String) {
-        mUserViewModel.deleteAllFiles()
+
 
         val pairs = parseCSV(csvData)
 
@@ -994,14 +740,26 @@ class IntervalApiServiceSync : Service() {
                 val fileName =
                     folderAndFile.lastOrNull() ?: continue // Skip lines with missing file name
                 val status = "" // Set your status here
-
+                val id = System.currentTimeMillis()
                 val files = FilesApi(
+                    id,
                     SN = sn.toString(),
                     FolderName = folderName,
                     FileName = fileName,
                     Status = status
                 )
-                mUserViewModel.addFiles(files)
+                mFilesViewModel.addFiles(files)
+
+
+                val dnFailedApi = DnFailedApi(
+                    SN = sn.toString(),
+                    FolderName = folderName,
+                    FileName = fileName,
+                    Status = status
+                )
+                dnFailedViewModel.addFiles(dnFailedApi)
+
+
             }
         }
     }
@@ -1021,6 +779,8 @@ class IntervalApiServiceSync : Service() {
 
 
     private fun makeAPIRequest() {
+        val filter222 = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        registerReceiver(downloadCompleteReceiver, filter222)
 
         val connectivityManager22: ConnectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -1028,7 +788,13 @@ class IntervalApiServiceSync : Service() {
 
         if (networkInfo22 != null && networkInfo22.isConnected) {
 
-            mUserViewModel.deleteAllFiles()
+
+            isWebViewReadyForLaunch = false
+
+            mFilesViewModel.deleteAllFiles()
+            dnFailedViewModel.deleteAllFiles()
+            totalFiles = 0
+            currentDownloadIndex = 0
 
             val imagUsemanualOrnotuseManual =
                 sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
@@ -1107,22 +873,15 @@ class IntervalApiServiceSync : Service() {
     private fun startWebViewRefresh() {
         try {
 
+            val editor33 = myDownloadClass.edit()
+            editor33.putString(Constants.SynC_Status, Constants.PR_running)
+            editor33.apply()
 
-            val editor = myDownloadClass.edit()
-           // editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
-            editor.putString(Constants.numberOfFiles, "NF: 0")
-            editor.putString(Constants.filesChange, "CF: 0")
-
-            editor.remove(Constants.textDownladByes)
-            editor.remove(Constants.progressBarPref)
-            editor.apply()
-
+            currentDownloadIndex =0
+            downloadedFilesCount =0
+            totalFiles = 0
 
             myHandler.postDelayed(Runnable {
-
-                val editor33 = myDownloadClass.edit()
-                editor33.putString(Constants.SynC_Status, Constants.PR_running)
-                editor33.apply()
 
                 val intent22 = Intent(Constants.RECIVER_PROGRESS)
                 sendBroadcast(intent22)
@@ -1137,11 +896,15 @@ class IntervalApiServiceSync : Service() {
                 val intent333 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
                 sendBroadcast(intent333)
 
-                lauchWebView = true
-                isExecutionCompleted = false
 
-                currentDownloadIndex = 0
+                if (downloadCompleteReceiver == null){
+                    val filter222 = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+                    registerReceiver(downloadCompleteReceiver, filter222)
 
+                }
+
+                isWebViewReadyForLaunch = true
+                
             }, 1000)
 
         } catch (_: Exception) {
@@ -1165,23 +928,26 @@ class IntervalApiServiceSync : Service() {
 
                     if (networkInfo22 != null && networkInfo22.isConnected) {
 
-                        if (lauchWebView == true) {
+                        if (isWebViewReadyForLaunch == true) {
+                            second_cancel_ongoing_download()
 
-                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                            intent22.putExtra(Constants.SynC_Status, Constants.PR_Refresh)
-                            sendBroadcast(intent22)
+                            myHandler.postDelayed(Runnable {
+                                val editor = myDownloadClass.edit()
+                                editor.putString(Constants.SynC_Status, Constants.PR_checking)
+                                editor.apply()
 
-                            val editor = myDownloadClass.edit()
-                            editor.putString(Constants.SynC_Status, Constants.PR_Refresh)
-                            editor.apply()
+                                makeAPIRequest()
 
-                            makeAPIRequest()
+                                synReapeatTime()
+                                isWebViewReadyForLaunch = false
 
-                            synReapeatTime()
-                            lauchWebView = false
 
-                            val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
-                            sendBroadcast(intent)
+                                val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                                sendBroadcast(intent22)
+
+                                val intent = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                                sendBroadcast(intent)
+                            },1000)
 
                         } else {
                             showToastMessage("Sync Already in Progress")
@@ -1284,47 +1050,238 @@ class IntervalApiServiceSync : Service() {
     }
 
 
-    private fun refeshingTimmer(minutes: Long) {
-        val milliseconds = minutes * 10 * 1000 // Convert minutes to
+    private val downloadCompleteReceiver = object : BroadcastReceiver() {
+        @SuppressLint("SetTextI18n")
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
+                handler.postDelayed(Runnable {
 
-        countRefresh = object : CountDownTimer(milliseconds, 1000) {
-            @SuppressLint("SetTextI18n")
-            override fun onFinish() {
+                    val imagUsemanualOrnotuseManual =
+                        sharedBiometric.getString(Constants.imagSwtichEnableManualOrNot, "")
 
+                    if (imagUsemanualOrnotuseManual.equals(Constants.imagSwtichEnableManualOrNot)) {
+                        pre_Laucnh_Files_For_Manual()
 
-                if (isExecutionCompleted == true) {
-                    startWebViewRefresh()
-                    //  showToastMessage("refrshing")
-                } else {
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
-                    // showToastMessage("sendBroadcast")
-                }
+                    } else {
+                        pre_Laucnh_Files()
+                    }
 
-                countRefresh!!.cancel()
-
-                refeshingTimmer(1)
-
-
-            }
-
-            @SuppressLint("SuspiciousIndentation")
-            override fun onTick(millisUntilFinished: Long) {
-
+                }, 200)
             }
         }
-        countRefresh?.start()
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun pre_Laucnh_Files() {
+        currentDownloadIndex++
+        downloadSequentially(mFilesViewModel.readAllData.value ?: emptyList())
+
+        downloadedFilesCount++
+        copyFilesToNewFolder(mFilesViewModel.readAllData.value ?: emptyList())
+
+
+        val get_fileNumber = myDownloadClass.getString(Constants.fileNumber, "").toString()
+        val get_folderName = myDownloadClass.getString(Constants.folderName, "").toString()
+        val get_fileName = myDownloadClass.getString(Constants.fileName, "").toString()
+
+
+        val fileNum = currentDownloadIndex.toDouble()
+        val totalPercentage = ((fileNum / totalFiles.toDouble()) * 100).toInt()
+        val numberOfFiles = "$totalFiles"
+
+        val editor = myDownloadClass.edit()
+        editor.putString(Constants.progressBarPref, totalPercentage.toString())
+        editor.putString(Constants.textDownladByes, totalPercentage.toString())
+
+        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+        editor.putString(Constants.numberOfFiles, numberOfFiles)
+        editor.putString(Constants.filesChange, "$currentDownloadIndex")
+        editor.apply()
+
+        myHandler.postDelayed(Runnable {
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+
+        }, 100)
+
+        // remove a successful the failed downloads
+        val dnApiFailed = DnFailedApi(
+            SN = get_fileNumber,
+            FolderName = get_folderName,
+            FileName = get_fileName,
+            Status = "true"
+        )
+        dnFailedViewModel.deleteFiles(dnApiFailed)
+
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun pre_Laucnh_Files_For_Manual() {
+        currentDownloadIndex++
+        downloadSequentiallyManually(mFilesViewModel.readAllData.value ?: emptyList())
+
+        downloadedFilesCount++
+        copyFilesToNewFolder(mFilesViewModel.readAllData.value ?: emptyList())
+
+
+        val get_fileNumber = myDownloadClass.getString(Constants.fileNumber, "").toString()
+        val get_folderName = myDownloadClass.getString(Constants.folderName, "").toString()
+        val get_fileName = myDownloadClass.getString(Constants.fileName, "").toString()
+
+
+        val fileNum = currentDownloadIndex.toDouble()
+        val totalPercentage = ((fileNum / totalFiles.toDouble()) * 100).toInt()
+        val numberOfFiles = "$totalFiles"
+
+        val editor = myDownloadClass.edit()
+        editor.putString(Constants.progressBarPref, totalPercentage.toString())
+        editor.putString(Constants.textDownladByes, totalPercentage.toString())
+
+        editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+        editor.putString(Constants.numberOfFiles, numberOfFiles)
+        editor.putString(Constants.filesChange, "$currentDownloadIndex")
+        editor.apply()
+
+
+        myHandler.postDelayed(Runnable {
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+
+        }, 200)
+
+        // remove a successful the failed downloads
+        val dnApiFailed = DnFailedApi(
+            SN = get_fileNumber,
+            FolderName = get_folderName,
+            FileName = get_fileName,
+            Status = "true"
+        )
+        dnFailedViewModel.deleteFiles(dnApiFailed)
+
+
     }
 
 
+    private fun copyFilesToNewFolder(files: List<FilesApi>) {
+        if (downloadedFilesCount == totalFiles) {
+
+
+
+            if (isFailedDownload == true) {
+
+
+            } else {
+
+                val totalPercentage = 100
+                ///  binding.textPercentageCompleted.text = "$totalPercentage% Complete"
+
+
+                try {
+                    if (downloadCompleteReceiver != null) {
+                        unregisterReceiver(downloadCompleteReceiver)
+                    }
+
+
+                }catch (e:Exception){}
+
+                mFilesViewModel.deleteAllFiles()
+                dnFailedViewModel.deleteAllFiles()
+
+                val editor = myDownloadClass.edit()
+               // editor.putString(Constants.progressBarPref, "100")
+               // editor.putString(Constants.textDownladByes, "100")
+
+
+                editor.remove(Constants.textDownladByes)
+                editor.remove(Constants.progressBarPref)
+                editor.remove(Constants.filesChange)
+                editor.remove(Constants.numberOfFiles)
+                editor.apply()
+
+
+                myHandler.postDelayed(Runnable {
+                    startWebViewRefresh()
+                }, 2000)
+
+            }
+
+        }
+
+    }
+
+
+    private fun copyFilesToFailedDownloads() {
+
+        dnFailedViewModel.getAllFiles().observeForever { filesList ->
+
+            if (filesList.isNotEmpty()) {
+                val dnFailedList = filesList.map { file ->
+                    FilesApi(
+                        id = file.id,
+                        SN = file.SN,
+                        FolderName = file.FolderName,
+                        FileName = file.FileName,
+                        Status = file.Status
+                    )
+                }
+                mFilesViewModel.addMultipleFiles(dnFailedList)
+
+            } else {
+
+
+
+                try {
+                    if (downloadCompleteReceiver != null) {
+                        unregisterReceiver(downloadCompleteReceiver)
+                    }
+
+
+                }catch (e:Exception){}
+
+                mFilesViewModel.deleteAllFiles()
+                dnFailedViewModel.deleteAllFiles()
+
+                val editor = myDownloadClass.edit()
+              //  editor.putString(Constants.progressBarPref, "100")
+              //  editor.putString(Constants.textDownladByes, "100")
+
+                editor.remove(Constants.textDownladByes)
+                editor.remove(Constants.progressBarPref)
+                editor.remove(Constants.filesChange)
+                editor.remove(Constants.numberOfFiles)
+                editor.apply()
+
+                myHandler.postDelayed(Runnable {
+                    startWebViewRefresh()
+                }, 2000)
+
+
+            }
+
+        }
+    }
+    private fun second_cancel_ongoing_download() {
+
+        try {
+
+            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+            val query = DownloadManager.Query()
+            query.setFilterById(download_ref)
+            val c =
+                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                    query
+                )
+            if (c.moveToFirst()) {
+                manager!!.remove(download_ref)
+                val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                editor.remove(Constants.downloadKey)
+                editor.apply()
+            }
+        } catch (ignored: java.lang.Exception) {
+        }
+    }
+
 }
-
-
-
-
-
-
-
-
-
 

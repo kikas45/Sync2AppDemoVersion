@@ -7,9 +7,21 @@
     android:padding="@dimen/_15dp"
     tools:context=".additionalSettings.MaintenanceActivity">
 
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action_bar_root"
-        style="@style/toolbarBackGroundColor"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginTop="2dp"
@@ -84,7 +96,6 @@
                 style="@style/textColorStyle"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="8dp"
                 android:clickable="true"
                 android:elegantTextHeight="true"
                 android:focusable="true"
@@ -99,9 +110,31 @@
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textBranding"
                 tools:ignore="HardcodedText,RtlSymmetry" />
 
+
+            <TextView
+                android:id="@+id/textBranding"
+                style="@style/textColorStyle"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:elegantTextHeight="true"
+                android:focusable="true"
+                android:foreground="?selectableItemBackground"
+                android:gravity="start|center"
+                android:maxLines="1"
+                android:paddingStart="65dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Branding"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="HardcodedText,RtlSymmetry" />
 
             <TextView
                 android:id="@+id/textCrashPage"
@@ -152,13 +185,11 @@
                 tools:ignore="HardcodedText,RtlSymmetry" />
 
 
-
             <TextView
                 android:id="@+id/textCheckDownloadStatus2"
                 style="@style/textColorStyle"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
-                android:layout_marginEnd="8dp"
                 android:clickable="true"
                 android:elegantTextHeight="true"
                 android:focusable="true"
@@ -171,7 +202,7 @@
                 android:paddingBottom="8dp"
                 android:text="Hide Download Status"
                 android:textSize="16sp"
-                app:layout_constraintEnd_toStartOf="@+id/imagEnableDownloadStatus"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider39"
@@ -196,10 +227,76 @@
                 android:paddingBottom="8dp"
                 android:text="Show Online Status Indicator"
                 android:textSize="16sp"
-                app:layout_constraintEnd_toStartOf="@+id/imagEnableDownloadStatus"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textCheckDownloadStatus2"
+                tools:ignore="HardcodedText,RtlSymmetry" />
+
+            <TextView
+                android:id="@+id/textShowAppRestartTvMode"
+                style="@style/textColorStyle"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:elegantTextHeight="true"
+                android:focusable="true"
+                android:foreground="?selectableItemBackground"
+                android:gravity="start|center"
+                android:maxLines="1"
+                android:paddingStart="65dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Auto Restart When Crashed"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowOnlineStatus"
+                tools:ignore="HardcodedText,RtlSymmetry" />
+
+            <TextView
+                android:id="@+id/textLockdeviceDown"
+                style="@style/textColorStyle"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:elegantTextHeight="true"
+                android:focusable="true"
+                android:foreground="?selectableItemBackground"
+                android:gravity="start|center"
+                android:maxLines="1"
+                android:paddingStart="65dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Device Lock Down Mode"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textBootFromStart2"
+                tools:ignore="HardcodedText,RtlSymmetry" />
+
+            <TextView
+                android:id="@+id/textBootFromStart2"
+                style="@style/textColorStyle"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:clickable="true"
+                android:elegantTextHeight="true"
+                android:focusable="true"
+                android:foreground="?selectableItemBackground"
+                android:gravity="start|center"
+                android:maxLines="1"
+                android:paddingStart="65dp"
+                android:paddingLeft="24dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Start App from Boot"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowAppRestartTvMode"
                 tools:ignore="HardcodedText,RtlSymmetry" />
 
             <androidx.appcompat.widget.SwitchCompat
@@ -224,6 +321,39 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textCheckDownloadStatus2" />
 
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/imgStartAppRestartOnTvMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:alpha="1"
+                android:checked="true"
+                app:layout_constraintBottom_toBottomOf="@+id/textShowAppRestartTvMode"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowOnlineStatus" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/imgBootFromStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:alpha="1"
+                android:checked="true"
+                app:layout_constraintBottom_toTopOf="@+id/textLockdeviceDown"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowAppRestartTvMode" />
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/imgBootFromStart2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:alpha="1"
+                android:checked="true"
+                app:layout_constraintBottom_toBottomOf="@+id/textLockdeviceDown"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textLockdeviceDown" />
+
             <ImageView
                 android:id="@+id/imageView4"
                 android:layout_width="25dp"
@@ -237,6 +367,17 @@
 
 
             <ImageView
+                android:id="@+id/imageView40"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_arrow_move_front"
+                app:layout_constraintBottom_toBottomOf="@+id/textBranding"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textBranding"
+                app:tint="#494646" />
+
+            <ImageView
                 android:id="@+id/imageView22"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
@@ -247,18 +388,18 @@
                 app:layout_constraintTop_toBottomOf="@+id/divider32"
                 app:tint="#494646" />
 
-   <!--         <ImageView
-                android:id="@+id/imageView23"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginEnd="16dp"
-                android:src="@drawable/ic_arrow_move_front"
-                app:layout_constraintBottom_toBottomOf="@+id/divider34"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textCrashPage"
-                app:tint="#494646" />
+            <!--         <ImageView
+                         android:id="@+id/imageView23"
+                         android:layout_width="25dp"
+                         android:layout_height="25dp"
+                         android:layout_marginEnd="16dp"
+                         android:src="@drawable/ic_arrow_move_front"
+                         app:layout_constraintBottom_toBottomOf="@+id/divider34"
+                         app:layout_constraintEnd_toEndOf="parent"
+                         app:layout_constraintTop_toBottomOf="@+id/textCrashPage"
+                         app:tint="#494646" />
 
-            -->
+                     -->
 
             <ImageView
                 android:id="@+id/imageView36"
@@ -282,6 +423,17 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textHardwarePage"
                 app:srcCompat="@drawable/ic_system_memory_24" />
+
+            <ImageView
+                android:id="@+id/imageView41"
+                style="@style/imageStyleColorTint"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textBranding"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textBranding"
+                app:srcCompat="@drawable/ic_branding" />
 
             <ImageView
                 android:id="@+id/imageView21"
@@ -329,6 +481,39 @@
                 app:layout_constraintTop_toBottomOf="@+id/divider40"
                 app:srcCompat="@drawable/ic_show_online_status" />
 
+            <ImageView
+                android:id="@+id/imageView37"
+                style="@style/imageStyleColorTint"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textShowAppRestartTvMode"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider29"
+                app:srcCompat="@drawable/ic_show_online_status" />
+
+            <ImageView
+                android:id="@+id/imageView37555"
+                style="@style/imageStyleColorTint"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textBootFromStart2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowAppRestartTvMode"
+                app:srcCompat="@drawable/ic_show_online_status" />
+
+            <ImageView
+                android:id="@+id/imageView3"
+                style="@style/imageStyleColorTint"
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textLockdeviceDown"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textLockdeviceDown"
+                app:srcCompat="@drawable/ic_show_online_status" />
+
             <View
                 android:id="@+id/divider32"
                 style="@style/dividerBackColor"
@@ -348,6 +533,16 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textCrashPage" />
+
+            <View
+                android:id="@+id/divider42"
+                style="@style/dividerBackColor"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textBranding" />
 
             <View
                 android:id="@+id/divider38"
@@ -384,12 +579,22 @@
                 style="@style/dividerBackColor"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textShowOnlineStatus" />
+
+            <View
+                android:id="@+id/divider41"
+                style="@style/dividerBackColor"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
                 android:layout_marginBottom="32dp"
                 android:background="?android:attr/listDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textShowOnlineStatus"
+                app:layout_constraintTop_toBottomOf="@+id/textShowAppRestartTvMode"
                 app:layout_constraintVertical_bias="0.0" />
 
             <View

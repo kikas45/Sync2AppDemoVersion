@@ -185,13 +185,13 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_server_layout"
-        android:layout_width="0dp"
-        android:layout_height="45dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
         android:layout_gravity="top|center"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginEnd="45dp"
         android:alpha="0.8"
-        android:background="#171616"
+        android:background="@drawable/card_design_for_download_ui"
         android:clickable="false"
         android:fitsSystemWindows="true"
         android:focusable="false"
@@ -205,12 +205,15 @@
         <ProgressBar
             android:id="@+id/progressBarPref"
             style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="2dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
             android:progressDrawable="@drawable/style_horizontal_bar"
             android:visibility="gone"
+            ads:layout_constraintEnd_toStartOf="@+id/horizontalScrollView2"
             ads:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/horizontalScrollView2"
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
@@ -219,10 +222,10 @@
             android:layout_height="25dp"
             android:layout_gravity="center"
             android:layout_marginStart="8dp"
-            android:padding="5dp"
+            android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:background="?selectableItemBackground"
+            android:padding="5dp"
             ads:layout_constraintBottom_toBottomOf="parent"
             ads:layout_constraintStart_toStartOf="parent"
             ads:layout_constraintTop_toTopOf="parent"
@@ -236,10 +239,10 @@
             android:layout_height="25dp"
             android:layout_gravity="center"
             android:layout_marginEnd="8dp"
-            android:padding="5dp"
+            android:background="?selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
-            android:background="?selectableItemBackground"
+            android:padding="5dp"
             ads:layout_constraintBottom_toBottomOf="parent"
             ads:layout_constraintEnd_toEndOf="parent"
             ads:layout_constraintTop_toTopOf="parent"
@@ -249,16 +252,19 @@
 
         <HorizontalScrollView
             android:id="@+id/horizontalScrollView2"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
             android:orientation="horizontal"
             ads:layout_constraintEnd_toStartOf="@+id/scroolToEnd"
             ads:layout_constraintStart_toEndOf="@+id/scroolTostart"
             ads:layout_constraintTop_toBottomOf="@+id/progressBarPref">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -407,7 +413,6 @@
                     app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
 
 
-
                 <TextView
                     android:id="@+id/textFilecount"
                     android:layout_width="wrap_content"
@@ -417,7 +422,7 @@
                     android:layout_marginEnd="10dp"
                     android:elegantTextHeight="true"
                     android:gravity="center"
-                    android:text=""
+                    android:text="DL:-/-"
                     android:textColor="@color/white"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -425,25 +430,6 @@
                     app:layout_constraintStart_toEndOf="@+id/textStatusProcess"
                     app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
 
-
-
-
-                <TextView
-                    android:id="@+id/textFileChange"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:elegantTextHeight="true"
-                    android:gravity="center"
-                    android:text=""
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="@+id/textStatusProcess"
-                    app:layout_constraintStart_toEndOf="@+id/textStatusProcess"
-                    app:layout_constraintTop_toTopOf="@+id/textStatusProcess" />
 
 
             </LinearLayout>

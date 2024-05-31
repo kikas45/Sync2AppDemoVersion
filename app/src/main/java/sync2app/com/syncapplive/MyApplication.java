@@ -45,7 +45,7 @@ public class MyApplication extends MultiDexApplication {
                 }
 
             }
-        }, 3000);
+        }, 1000);
 
 
         OneSignal.setNotificationOpenedHandler(new OneSignal.OSNotificationOpenedHandler() {

@@ -10,15 +10,18 @@ import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityWiFiBinding
+import java.io.File
 
 
 class WiFiActivity : AppCompatActivity() {
@@ -30,6 +33,12 @@ class WiFiActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
     }
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
+            Context.MODE_PRIVATE
+        )
+    }
 
 
 
@@ -38,6 +47,14 @@ class WiFiActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityWiFiBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
+        val get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "")
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage()
+        }
+
+
 
 
         val getWifiName: String = sharedBiometric.getString("getWifiName", "").toString()
@@ -82,6 +99,23 @@ class WiFiActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun loadBackGroundImage() {
+
+        val fileTypes = "app_background.png"
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+        val pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/${Constants.Syn2AppLive}/" + pathFolder
+        val file = File(folder, fileTypes)
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.backgroundImage)
+
+        }
     }
 
 

@@ -8,11 +8,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivitySmsactivityBinding
+import java.io.File
 
 
 class SMSActivity : AppCompatActivity() {
@@ -21,6 +24,12 @@ class SMSActivity : AppCompatActivity() {
     private val sharedBiometric: SharedPreferences by lazy {
         applicationContext.getSharedPreferences(
             Constants.SHARED_BIOMETRIC,
+            Context.MODE_PRIVATE
+        )
+    }
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
             Context.MODE_PRIVATE
         )
     }
@@ -34,6 +43,15 @@ class SMSActivity : AppCompatActivity() {
 
         val phoneNumber: String = sharedBiometric.getString("phoneNumber", "").toString()
         val message: String = sharedBiometric.getString("message", "").toString()
+
+
+        val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
+        val get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "")
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage()
+        }
+
+
 
 
         binding.textSendMySms.setOnClickListener {
@@ -64,6 +82,23 @@ class SMSActivity : AppCompatActivity() {
 
     }
 
+
+    private fun loadBackGroundImage() {
+
+        val fileTypes = "app_background.png"
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+        val pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/${Constants.Syn2AppLive}/" + pathFolder
+        val file = File(folder, fileTypes)
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.backgroundImage)
+
+        }
+    }
 
 
 

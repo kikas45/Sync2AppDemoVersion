@@ -35,6 +35,7 @@ import sync2app.com.syncapplive.R
 import sync2app.com.syncapplive.additionalSettings.OnFileChange.Retro_On_Change
 import sync2app.com.syncapplive.additionalSettings.urlchecks.checkUrlExistence
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
+import sync2app.com.syncapplive.additionalSettings.utils.IndexFileChecker
 import java.io.File
 import java.io.FileInputStream
 import java.util.Objects
@@ -91,12 +92,13 @@ class OnChnageService : Service() {
         )
     }
 
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
 
         val editorDN = myDownloadClass.edit()
         editorDN.remove(Constants.SynC_Status)
-     //  editorDN.remove(Constants.SAVED_CN_TIME)
+        //  editorDN.remove(Constants.SAVED_CN_TIME)
         editorDN.remove(Constants.textDownladByes)
         editorDN.remove(Constants.progressBarPref)
         editorDN.remove(Constants.progressBarPref)
@@ -136,7 +138,7 @@ class OnChnageService : Service() {
         val editor = myDownloadClass.edit()
         editor.putString(Constants.Zip, Constants.Zip)
         editor.remove(Constants.SynC_Status)
-       // editor.remove(Constants.SAVED_CN_TIME)
+        // editor.remove(Constants.SAVED_CN_TIME)
         editor.remove(Constants.textDownladByes)
         editor.remove(Constants.progressBarPref)
         editor.remove(Constants.progressBarPref)
@@ -146,17 +148,10 @@ class OnChnageService : Service() {
         editor.apply()
         countdownTimerServerUpdater?.cancel()
 
-      //  second_cancel_download()
-
-
-
-
+        //  second_cancel_download()
 
 
         showToastMessage("Sync On Change Activated")
-
-        val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
-        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
 
 
         val getFolderClo = myDownloadClass.getString("getFolderClo", "").toString()
@@ -166,59 +161,130 @@ class OnChnageService : Service() {
 
         handler.postDelayed(Runnable {
 
-        if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty()) {
-            SyncIntervalDownload()
-            synReapeatTime();
+            if (baseUrl.isNotEmpty() && getFolderClo.isNotEmpty() && getFolderSubpath.isNotEmpty() && fileName.isNotEmpty()) {
+                SyncIntervalDownload()
+                synReapeatTime();
 
-            if (networkInfo != null && networkInfo!!.isConnected) {
+                if (networkInfo != null && networkInfo!!.isConnected) {
+                    val get_imagSwtichUseIndexCahngeOrTimeStamp =
+                        sharedBiometric.getString(Constants.imagSwtichUseIndexCahngeOrTimeStamp, "")
 
-                if (currentTime.isEmpty() || severTime.isEmpty()) {
+                    if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
 
-                    val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-                    val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
-                    val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
-
-                    val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
-
-                    if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
-                        val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
-                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                        getServerTimeFromJson(un_dynaic_path, dynamicPart)
-
-                        Log.d("OnChnageService"," $un_dynaic_path$dynamicPart")
+                        fetchIndexChangeTime()
 
                     } else {
-
-                        val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                        getServerTimeFromJson(get_tMaster, dynamicPart)
-
-                        Log.d("OnChnageService","$get_tMaster$dynamicPart")
-
+                        fecthPtTime()
                     }
 
 
-
-
-
-
-                    editor.putString(Constants.SynC_Status, Constants.PR_running)
-                    editor.apply()
-
-                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                    sendBroadcast(intent22)
+                } else {
+                    showToastMessage("No internet Connection")
                 }
 
             } else {
-                showToastMessage("No internet Connection")
+                showToastMessage("Invalid Path Format")
             }
 
-        } else {
-            showToastMessage("Invalid Path Format")
-        }
-
-        },500)
+        }, 500)
 
         return START_STICKY
+    }
+
+    private fun fetchIndexChangeTime() {
+
+        val currentTime =
+            myDownloadClass.getString(Constants.CurrentServerTime_for_IndexChange, "") + ""
+        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved_For_IndexChange, "") + ""
+
+        if (currentTime.isEmpty() || severTime.isEmpty()) {
+
+            val get_tMaster: String =
+                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+            val get_UserID: String =
+                myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+            val get_LicenseKey: String =
+                myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+
+            val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+            if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+
+                val urlPath =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$get_UserID/$get_LicenseKey/App/index.html"
+                checkIndexFileChange(urlPath)
+
+            } else {
+
+                val urlPath = "$get_tMaster$get_UserID/$get_LicenseKey/App/index.html"
+                checkIndexFileChange(urlPath)
+            }
+
+
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SynC_Status, Constants.PR_running)
+            editor.apply()
+
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+        }
+
+
+    }
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun checkIndexFileChange(url: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val checker = IndexFileChecker(url)
+            val result = checker.checkIndexFileChange()
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SeverTimeSaved, result)
+            editor.putString(Constants.CurrentServerTime, result)
+            editor.apply()
+        }
+    }
+
+
+    private fun fecthPtTime() {
+        val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+
+        if (currentTime.isEmpty() || severTime.isEmpty()) {
+
+            val get_tMaster: String =
+                myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+            val get_UserID: String =
+                myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+            val get_LicenseKey: String =
+                myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+
+            val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+
+            if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+                val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
+                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                getServerTimeFromJson(un_dynaic_path, dynamicPart)
+
+                Log.d("OnChnageService", " $un_dynaic_path$dynamicPart")
+
+            } else {
+
+                val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                getServerTimeFromJson(get_tMaster, dynamicPart)
+
+                Log.d("OnChnageService", "$get_tMaster$dynamicPart")
+
+            }
+
+
+            val editor = myDownloadClass.edit()
+            editor.putString(Constants.SynC_Status, Constants.PR_running)
+            editor.apply()
+
+            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+            sendBroadcast(intent22)
+        }
     }
 
 
@@ -242,7 +308,7 @@ class OnChnageService : Service() {
         myHandler.removeCallbacksAndMessages(null)
         handler.removeCallbacksAndMessages(null)
 
-      //  second_cancel_download()
+        //  second_cancel_download()
 
     }
 
@@ -310,9 +376,6 @@ class OnChnageService : Service() {
     }
 
 
-
-
-
     @SuppressLint("SuspiciousIndentation")
     @OptIn(DelicateCoroutinesApi::class)
     private fun download(
@@ -333,53 +396,67 @@ class OnChnageService : Service() {
         delete(file)
 
 
-
-
         val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
 
 
-
-        val get_imagSwtichEnableSyncFromAPI = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
+        val get_imagSwtichEnableSyncFromAPI =
+            sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "")
 
         if (get_imagSwtichEnableSyncFromAPI.equals(Constants.imagSwtichEnableSyncFromAPI)) {
 
             // when enable Sync Zip is  toggle On from Syn manager Page
             if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
 
-                val baseUrl = "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
+                val baseUrl =
+                    "https://cp.cloudappserver.co.uk/app_base/public/$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
                 GlobalScope.launch {
                     val result = checkUrlExistence(baseUrl)
-                    if (result){
-                        manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+                    if (result) {
+                        manageDownload(
+                            baseUrl,
+                            getFolderClo,
+                            getFolderSubpath,
+                            "Zip",
+                            Constants.fileNmae_App_Zip,
+                            Extracted
+                        )
 
-                        withContext(Dispatchers.Main){
-                         //   showToastMessage("partner url On Chnage (Zip)  $baseUrl")
+                        withContext(Dispatchers.Main) {
+                            //   showToastMessage("partner url On Chnage (Zip)  $baseUrl")
                         }
 
-                    }else{
-                        withContext(Dispatchers.Main){
+                    } else {
+                        withContext(Dispatchers.Main) {
                             showToastMessage("Invalid url")
                         }
                     }
                 }
 
 
-            } else{
+            } else {
 
                 // No partner url
 
-                val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+                val get_tMaster: String =
+                    myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
                 val baseUrl = "$get_tMaster$getFolderClo/$getFolderSubpath/Zip/App.zip"
 
                 GlobalScope.launch {
                     val result = checkUrlExistence(baseUrl)
-                    if (result){
-                        manageDownload(baseUrl,getFolderClo, getFolderSubpath, "Zip", Constants.fileNmae_App_Zip, Extracted )
+                    if (result) {
+                        manageDownload(
+                            baseUrl,
+                            getFolderClo,
+                            getFolderSubpath,
+                            "Zip",
+                            Constants.fileNmae_App_Zip,
+                            Extracted
+                        )
                         withContext(Dispatchers.Main) {
-                         //   showToastMessage("Master url Onchnage (Zip)  $baseUrl")
+                            //   showToastMessage("Master url Onchnage (Zip)  $baseUrl")
                         }
-                    }else{
+                    } else {
                         withContext(Dispatchers.Main) {
                             showToastMessage("Invalid url")
                         }
@@ -388,7 +465,6 @@ class OnChnageService : Service() {
 
             }
         }
-
 
 
     }
@@ -468,10 +544,6 @@ class OnChnageService : Service() {
 
 
     }
-
-
-
-
 
 
     fun delete(file: File): Boolean {
@@ -663,386 +735,541 @@ class OnChnageService : Service() {
 
 
     @OptIn(DelicateCoroutinesApi::class)
-    private fun fetchData(baseUrl: String, dynamicPart: String) {
+    private fun fetch_Data_Index_OnChange(urlPath: String) {
+
 
         val editor = myDownloadClass.edit()
 
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val api = Retro_On_Change.create(baseUrl)
-                val response = api.getAppConfig(dynamicPart)
 
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
 
-                        val getvalue = response.body()?.last_updated.toString()
-                        editor.putString(Constants.CurrentServerTime, getvalue)
+                val checker = IndexFileChecker(urlPath)
+                val getvalue = checker.checkIndexFileChange()
+
+
+                editor.putString(Constants.CurrentServerTime, getvalue)
+                editor.apply()
+
+
+                val currentTime = myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+                val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+
+                if (currentTime == severTime) {
+
+
+                    editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
+                    editor.apply()
+
+
+                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                    sendBroadcast(intent22)
+
+                    myHandler.postDelayed(Runnable {
+
+                        if (isDownloading == false) {
+                            editor.putString(Constants.SynC_Status, Constants.PR_running)
+                            editor.apply()
+                            val intent2244 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent2244)
+
+                        } else {
+                            val intent22111 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22111)
+
+                            showToastMessage("Sync Already in Progress")
+
+
+                            if (isRxtracting == true) {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(Constants.SynC_Status, Constants.PR_Extracting)
+                                editor.apply()
+
+                            } else {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.apply()
+
+                            }
+
+                        }
+
+
+                    }, 1300)
+
+
+                } else {
+
+                    if (isDownloading == false) {
+                        makeADownload()
+
+                        checkIndexFileChange(urlPath)
+
+
+                        editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
+                        editor.apply()
+
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        sendBroadcast(intent22)
+
+
+                    } else {
+                        showToastMessage("Sync Already in Progress")
+
+                        myHandler.postDelayed(Runnable {
+                            val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                            sendBroadcast(intent22)
+
+                            if (isRxtracting == true) {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(
+                                    Constants.SynC_Status,
+                                    Constants.PR_Extracting
+                                )
+                                editor.apply()
+
+                            } else {
+                                //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                editor.putString(
+                                    Constants.SynC_Status,
+                                    Constants.PR_Downloading
+                                )
+                                editor.apply()
+
+                            }
+
+
+                        }, 1300)
+
+                    }
+
+                }
+
+
+    } catch (e: HttpException){
+        withContext(Dispatchers.Main) {
+            showToastMessage("HTTP Exception: ${e.message()}")
+
+        }
+    } catch (e: Exception)
+    {
+        withContext(Dispatchers.Main) {
+            showToastMessage("Error: ${e.message}")
+
+            showToastMessage("No internet Connection")
+
+
+        }
+    }
+}
+}
+
+
+
+@OptIn(DelicateCoroutinesApi::class)
+private fun fetchData(baseUrl: String, dynamicPart: String) {
+
+    val editor = myDownloadClass.edit()
+
+    GlobalScope.launch(Dispatchers.IO) {
+        try {
+            val api = Retro_On_Change.create(baseUrl)
+            val response = api.getAppConfig(dynamicPart)
+
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+
+                    val getvalue = response.body()?.last_updated.toString()
+                    editor.putString(Constants.CurrentServerTime, getvalue)
+                    editor.apply()
+
+
+                    val currentTime =
+                        myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
+                    val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+
+                    if (currentTime == severTime) {
+
+
+                        editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
                         editor.apply()
 
 
-                        val currentTime =
-                            myDownloadClass.getString(Constants.CurrentServerTime, "") + ""
-                        val severTime = myDownloadClass.getString(Constants.SeverTimeSaved, "") + ""
+                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                        sendBroadcast(intent22)
 
-                        if (currentTime == severTime) {
+                        myHandler.postDelayed(Runnable {
+
+                            if (isDownloading == false) {
+                                editor.putString(Constants.SynC_Status, Constants.PR_running)
+                                editor.apply()
+                                val intent2244 = Intent(Constants.RECIVER_PROGRESS)
+                                sendBroadcast(intent2244)
+
+                            } else {
+                                val intent22111 = Intent(Constants.RECIVER_PROGRESS)
+                                sendBroadcast(intent22111)
+
+                                showToastMessage("Sync Already in Progress")
 
 
-                            editor.putString(Constants.SynC_Status, Constants.PR_NO_CHange)
+                                if (isRxtracting == true) {
+                                    //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                    editor.putString(
+                                        Constants.SynC_Status,
+                                        Constants.PR_Extracting
+                                    )
+                                    editor.apply()
+
+                                } else {
+                                    //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                    editor.putString(
+                                        Constants.SynC_Status,
+                                        Constants.PR_Downloading
+                                    )
+                                    editor.apply()
+
+                                }
+
+                            }
+
+
+                        }, 1300)
+
+
+                    } else {
+
+                        if (isDownloading == false) {
+                            makeADownload()
+
+                            getServerTimeFromJson(baseUrl, dynamicPart)
+
+                            editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
                             editor.apply()
-
 
                             val intent22 = Intent(Constants.RECIVER_PROGRESS)
                             sendBroadcast(intent22)
 
-                            myHandler.postDelayed(Runnable {
 
-                                if (isDownloading == false) {
-                                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                        } else {
+                            showToastMessage("Sync Already in Progress")
+
+                            myHandler.postDelayed(Runnable {
+                                val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                                sendBroadcast(intent22)
+
+                                if (isRxtracting == true) {
+                                    //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                    editor.putString(
+                                        Constants.SynC_Status,
+                                        Constants.PR_Extracting
+                                    )
                                     editor.apply()
-                                    val intent2244 = Intent(Constants.RECIVER_PROGRESS)
-                                    sendBroadcast(intent2244)
 
                                 } else {
-                                    val intent22111 = Intent(Constants.RECIVER_PROGRESS)
-                                    sendBroadcast(intent22111)
-
-                                    showToastMessage("Sync Already in Progress")
-
-
-                                    if (isRxtracting == true) {
-                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Extracting
-                                        )
-                                        editor.apply()
-
-                                    } else {
-                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Downloading
-                                        )
-                                        editor.apply()
-
-                                    }
+                                    //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
+                                    editor.putString(
+                                        Constants.SynC_Status,
+                                        Constants.PR_Downloading
+                                    )
+                                    editor.apply()
 
                                 }
 
 
                             }, 1300)
 
-
-                        } else {
-
-                            if (isDownloading == false) {
-                                makeADownload()
-
-                                getServerTimeFromJson(baseUrl, dynamicPart)
-
-                                editor.putString(Constants.SynC_Status, Constants.PR_Change_Found)
-                                editor.apply()
-
-                                val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                                sendBroadcast(intent22)
-
-
-                            } else {
-                                showToastMessage("Sync Already in Progress")
-
-                                myHandler.postDelayed(Runnable {
-                                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                                    sendBroadcast(intent22)
-
-                                    if (isRxtracting == true) {
-                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Extracting
-                                        )
-                                        editor.apply()
-
-                                    } else {
-                                        //  editor.putString(Constants.SynC_Status, Constants.PR_Downloading)
-                                        editor.putString(
-                                            Constants.SynC_Status,
-                                            Constants.PR_Downloading
-                                        )
-                                        editor.apply()
-
-                                    }
-
-
-                                }, 1300)
-
-                            }
-
                         }
 
-                    } else {
-                        showToastMessage("bad request")
                     }
 
-
+                } else {
+                    showToastMessage("bad request")
                 }
-            } catch (e: HttpException) {
-                withContext(Dispatchers.Main) {
-                    showToastMessage("HTTP Exception: ${e.message()}")
-
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    showToastMessage("Error: ${e.message}")
-
-                    showToastMessage("No internet Connection")
 
 
-                }
+            }
+        } catch (e: HttpException) {
+            withContext(Dispatchers.Main) {
+                showToastMessage("HTTP Exception: ${e.message()}")
+
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                showToastMessage("Error: ${e.message}")
+
+                showToastMessage("No internet Connection")
+
+
             }
         }
     }
+}
 
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun getServerTimeFromJson(baseUrl: String, dynamicPart: String) {
+@OptIn(DelicateCoroutinesApi::class)
+private fun getServerTimeFromJson(baseUrl: String, dynamicPart: String) {
 
 
-        val editor = myDownloadClass.edit()
+    val editor = myDownloadClass.edit()
 
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val api = Retro_On_Change.create(baseUrl)
-                val response = api.getAppConfig(dynamicPart)
-
-                withContext(Dispatchers.Main) {
-                    if (response.isSuccessful) {
-
-                        val getvalue = response.body()?.last_updated.toString()
-
-                        editor.putString(Constants.SeverTimeSaved, getvalue)
-                        editor.putString(Constants.CurrentServerTime, getvalue)
-                        editor.apply()
-
-
-                    } else {
-                        showToastMessage("bad request")
-                    }
-
-
-                }
-            } catch (e: HttpException) {
-                withContext(Dispatchers.Main) {
-                    showToastMessage("HTTP Exception: ${e.message()}")
-
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    showToastMessage("Error: ${e.message}")
-
-                }
-            }
-        }
-    }
-
-
-    private fun showToastMessage(messages: String) {
-
+    GlobalScope.launch(Dispatchers.IO) {
         try {
-            Toast.makeText(applicationContext, messages, Toast.LENGTH_SHORT).show()
-        } catch (_: Exception) {
+            val api = Retro_On_Change.create(baseUrl)
+            val response = api.getAppConfig(dynamicPart)
+
+            withContext(Dispatchers.Main) {
+                if (response.isSuccessful) {
+
+                    val getvalue = response.body()?.last_updated.toString()
+
+                    editor.putString(Constants.SeverTimeSaved, getvalue)
+                    editor.putString(Constants.CurrentServerTime, getvalue)
+                    editor.apply()
+
+
+                } else {
+                    showToastMessage("bad request")
+                }
+
+
+            }
+        } catch (e: HttpException) {
+            withContext(Dispatchers.Main) {
+                showToastMessage("HTTP Exception: ${e.message()}")
+
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                showToastMessage("Error: ${e.message}")
+
+            }
         }
     }
+}
 
 
-    private fun attemptRequestAgain(minutes: Long) {
-        val milliseconds = minutes * 60 * 1000 // Convert minutes to
-        val editor = myDownloadClass.edit()
+private fun showToastMessage(messages: String) {
+
+    try {
+        Toast.makeText(applicationContext, messages, Toast.LENGTH_SHORT).show()
+    } catch (_: Exception) {
+    }
+}
 
 
-        val connectivityManager22: ConnectivityManager =
-            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
+private fun attemptRequestAgain(minutes: Long) {
+    val milliseconds = minutes * 60 * 1000 // Convert minutes to
+    val editor = myDownloadClass.edit()
+
+
+    val connectivityManager22: ConnectivityManager =
+        applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val networkInfo22: NetworkInfo? = connectivityManager22.activeNetworkInfo
 
 
 
-        countdownTimerServerUpdater = object : CountDownTimer(milliseconds, 1000) {
-            @SuppressLint("SetTextI18n")
-            override fun onFinish() {
-                try {
-                    countdownTimerServerUpdater?.cancel()
-                    attemptRequestAgain(minutes)
-                    startOrResumeTimer(minutes)
+    countdownTimerServerUpdater = object : CountDownTimer(milliseconds, 1000) {
+        @SuppressLint("SetTextI18n")
+        override fun onFinish() {
+            try {
+                countdownTimerServerUpdater?.cancel()
+                attemptRequestAgain(minutes)
+                startOrResumeTimer(minutes)
 
 
-                    if (networkInfo22 != null && networkInfo22.isConnected) {
+                if (networkInfo22 != null && networkInfo22.isConnected) {
 
-                        // start the time again
+                    // start the time again
 
-                        val get_tMaster: String = myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
-                        val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
-                        val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
+                    val get_tMaster: String =
+                        myDownloadClass.getString(Constants.get_ModifiedUrl, "").toString()
+                    val get_UserID: String = myDownloadClass.getString(Constants.getSavedCLOImPutFiled, "").toString()
+                    val get_LicenseKey: String = myDownloadClass.getString(Constants.getSaveSubFolderInPutFiled, "").toString()
 
-                        val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
+                    val imagSwtichPartnerUrl = sharedBiometric.getString(Constants.imagSwtichPartnerUrl, "")
 
-                        if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+                    val get_imagSwtichUseIndexCahngeOrTimeStamp = sharedBiometric.getString(Constants.imagSwtichUseIndexCahngeOrTimeStamp, "")
+
+
+                    if (imagSwtichPartnerUrl == Constants.imagSwtichPartnerUrl) {
+
+
+                        if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
+                            val urlPath = "https://cp.cloudappserver.co.uk/app_base/public/$get_UserID/$get_LicenseKey/App/index.html"
+                            fetch_Data_Index_OnChange(urlPath)
+
+                        } else {
                             val un_dynaic_path = "https://cp.cloudappserver.co.uk/app_base/public/"
                             val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
                             fetchData(un_dynaic_path, dynamicPart)
-                            Log.d("OnChnageService","Img  $un_dynaic_path$dynamicPart")
-                        } else {
-
-                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
-                            fetchData(get_tMaster, dynamicPart)
-                            Log.d("OnChnageService","$get_tMaster$dynamicPart")
+                            Log.d("OnChnageService", "Img  $un_dynaic_path$dynamicPart")
                         }
 
 
-                        val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
-                        sendBroadcast(intent11)
-
-                        editor.putString(Constants.SynC_Status, Constants.PR_running)
-                        editor.apply()
-                        val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        sendBroadcast(intent22)
-
-
                     } else {
-                        showToastMessage("No internet Connection")
 
+                        if (get_imagSwtichUseIndexCahngeOrTimeStamp.equals(Constants.imagSwtichUseIndexCahngeOrTimeStamp)) {
 
-                        //  editor.putString(Constants.SynC_Status, "Error Network")
-                        //   editor.apply()
+                            val urlPath = "$get_tMaster/$get_UserID/$get_LicenseKey/App/index.html"
+                            fetch_Data_Index_OnChange(urlPath)
 
-                        //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
-                        //   sendBroadcast(intent22)
-
-                        val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
-                        sendBroadcast(intent11)
+                        }else{
+                            val dynamicPart = "$get_UserID/$get_LicenseKey/PTime/"
+                            fetchData(get_tMaster, dynamicPart)
+                            Log.d("OnChnageService", "$get_tMaster$dynamicPart")
+                        }
 
 
                     }
 
 
-                } catch (ignored: java.lang.Exception) {
-                }
-            }
+                    val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                    sendBroadcast(intent11)
 
-            @SuppressLint("SuspiciousIndentation")
-            override fun onTick(millisUntilFinished: Long) {
-                try {
+                    editor.putString(Constants.SynC_Status, Constants.PR_running)
+                    editor.apply()
+                    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                    sendBroadcast(intent22)
 
-
-                    val totalSecondsRemaining = millisUntilFinished / 1000
-                    var minutesUntilFinished = totalSecondsRemaining / 60
-                    var remainingSeconds = totalSecondsRemaining % 60
-
-                    // Adjusting minutes if seconds are in the range of 0-59
-                    if (remainingSeconds == 0L && minutesUntilFinished > 0) {
-                        minutesUntilFinished--
-                        remainingSeconds = 59
-                    }
-                    val displayText =
-                        String.format("CD: %d:%02d", minutesUntilFinished, remainingSeconds)
-                    // showToastMessage(displayText)
-
-                } catch (ignored: java.lang.Exception) {
-                }
-            }
-        }
-        countdownTimerServerUpdater?.start()
-    }
-
-
-    private fun startOrResumeTimer(minutes: Long) {
-        val milliseconds = minutes * 60 * 1000
-        if (milliseconds > 0) {
-            val savedTime = System.currentTimeMillis() + milliseconds
-            val editor = myDownloadClass.edit()
-            editor.putLong(Constants.SAVED_CN_TIME, savedTime)
-            editor.apply()
-        }
-    }
-
-
-    private val UpdateTimmerBroad_Reciver: BroadcastReceiver = object : BroadcastReceiver() {
-        @SuppressLint("SetTextI18n")
-        override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action != null && intent.action == Constants.UpdateTimmer_Reciver) {
-                countdownTimerServerUpdater?.cancel()
-
-                SyncIntervalDownload();
-                showToastMessage("Sync Time Updated")
-                synReapeatTime()
-
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-                    startMyOwnForeground()
 
                 } else {
-                    startForeground(1, Notification())
+                    showToastMessage("No internet Connection")
+
+
+                    //  editor.putString(Constants.SynC_Status, "Error Network")
+                    //   editor.apply()
+
+                    //    val intent22 = Intent(Constants.RECIVER_PROGRESS)
+                    //   sendBroadcast(intent22)
+
+                    val intent11 = Intent(Constants.SEND_UPDATE_TIME_RECIEVER)
+                    sendBroadcast(intent11)
+
 
                 }
 
 
+            } catch (ignored: java.lang.Exception) {
+            }
+        }
+
+        @SuppressLint("SuspiciousIndentation")
+        override fun onTick(millisUntilFinished: Long) {
+            try {
+
+
+                val totalSecondsRemaining = millisUntilFinished / 1000
+                var minutesUntilFinished = totalSecondsRemaining / 60
+                var remainingSeconds = totalSecondsRemaining % 60
+
+                // Adjusting minutes if seconds are in the range of 0-59
+                if (remainingSeconds == 0L && minutesUntilFinished > 0) {
+                    minutesUntilFinished--
+                    remainingSeconds = 59
+                }
+                val displayText =
+                    String.format("CD: %d:%02d", minutesUntilFinished, remainingSeconds)
+                // showToastMessage(displayText)
+
+            } catch (ignored: java.lang.Exception) {
             }
         }
     }
+    countdownTimerServerUpdater?.start()
+}
 
 
-    private fun SyncIntervalDownload() {
-        val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
+private fun startOrResumeTimer(minutes: Long) {
+    val milliseconds = minutes * 60 * 1000
+    if (milliseconds > 0) {
+        val savedTime = System.currentTimeMillis() + milliseconds
+        val editor = myDownloadClass.edit()
+        editor.putLong(Constants.SAVED_CN_TIME, savedTime)
+        editor.apply()
+    }
+}
 
-        if (getTimeDefined != 0L) {
 
-            attemptRequestAgain(getTimeDefined)
+private val UpdateTimmerBroad_Reciver: BroadcastReceiver = object : BroadcastReceiver() {
+    @SuppressLint("SetTextI18n")
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != null && intent.action == Constants.UpdateTimmer_Reciver) {
+            countdownTimerServerUpdater?.cancel()
 
-            if (networkInfo != null && networkInfo!!.isConnected) {
-                // showToastMessage("System will Sync in $getTimeDefined minute")
+            SyncIntervalDownload();
+            showToastMessage("Sync Time Updated")
+            synReapeatTime()
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                startMyOwnForeground()
+
             } else {
-                showToastMessage("No internet Connection")
+                startForeground(1, Notification())
+
+            }
+
+
+        }
+    }
+}
+
+
+private fun SyncIntervalDownload() {
+    val getTimeDefined = myDownloadClass.getLong(Constants.getTimeDefined, 0)
+
+    if (getTimeDefined != 0L) {
+
+        attemptRequestAgain(getTimeDefined)
+
+        if (networkInfo != null && networkInfo!!.isConnected) {
+            // showToastMessage("System will Sync in $getTimeDefined minute")
+        } else {
+            showToastMessage("No internet Connection")
+        }
+
+    }
+
+
+}
+
+
+private fun synReapeatTime() {
+    val my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE)
+
+    val getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0)
+
+    if (getTimeDefined != 0L) {
+        startOrResumeTimer(getTimeDefined)
+    }
+
+}
+
+
+private fun second_cancel_download() {
+    try {
+
+        val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
+
+        if (download_ref != -15L) {
+            val query = DownloadManager.Query()
+            query.setFilterById(download_ref)
+            val c =
+                (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
+                    query
+                )
+            if (c.moveToFirst()) {
+                manager!!.remove(download_ref)
+                val editor: SharedPreferences.Editor = myDownloadClass.edit()
+                editor.remove(Constants.downloadKey)
+                editor.apply()
             }
 
         }
 
-
+    } catch (ignored: java.lang.Exception) {
     }
-
-
-    private fun synReapeatTime() {
-        val my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, MODE_PRIVATE)
-
-        val getTimeDefined = my_DownloadClass.getLong(Constants.getTimeDefined, 0)
-
-        if (getTimeDefined != 0L) {
-            startOrResumeTimer(getTimeDefined)
-        }
-
-    }
-
-
-    private fun second_cancel_download() {
-        try {
-
-            val download_ref: Long = myDownloadClass.getLong(Constants.downloadKey, -15)
-
-            if (download_ref != -15L) {
-                val query = DownloadManager.Query()
-                query.setFilterById(download_ref)
-                val c =
-                    (applicationContext.getSystemService(DOWNLOAD_SERVICE) as DownloadManager).query(
-                        query
-                    )
-                if (c.moveToFirst()) {
-                    manager!!.remove(download_ref)
-                    val editor: SharedPreferences.Editor = myDownloadClass.edit()
-                    editor.remove(Constants.downloadKey)
-                    editor.apply()
-                }
-
-            }
-
-        } catch (ignored: java.lang.Exception) {
-        }
-    }
+}
 
 
 }

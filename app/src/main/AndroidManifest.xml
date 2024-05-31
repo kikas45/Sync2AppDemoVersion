@@ -18,6 +18,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
@@ -49,12 +53,21 @@
         android:theme="@style/Theme.RemoteWebViewLight"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup,UnusedAttribute">
+
         <activity
-            android:name=".additionalSettings.WebbyTestActivity"
+            android:name=".additionalSettings.RetryApiDownloadActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
-            android:name=".additionalSettings.DownloadTheApisActivity"
+            android:name=".additionalSettings.BrandingActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.TvActivityOrAppMode"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:exported="false" />
+        <activity
+            android:name=".additionalSettings.DownloadApisFilesActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
@@ -63,6 +76,7 @@
             android:exported="false" />
         <activity
             android:name=".QrPages.PhoneActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
             android:name=".QrPages.EmailActivity"
@@ -76,34 +90,20 @@
             android:name=".QrPages.WiFiActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
-        <activity
-            android:name=".additionalSettings.FileExplorerActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
-        <activity
-            android:name=".additionalSettings.TestScreenActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
+
         <activity
             android:name=".additionalSettings.MaintenanceActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
-            android:name=".additionalSettings.DownlodPagger"
+            android:name=".additionalSettings.DownlodZipActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
         <activity
             android:name=".additionalSettings.RequiredBioActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="false" />
-        <activity
-            android:name=".additionalSettings.SystemInfoActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
-        <activity
-            android:name=".additionalSettings.AdditionalSettingsActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
+
         <activity
             android:name=".additionalSettings.ReSyncActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
@@ -133,17 +133,10 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".WebActivity"
-            android:theme="@style/Theme.RemoteWebViewSettings" />
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity android:name=".WelcomeSlider" />
         <activity
-            android:name=".additionalSettings.MyTestDownloadAPI"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
-            android:exported="false" />
-        <activity
-            android:name=".additionalSettings.TvActivityOrAppMode"
+            android:name=".additionalSettings.SplashVideoActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:exported="true">
             <intent-filter>
@@ -204,9 +197,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".RemotexNotifier"
-            android:exported="false" />
 
         <receiver
             android:name=".additionalSettings.devicelock.MyDeviceAdminReceiver"

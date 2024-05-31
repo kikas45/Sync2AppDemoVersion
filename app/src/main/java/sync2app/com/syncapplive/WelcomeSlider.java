@@ -49,6 +49,7 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYou;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYouListener;
@@ -103,6 +104,12 @@ public class WelcomeSlider extends AppCompatActivity {
             launchHomeScreen();
             finish();
         }
+
+
+        //add exception
+        Methods.addExceptionHandler(this);
+
+
 
         // Making notification bar transparent
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);

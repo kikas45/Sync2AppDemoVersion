@@ -3,23 +3,28 @@ package sync2app.com.syncapplive.additionalSettings
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import sync2app.com.syncapplive.MyApplication
 import sync2app.com.syncapplive.R
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityPasswordBinding
 import sync2app.com.syncapplive.databinding.CustomDefaultEmailSavedLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomFailedLayoutBinding
 import sync2app.com.syncapplive.databinding.CustomSucessLayoutBinding
+import java.io.File
 import java.util.regex.Pattern
 
 class PasswordActivity : AppCompatActivity() {
@@ -38,6 +43,14 @@ class PasswordActivity : AppCompatActivity() {
         )
     }
 
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
+            Context.MODE_PRIVATE
+        )
+    }
+
+
     private var olDPassworEnabled = false;
     private var newPassworEnabled = false;
     private var isEmailReady = false;
@@ -51,6 +64,20 @@ class PasswordActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         MyApplication.incrementRunningActivities()
+
+        //add exception
+        Methods.addExceptionHandler(this)
+
+
+
+
+        val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
+        val get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "")
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage()
+        }
+
+
 
         binding.apply {
             closeBs.setOnClickListener {
@@ -470,6 +497,24 @@ class PasswordActivity : AppCompatActivity() {
 
         alertDialog.show()
 
+
+    }
+
+    private fun loadBackGroundImage() {
+
+        val fileTypes = "app_background.png"
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+        val pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/${Constants.Syn2AppLive}/" + pathFolder
+        val file = File(folder, fileTypes)
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.backgroundImage)
+
+        }
 
     }
 

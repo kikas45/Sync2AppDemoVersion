@@ -5,12 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/_15dp"
-    tools:context=".additionalSettings.DownlodPagger">
+    tools:context=".additionalSettings.DownlodZipActivity">
+
+
+    <ImageView
+        android:id="@+id/backgroundImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action_bar_root"
-        style="@style/toolbarBackGroundColor"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginTop="2dp"

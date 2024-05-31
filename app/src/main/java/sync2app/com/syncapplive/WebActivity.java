@@ -11,16 +11,6 @@ import static sync2app.com.syncapplive.constants.ChangeToolbarBgColor;
 import static sync2app.com.syncapplive.constants.CurrVersion;
 import static sync2app.com.syncapplive.constants.ForceUpdate;
 import static sync2app.com.syncapplive.constants.NewVersion;
-import static sync2app.com.syncapplive.constants.NotifAvailable;
-import static sync2app.com.syncapplive.constants.NotifLinkExternal;
-import static sync2app.com.syncapplive.constants.NotifSound;
-import static sync2app.com.syncapplive.constants.Notif_ID;
-import static sync2app.com.syncapplive.constants.Notif_Img_url;
-import static sync2app.com.syncapplive.constants.Notif_Shown;
-import static sync2app.com.syncapplive.constants.Notif_button_action;
-import static sync2app.com.syncapplive.constants.Notif_desc;
-import static sync2app.com.syncapplive.constants.Notif_title;
-import static sync2app.com.syncapplive.constants.Notifx_service;
 import static sync2app.com.syncapplive.constants.ShowWebBtn;
 import static sync2app.com.syncapplive.constants.ToolbarBgColor;
 import static sync2app.com.syncapplive.constants.ToolbarTitleText;
@@ -92,7 +82,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -107,7 +96,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.text.Html;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -191,6 +179,9 @@ import java.util.Date;
 import java.util.Objects;
 
 import sync2app.com.syncapplive.QrPages.QRSanActivity;
+import sync2app.com.syncapplive.additionalSettings.MaintenanceActivity;
+import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods;
 import sync2app.com.syncapplive.additionalSettings.myApiDownload.FilesViewModel;
 import sync2app.com.syncapplive.additionalSettings.myService.IntervalApiServiceSync;
 import sync2app.com.syncapplive.additionalSettings.myService.MyDownloadMangerClass;
@@ -199,8 +190,7 @@ import sync2app.com.syncapplive.additionalSettings.myService.SyncInterval;
 import sync2app.com.syncapplive.additionalSettings.myService.OnChnageService;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.additionalSettings.utils.ServiceUtils;
-import sync2app.com.syncapplive.databinding.CustomNotificationLayoutBinding;
-import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
+import sync2app.com.syncapplive.databinding.CustomNivigationPopLayoutBinding;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYou;
 import sync2app.com.syncapplive.glidetovectoryou.GlideToVectorYouListener;
 
@@ -419,9 +409,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     TextView textStatusProcess;
 
 
-    TextView textFileChange ;
-    TextView textDownladByes ;
-    TextView textFilecount ;
+
+    TextView textDownladByes;
+    TextView textFilecount;
     ProgressBar progressBarPref;
 
     private WebView mWebviewPop;
@@ -463,7 +453,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
     private FilesViewModel mUserViewModel;
-
 
 
     public static boolean hasPermissions(Context context, String... permissions) {
@@ -520,16 +509,12 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         drawer_menu = findViewById(R.id.native_drawer_menu);
         drawer_menu_btn = findViewById(R.id.drawer_menu_Btn);
         bottom_server_layout = findViewById(R.id.bottom_server_layout);
-
         mAdView = findViewById(R.id.adView);
-
-
         HorizontalProgressBar = findViewById(R.id.progressbar);
         webView = findViewById(R.id.webview);
         swipeView = findViewById(R.id.swipeLayout);
         urlEdittext = findViewById(R.id.urledittextbox);
         urllayout = findViewById(R.id.urllayoutroot);
-
         web_button = findViewById(R.id.web_button);
 
         // webx_layout = findViewById(R.id.webx_layout);
@@ -544,6 +529,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         imageCirclGreenOnline = findViewById(R.id.imageCirclGreenOnline);
 
         MyApplication.incrementRunningActivities();
+
+        //add exception
+        Methods.addExceptionHandler(this);
+
 
         bottomtoolbar_btn_7.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -579,6 +568,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 });
             }
         });
+
 
         scroolToStart.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -631,7 +621,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         textStatusProcess = findViewById(R.id.textStatusProcess);
 
 
-        textFileChange = findViewById(R.id.textFileChange);
         textDownladByes = findViewById(R.id.textDownladByes);
         textFilecount = findViewById(R.id.textFilecount);
         progressBarPref = findViewById(R.id.progressBarPref);
@@ -639,7 +628,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         imageWiFiOFF = findViewById(R.id.imageWiFiOFF);
         imageWiFiOn = findViewById(R.id.imageWiFiOn);
-
 
         webView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -731,32 +719,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         InitiateAds();
 
-        if (Notifx_service) {
-
-            isAppOpen = true;
-
-
-            startService(new Intent(this, RemotexNotifier.class));
-            IntentFilter filter = new IntentFilter("notifx_ready");
-            BroadcastReceiver receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-
-
-                    try {
-                        if (!Notif_Shown) {
-                            showNotifxDialog(WebActivity.this);
-                        }
-
-                    } catch ( Exception e ) {
-                        e.printStackTrace();
-                    }
-
-                }
-            };
-            mContext.registerReceiver(receiver, filter);
-        }
-
 
         //// Iniliazing the webview
 
@@ -791,7 +753,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -819,12 +781,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 } else {
 
 
-                    showPopForTVConfiguration(Constants.UnableToFindIndex);
-                    // showToast(mContext, "Pop for ... when offline folder checked");
+                   /// showPopForTVConfiguration(Constants.UnableToFindIndex);
+                    // unable to find index file
+                    loadTheMainWebview();
 
                 }
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -863,7 +826,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             if (!getSaved_manaul_index_edit_url_Input.isEmpty()) {
                                 load_Launch_Online_Mode(getSaved_manaul_index_edit_url_Input);
                             } else {
-                                showPopForTVConfiguration(Constants.badRequest);
+                               // showPopForTVConfiguration(Constants.badRequest);
+                                // unable to find index file
+                                loadTheMainWebview();
+
                                 showToast(mContext, "Bad manual url");
 
                             }
@@ -888,8 +854,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                 }
 
                             } else {
-                                showPopForTVConfiguration(Constants.badRequest);
-                                //  showToast(mContext, "single url appended 22");
+                                ///showPopForTVConfiguration(Constants.badRequest);
+                                // unable to find index file
+                                loadTheMainWebview();
                             }
                         }
 
@@ -903,15 +870,18 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         if (fil_CLO.isEmpty() && fil_DEMO.isEmpty() && syncUrl.isEmpty()) {
 
                             if (get_AppMode.equals(Constants.TV_Mode)) {
-                                showPopForTVConfiguration(Constants.compleConfiguration);
-                                //  showToast(mContext, "Tv mode111111");
+                              //  showPopForTVConfiguration(Constants.compleConfiguration);
+
+                                // unable to find index file
+                                loadTheMainWebview();
+
                             } else if (Tapped_OnlineORoffline.equals(Constants.tapped_launchOffline) || Tapped_OnlineORoffline.equals(Constants.tapped_launchOnline)) {
-                                showPopForTVConfiguration(Constants.compleConfiguration);
-                                //    showToast(mContext, " Tv mode222222");
+                              //  showPopForTVConfiguration(Constants.compleConfiguration);
+                                // unable to find index file
+                                loadTheMainWebview();
                             } else {
                                 loadTheMainWebview();
-                                // showPopForTVConfiguration();
-                                //    showToast(mContext, "Tv mode3333");
+
                             }
                         } else {
                             //   showToast(mContext,"no congig no img");
@@ -923,7 +893,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                 }
 
             } else {
@@ -940,9 +910,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             if (!getSaved_manaul_index_edit_url_Input.isEmpty()) {
                                 load_Launch_Online_Mode(getSaved_manaul_index_edit_url_Input);
                             } else {
-                                showPopForTVConfiguration(Constants.badRequest);
+                              //  showPopForTVConfiguration(Constants.badRequest);
                                 showToast(mContext, "Bad manual url");
-
+                                // unable to find index file
+                                loadTheMainWebview();
                             }
 
                         } else {
@@ -965,7 +936,10 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
                             } else {
-                                showPopForTVConfiguration(Constants.UnableToFindIndex);
+                               /// showPopForTVConfiguration(Constants.UnableToFindIndex);
+
+                                // unable to find index file
+                                loadTheMainWebview();
                             }
 
                         }
@@ -982,12 +956,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         if (fil_CLO.isEmpty() && fil_DEMO.isEmpty() && syncUrl.isEmpty()) {
 
                             if (get_AppMode.equals(Constants.TV_Mode)) {
-                                showPopForTVConfiguration(Constants.compleConfiguration);
-                                // showToast(mContext, "img pop Tv mode111111");
+                               /// showPopForTVConfiguration(Constants.compleConfiguration);
+                                // unable to find index file
+                                loadTheMainWebview();
 
                             } else if (Tapped_OnlineORoffline.equals(Constants.tapped_launchOffline) || Tapped_OnlineORoffline.equals(Constants.tapped_launchOnline)) {
-                                showPopForTVConfiguration(Constants.compleConfiguration);
-                                //  showToast(mContext, "img pop Tv mode222222");
+                               /// showPopForTVConfiguration(Constants.compleConfiguration);
+                                // unable to find index file
+                                loadTheMainWebview();
                             } else {
                                 loadTheMainWebview();
                                 // showPopForTVConfiguration();
@@ -1002,13 +978,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                 }
 
 
             }
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
     }
 
@@ -1085,7 +1061,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
         } else {
-            showPopForTVConfiguration(Constants.badRequest);
+           /// showPopForTVConfiguration(Constants.badRequest);
+            // unable to find index file
+            loadTheMainWebview();
         }
 
 
@@ -1236,7 +1214,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 if (!get_imagShowOnlineStatus.equals(Constants.imagShowOnlineStatus)) {
                     imageCirclGreenOnline.setVisibility(View.INVISIBLE);
                     imageCircleBlueOffline.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     imageCirclGreenOnline.setVisibility(View.INVISIBLE);
                     imageCircleBlueOffline.setVisibility(View.INVISIBLE);
 
@@ -1256,7 +1234,9 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
                 if (use_offline.equals(Constants.USE_OFFLINE_FOLDER) || get_AppMode.equals(Constants.TV_Mode) || Tapped_OnlineORoffline.equals(Constants.tapped_launchOffline)) {
-                    showPopForTVConfiguration(Constants.UnableToFindIndex);
+                    ////showPopForTVConfiguration(Constants.UnableToFindIndex);
+                    // unable to find index file
+                    loadTheMainWebview();
                 } else {
                     loadTheMainWebview();
                 }
@@ -1265,110 +1245,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-        } catch ( Exception e ) {
-        }
-
-    }
-
-    public void showNotifxDialog(final Context context) {
-
-
-        String lastNotifxId = preferences.getString("lastId", "");
-        if (NotifAvailable & !lastNotifxId.matches(Notif_ID)) {
-            try {
-
-
-                CustomNotificationLayoutBinding binding = CustomNotificationLayoutBinding.inflate(getLayoutInflater());
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-                builder.setView(binding.getRoot());
-
-                final AlertDialog dialog = builder.create();
-
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.setCancelable(false);
-
-                // Set the background of the AlertDialog to be transparent
-                if (dialog.getWindow() != null) {
-                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                }
-
-
-                TextView notifTitle = binding.notifTitle;
-                TextView notifDesc = binding.notifDesc;
-                ImageView closeThis = binding.closeNotif;
-                TextView notifButton = binding.notifActionButton;
-                ImageView imageView = binding.notifImg;
-
-
-                closeThis.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dialog.dismiss();
-                        dialog.cancel();
-                    }
-                });
-
-                notifButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (Notif_button_action.startsWith("https") | Notif_button_action.startsWith("https")) {
-
-                            if (NotifLinkExternal) {
-
-                                webView.loadUrl(Notif_button_action);
-
-                            } else {
-                                redirectStore(Notif_button_action);
-                            }
-
-                            dialog.dismiss();
-                            dialog.cancel();
-                        } else if (Notif_button_action.matches("dismiss")) {
-                            dialog.dismiss();
-                            dialog.cancel();
-                        }
-                        dialog.dismiss();
-                        dialog.cancel();
-                    }
-                });
-
-                notifTitle.setText(Notif_title);
-                notifDesc.setText(Html.fromHtml(Notif_desc));
-
-                Glide.with(context)
-                        .load(Notif_Img_url) // image url
-                        .placeholder(R.drawable.img_logo_icon) // any placeholder to load at start
-                        .error(R.drawable.img_logo_icon)  // any image in case of error
-                        .into(imageView);  // imageview object
-
-
-                dialog.setCancelable(false);
-
-
-                if (NotifSound) {
-                    MediaPlayer mp = MediaPlayer.create(context, R.raw.alertx);
-                    mp.setVolume((float) 0.1, (float) 0.1);
-                    mp.start();
-                }
-
-
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString("lastId", Notif_ID).apply();
-
-                Notif_Shown = true;
-
-
-                try {
-                    dialog.show();
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                }
-
-            } catch ( Exception e ) {
-                e.printStackTrace();
-            }
-
+        } catch (Exception e) {
         }
 
     }
@@ -1379,7 +1256,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         try {
             CurrVersion = mContext.getPackageManager()
                     .getPackageInfo(mContext.getPackageName(), 0).versionName;
-        } catch ( PackageManager.NameNotFoundException e ) {
+        } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
 
         }
@@ -1437,7 +1314,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         try {
             if (url == null | url.equals("null"))
                 return;
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -1467,7 +1344,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         .error(R.drawable.demo_btn_24)  // any image in case of error
                         .into(view);  // imageview object
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
 
         }
@@ -1590,7 +1467,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             if (myHandler != null) {
                 myHandler.removeCallbacks(runnableDn);
             }
-        } catch ( Exception ignored ) {
+        } catch (Exception ignored) {
             // Ignore the exception
         }
 
@@ -1603,16 +1480,15 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     @Override
     public void onResume() {
 
-
         try {
             if (myHandler != null) {
                 myHandler.removeCallbacks(runnableDn);
             }
 
             SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-            String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+            String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
 
                 TextView textDownladByes = findViewById(R.id.textDownladByes);
                 ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
@@ -1621,7 +1497,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
 
 
-            }else {
+            } else {
 
                 SharedPreferences my_DownloadClass = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
 
@@ -1650,7 +1526,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-
             if (myHandler != null) {
                 myHandler.postDelayed(runnableDn, 500);
             }
@@ -1662,7 +1537,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             registerReceiver(connectivityReceiver, intentFilter);
 
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -1674,16 +1549,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 public void run() {
 
                     SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                    String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+                    String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-                    if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                    if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
                         updateSyncViewZip();
-                    }else {
+                    } else {
                         updateSyncViewAPi();
                     }
-
-
-
 
 
                 }
@@ -1693,7 +1565,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -1710,7 +1582,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             registerReceiver(Send_Time_Update_Reciver, filter22);
 
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -1730,15 +1602,15 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             String getToHideQRCode = sharedBiometric.getString(Constants.HIDE_QR_CODE, "");
             String get_drawer = sharedBiometric.getString(Constants.HIDE_DRAWER_ICON, "");
-            //  String get_imagEnableDownloadStatus = sharedBiometric.getString(Constants.imagEnableDownloadStatus, "");
             String get_imagEnableDownloadStatus = sharedBiometric.getString(Constants.showDownloadSyncStatus, "");
 
-
-            if (get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)) {
+    /*        if (get_imagEnableDownloadStatus.equals(Constants.showDownloadSyncStatus)) {
                 bottom_server_layout.setVisibility(View.VISIBLE);
             } else {
                 bottom_server_layout.setVisibility(View.GONE);
             }
+*/
+            bottom_server_layout.setVisibility(View.VISIBLE);
 
 
             if (get_drawer.equals(Constants.HIDE_DRAWER_ICON)) {
@@ -1788,15 +1660,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
             String get_intervals = sharedBiometric.getString(Constants.imagSwtichEnableSyncOnFilecahnge, "");
 
-            String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+            String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
             // set up for Zip download
-            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
 
                 if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
-                    textFilecount.setVisibility(View.INVISIBLE);
-                    textFileChange.setVisibility(View.INVISIBLE);
 
 
                     if (get_intervals != null && get_intervals.equals(Constants.imagSwtichEnableSyncOnFilecahnge)) {
@@ -1805,11 +1675,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
                             stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
                             startService(new Intent(getApplicationContext(), SyncInterval.class));
-
-                            /*textFilecount.setText("NF: 1");
-                            textFileChange.setText("CF: 1");*/
-
-                          //   showToast(mContext, "SyncInterval");
 
                         }
 
@@ -1820,8 +1685,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             stopService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
                             stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
                             startService(new Intent(getApplicationContext(), OnChnageService.class));
-
-                         //   showToast(mContext, "OnChnageService");
 
                         }
 
@@ -1837,7 +1700,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             //  Set up for Api , if allowed to use Api
             //  Set up for Api , if allowed to use Api
 
-            if (!get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+            if (!get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
 
                 if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
@@ -1846,7 +1709,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         if (!fil_CLO.isEmpty() && !fil_DEMO.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
 
                             textFilecount.setVisibility(View.VISIBLE);
-                            textFileChange.setVisibility(View.VISIBLE);
+
 
                             if (!ServiceUtils.foregroundServiceMyAPiSyncInterval(getApplicationContext())) {
                                 stopService(new Intent(getApplicationContext(), SyncInterval.class));
@@ -1854,7 +1717,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                 stopService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
                                 startService(new Intent(getApplicationContext(), IntervalApiServiceSync.class));
 
-                              //  showToast(mContext, "IntervalApiServiceSync");
+                                //  showToast(mContext, "IntervalApiServiceSync");
 
                             }
                         }
@@ -1869,7 +1732,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                             stopService(new Intent(getApplicationContext(), OnChnageService.class));
                             startService(new Intent(getApplicationContext(), OnChangeApiServiceSync.class));
 
-                           //  showToast(mContext, "Sync On Change Activated");
+                            //  showToast(mContext, "Sync On Change Activated");
 
                         }
 
@@ -1881,10 +1744,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-
-
-
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -1927,10 +1787,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
+
                     String finalFolderPath = "LN: " + getFolderClo + "/" + getFolderSubpath;
 
                     if (!getFolderClo.isEmpty() && !getFolderSubpath.isEmpty() && Manage_My_Sync_Start.isEmpty()) {
                         textLocation.setText(finalFolderPath);
+
+                        textFilecount.setText("DL: 1/1");
+
                     } else {
                         textLocation.setText("LN: --");
                     }
@@ -1976,7 +1840,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                 }
 
             }
@@ -2012,8 +1876,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     String getFolderSubpath = my_DownloadClass.getString(Constants.getFolderSubpath, "");
                     String zip = my_DownloadClass.getString("Zip", "");
                     String Manage_My_Sync_Start = my_DownloadClass.getString(Constants.Manage_My_Sync_Start, "");
-
-
 
 
                     myDownloadStatus();
@@ -2076,19 +1938,17 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
                         if (!numberOfFiles.isEmpty()) {
-                            textFilecount.setText(numberOfFiles + "");
+                            if (filesChange.isEmpty()){
+                                textFilecount.setText("DL: "  + "0/" +numberOfFiles );
+                            }else {
+                                textFilecount.setText("DL: " +filesChange + "/" +numberOfFiles );
+                            }
                         } else {
-                            textFilecount.setText("NF:--");
+                            textFilecount.setText("DL:-/-");
                         }
 
-                        if (!filesChange.isEmpty()) {
-                            textFileChange.setText(filesChange + "");
-                        } else {
-                            textFileChange.setText("CF:--");
-                        }
-
-                        if (!dnBytes.isEmpty() && !dnBytes.equals("100%")) {
-                            textDownladByes.setText(dnBytes + "");
+                        if (!dnBytes.isEmpty() && !dnBytes.equals("100")) {
+                            textDownladByes.setText(dnBytes + "%");
                             textDownladByes.setVisibility(View.VISIBLE);
                         } else {
                             textDownladByes.setVisibility(View.GONE);
@@ -2105,13 +1965,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         }
 
 
-
                     }
 
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                 }
-
 
 
             }
@@ -2119,8 +1977,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
 
     }
-
-
 
 
     @Override
@@ -2154,7 +2010,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             unregisterReceiver(Send_Time_Update_Reciver);
             unregisterReceiver(Reciver_Progress);
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -2162,7 +2018,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             if (myHandler != null) {
                 myHandler.removeCallbacks(runnableDn);
             }
-        } catch ( Exception ignored ) {
+        } catch (Exception ignored) {
             // Ignore the exception
         }
 
@@ -2205,7 +2061,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             }
 
 
-        } catch ( Exception e ) {
+        } catch (Exception e) {
         }
 
 
@@ -2213,7 +2069,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             if (myHandler != null) {
                 myHandler.removeCallbacks(runnableDn);
             }
-        } catch ( Exception ignored ) {
+        } catch (Exception ignored) {
             // Ignore the exception
         }
 
@@ -2275,7 +2131,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
                 }
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -2316,7 +2172,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     toolbartitleText.setTextColor(Color.parseColor(ToolbarTitleTextColor));
                 }
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -2333,7 +2189,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
                 }
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -2380,7 +2236,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
                 }
 
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -2639,7 +2495,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         try {
             ClosePopupWindow(mWebviewPop);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -2682,7 +2538,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         }, 4000);
         try {
             ClosePopupWindow(mWebviewPop);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -2721,7 +2577,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     try {
                         status.startResolutionForResult(WebActivity.this, REQUEST_CHECK_SETTINGS);
-                    } catch ( IntentSender.SendIntentException e ) {
+                    } catch (IntentSender.SendIntentException e) {
                         Log.i(TAG, "PendingIntent unable to execute request.");
 
                     }
@@ -2769,7 +2625,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
             try {
                 mUMA.onReceiveValue(results);
                 mUMA = null;
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -2825,9 +2681,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     webView.stopLoading();
                     webView.destroy();
 
-                    Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
-                    startActivity(myactivity);
-                    finish();
+                    showPopForNavigation();
                     showToast(mContext, "Please wait..");
 
 
@@ -2836,6 +2690,83 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         }
     }
+
+
+
+
+
+
+    @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
+    private void showPopForNavigation() {
+
+
+        CustomNivigationPopLayoutBinding binding = CustomNivigationPopLayoutBinding.inflate(getLayoutInflater());
+        AlertDialog.Builder builder = new AlertDialog.Builder(WebActivity.this);
+        builder.setView(binding.getRoot());
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setCancelable(false);
+
+
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        TextView textSyncNavigation = binding.textSyncNavigation;
+        TextView textMainTenacePage = binding.textMainTenacePage;
+        TextView textLaunchApp = binding.textLaunchApp;
+        TextView textSettingsPage = binding.textSettingsPage;
+        ImageView imageCrossClose = binding.imageCrossClose;
+
+        imageCrossClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
+
+
+        textSyncNavigation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), ReSyncActivity.class));
+                finish();
+            }
+        });
+
+
+        textMainTenacePage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getApplicationContext(), MaintenanceActivity.class));
+                finish();
+            }
+        });
+
+
+        textSettingsPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myactivity = new Intent(WebActivity.this, SettingsActivity.class);
+                startActivity(myactivity);
+                finish();
+            }
+        });
+
+
+        textLaunchApp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
+
+    }
+
+
 
 
     private void ShowExitDialogue() {
@@ -2916,7 +2847,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
         try {
             dialog.show();
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -2998,7 +2929,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 input.close();
                 mProgressDialog.setProgress(0);
 
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -3068,7 +2999,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                 view.getContext().startActivity(intent);
 
-            } catch ( Exception e ) {
+            } catch (Exception e) {
                 Log.i(TAG, "shouldOverrideUrlLoading Exception:" + e.getMessage());
                 Toast.makeText(mContext, "The app or ACTIVITY not found. Error Message:" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
@@ -3119,7 +3050,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 view.clearCache(true);
 
 
-            } catch ( Exception e ) {
+            } catch (Exception e) {
             }
             super.onPageFinished(view, url);
         }
@@ -3268,7 +3199,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         simpleProgressbar.setVisibility(View.GONE);
                     }
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -3305,7 +3236,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     }
 
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -3435,7 +3366,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     try {
                         photoFile = createImageFile();
                         takePictureIntent.putExtra("PhotoPath", mCM);
-                    } catch ( IOException ex ) {
+                    } catch (IOException ex) {
                         Log.e(TAG, "Image file creation failed", ex);
                     }
                     if (photoFile != null) {
@@ -3474,94 +3405,6 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
     }
 
 
-    @SuppressLint({"MissingInflatedId", "UseCompatLoadingForDrawables"})
-    private void showPopForTVConfiguration(String message) {
-
-
-        CustomOfflinePopLayoutBinding binding = CustomOfflinePopLayoutBinding.inflate(getLayoutInflater());
-        AlertDialog.Builder builder = new AlertDialog.Builder(WebActivity.this);
-        builder.setView(binding.getRoot());
-        final AlertDialog alertDialog = builder.create();
-
-        alertDialog.setCanceledOnTouchOutside(false);
-        alertDialog.setCancelable(false);
-
-
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, Context.MODE_PRIVATE);
-        String get_AppMode = sharedBiometric.getString(Constants.MY_TV_OR_APP_MODE, "");
-
-
-        TextView textContinuPasswordDai3 = binding.textContinuPasswordDai3;
-        TextView textContinue = binding.textContinue;
-        TextView textDescription = binding.textDescription;
-        ImageView imgCloseDialog = binding.imgCloseDialog;
-        ImageView imageView24 = binding.imageView24;
-
-
-        if (!message.isEmpty()) {
-            textDescription.setText(message);
-        }
-
-        if (message.equals(Constants.UnableToFindIndex)) {
-            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_folder_24));
-
-        } else if (message.equals(Constants.badRequest)) {
-            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_wifi_no_internet));
-        } else {
-            imageView24.setBackground(getResources().getDrawable(R.drawable.ic_sync_cm));
-        }
-
-
-        SharedPreferences.Editor editor222 = sharedBiometric.edit();
-        textContinuPasswordDai3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(WebActivity.this, SettingsActivity.class));
-                finish();
-                editor222.putString(Constants.SAVE_NAVIGATION, Constants.WebViewPage);
-                editor222.apply();
-
-                showToast(mContext, "Please wait");
-            }
-        });
-
-
-        textContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
-                    showToast(mContext, "Tap The Back Button to Go Settings Page");
-                }
-
-                loadTheMainWebview();
-
-                alertDialog.dismiss();
-            }
-        });
-
-
-        imgCloseDialog.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                if (get_AppMode.equals(Constants.TV_Mode) || jsonUrl == null) {
-                    showToast(mContext, "Tap The Back Button to Go Settings Page");
-                }
-                loadTheMainWebview();
-                alertDialog.dismiss();
-            }
-        });
-
-
-        alertDialog.show();
-
-
-    }
 
     private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -3575,11 +3418,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     @Override
                     public void run() {
                         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                        String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+                        String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
                             updateSyncViewZip();
-                        }else {
+                        } else {
                             updateSyncViewAPi();
                         }
 
@@ -3604,11 +3447,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     public void run() {
 
                         SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                        String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+                        String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                        if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
                             updateSyncViewZip();
-                        }else {
+                        } else {
                             updateSyncViewAPi();
                         }
 
@@ -3631,11 +3474,11 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 myDownloadStatus();
 
                 SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
-                String  get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+                String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
 
-                if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)){
+                if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
                     updateSyncViewZip();
-                }else {
+                } else {
                     updateSyncViewAPi();
                 }
 
@@ -3665,7 +3508,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                         } else {
                             textStatusProcess.setText("PR: Running");
                         }
-                    } catch ( Exception e ) {
+                    } catch (Exception e) {
                     }
 
 
@@ -3721,7 +3564,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     remainingTime = millisUntilFinished;
 
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                 }
             }
         };
@@ -3732,11 +3575,19 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
         @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
         @Override
         public void run() {
-            TextView textDownladByes = findViewById(R.id.textDownladByes);
-            ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
-            MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
 
-            downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
+            SharedPreferences sharedBiometric = getSharedPreferences(Constants.SHARED_BIOMETRIC, MODE_PRIVATE);
+            String get_Api_state = sharedBiometric.getString(Constants.imagSwtichEnableSyncFromAPI, "");
+
+            if (get_Api_state.equals(Constants.imagSwtichEnableSyncFromAPI)) {
+                TextView textDownladByes = findViewById(R.id.textDownladByes);
+                ProgressBar progressBarPref = findViewById(R.id.progressBarPref);
+                MyDownloadMangerClass downloadManager = new MyDownloadMangerClass();
+
+                downloadManager.getDownloadStatus(progressBarPref, textDownladByes, getApplicationContext());
+
+            }
+
             myHandler.postDelayed(this, 500);
         }
     };
@@ -3768,14 +3619,14 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                                     myDownloadStatus();
 
 
-                                } catch ( Exception e ) {
+                                } catch (Exception e) {
                                 }
 
                             }
                         }, SPLASH_TIME_OUT);
 
 
-                    } catch ( Exception ignored ) {
+                    } catch (Exception ignored) {
                     }
 
 
@@ -3783,13 +3634,13 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
 
                     // No internet Connection
                     try {
-                        int SPLASH_TIME_OUT = 1000;
+
                         imageWiFiOn.setVisibility(View.VISIBLE);
                         imageWiFiOFF.setVisibility(View.GONE);
                         textStatusProcess.setText("No Internet");
 
 
-                    } catch ( Exception e ) {
+                    } catch (Exception e) {
                     }
 
                 }
@@ -3797,7 +3648,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                 // No internet Connection
 
 
-            } catch ( Exception ignored ) {
+            } catch (Exception ignored) {
             }
         }
 
@@ -3906,7 +3757,7 @@ public class WebActivity extends AppCompatActivity implements ObservableScrollVi
                     assert downloadManager != null;
                     try {
                         downloadManager.enqueue(request);
-                    } catch ( Exception e ) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(mContext, e.toString(), Toast.LENGTH_SHORT).show();
                     }

@@ -21,6 +21,7 @@
 
 <!--    by david -->
     <color name="deep_blue">#033851</color>
+    <color name="dark_layout_for_ui">#171616</color>
     <color name="deep_green">#318F34</color>
     <color name="deep_blue_light">#21485A</color>
     <color name="light_gray">#676A6C</color>

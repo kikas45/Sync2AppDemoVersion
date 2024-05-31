@@ -143,6 +143,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import sync2app.com.syncapplive.additionalSettings.ReSyncActivity;
+import sync2app.com.syncapplive.additionalSettings.autostartAppOncrash.Methods;
 import sync2app.com.syncapplive.additionalSettings.utils.Constants;
 import sync2app.com.syncapplive.databinding.CustomHelperLayoutBinding;
 import sync2app.com.syncapplive.databinding.CustomOfflinePopLayoutBinding;
@@ -165,6 +166,7 @@ public class Splash extends AppCompatActivity {
     ImageView imagwifi2;
 
     ImageView splash_image;
+    ImageView backgroundImage;
     ImageView imageHelper;
 
     int clickcount = 0;
@@ -173,7 +175,7 @@ public class Splash extends AppCompatActivity {
     private ConnectivityReceiver connectivityReceiver;
 
 
-    @SuppressLint({"NewApi", "MissingInflatedId"})
+    @SuppressLint({"NewApi", "MissingInflatedId", "CutPasteId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,6 +185,11 @@ public class Splash extends AppCompatActivity {
         SharedPreferences sharedLicenseKeys = getSharedPreferences(Constants.SIMPLE_SAVED_PASSWORD, Context.MODE_PRIVATE);
 
         ServerUrl = sharedLicenseKeys.getString(Constants.get_masterDomain , "");
+
+
+        //add exception
+        Methods.addExceptionHandler(this);
+
 
 
         try {
@@ -251,6 +258,17 @@ public class Splash extends AppCompatActivity {
         imagwifi2 = findViewById(R.id.imagwifi2);
         splash_image = findViewById(R.id.splash_image);
         imageHelper = findViewById(R.id.imageHelper);
+
+        String get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "");
+        String get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "");
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage();
+        }
+
+        if (get_imageUseBranding.equals(Constants.imageUseBranding)) {
+            loadImage();
+        }
+
 
         handler = new Handler(Looper.getMainLooper());
         imageHelper.setOnClickListener(new View.OnClickListener() {
@@ -363,6 +381,45 @@ public class Splash extends AppCompatActivity {
 
 
     }
+
+
+    private void loadImage() {
+        splash_image = findViewById(R.id.splash_image);
+        SharedPreferences sharedP = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+        String getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString();
+        String getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString();
+
+        String pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config";
+        String folder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + Constants.Syn2AppLive + "/" + pathFolder;
+
+        String fileTypes = "app_logo.png";
+        File file = new File(folder, fileTypes);
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(splash_image);
+        }
+    }
+
+    private void loadBackGroundImage() {
+
+
+        backgroundImage = findViewById(R.id.backgroundImage);
+        SharedPreferences sharedP = getSharedPreferences(Constants.MY_DOWNLOADER_CLASS, Context.MODE_PRIVATE);
+        String getFolderClo = sharedP.getString(Constants.getFolderClo, "").toString();
+        String getFolderSubpath = sharedP.getString(Constants.getFolderSubpath, "").toString();
+
+        String pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config";
+        String folder = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/" + Constants.Syn2AppLive + "/" + pathFolder;
+
+        String fileTypes =  "app_background.png";
+        File file = new File(folder, fileTypes);
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(backgroundImage);
+        }
+    }
+
+
 
 
     public static void deleteCache(Context context) {
@@ -574,6 +631,8 @@ public class Splash extends AppCompatActivity {
                                     URI uri = new URI(homeurl);
                                     String domain = uri.getHost();
                                     filterdomain = domain;
+                                    Log.d("WebActivity", "shouldOverrideUrlLoading: " + domain);
+
                                 } catch ( URISyntaxException e ) {
                                     e.printStackTrace();
                                 }

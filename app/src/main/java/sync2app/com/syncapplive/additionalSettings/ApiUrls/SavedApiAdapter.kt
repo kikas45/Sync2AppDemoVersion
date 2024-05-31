@@ -1,17 +1,10 @@
 package sync2app.com.syncapplive.additionalSettings.ApiUrls
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import sync2app.com.syncapplive.R
-import sync2app.com.syncapplive.additionalSettings.TestScreenActivity
-import sync2app.com.syncapplive.additionalSettings.savedDownloadHistory.User
 import sync2app.com.syncapplive.databinding.ItemApiUrlsRowsBinding
-import sync2app.com.syncapplive.databinding.ItemSavedHistoryRowsBinding
-
 
 
 class SavedApiAdapter(

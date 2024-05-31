@@ -6,11 +6,14 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import sync2app.com.syncapplive.WebActivity
 import sync2app.com.syncapplive.additionalSettings.utils.Constants
 import sync2app.com.syncapplive.databinding.ActivityPhoneBinding
+import java.io.File
 
 class PhoneActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPhoneBinding
@@ -22,10 +25,26 @@ class PhoneActivity : AppCompatActivity() {
         )
     }
 
+    private val myDownloadClass: SharedPreferences by lazy {
+        applicationContext.getSharedPreferences(
+            Constants.MY_DOWNLOADER_CLASS,
+            Context.MODE_PRIVATE
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPhoneBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+
+        val get_imgToggleImageBackground = sharedBiometric.getString(Constants.imgToggleImageBackground, "")
+        val get_imageUseBranding = sharedBiometric.getString(Constants.imageUseBranding, "")
+        if (get_imgToggleImageBackground.equals(Constants.imgToggleImageBackground) && get_imageUseBranding.equals(Constants.imageUseBranding) ){
+            loadBackGroundImage()
+        }
+
+
 
         val phoneNumber: String = sharedBiometric.getString("phoneNumber", "").toString()
 
@@ -49,7 +68,26 @@ class PhoneActivity : AppCompatActivity() {
 
     }
 
-  private  fun makeCall(phoneNumber: String?) {
+    private fun loadBackGroundImage() {
+
+        val fileTypes = "app_background.png"
+        val getFolderClo = myDownloadClass.getString(Constants.getFolderClo, "").toString()
+        val getFolderSubpath = myDownloadClass.getString(Constants.getFolderSubpath, "").toString()
+
+        val pathFolder = "/" + getFolderClo + "/" + getFolderSubpath + "/" + Constants.App + "/" + "Config"
+        val folder =
+            Environment.getExternalStorageDirectory().absolutePath + "/Download/${Constants.Syn2AppLive}/" + pathFolder
+        val file = File(folder, fileTypes)
+
+        if (file.exists()) {
+            Glide.with(this).load(file).centerCrop().into(binding.backgroundImage)
+
+        }
+    }
+
+
+
+    private  fun makeCall(phoneNumber: String?) {
 
 
         // Create intent to dial the phone number
